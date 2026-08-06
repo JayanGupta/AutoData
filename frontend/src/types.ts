@@ -84,6 +84,10 @@ export interface DatasetInfo {
   rows: number;
   columns: number;
   created_at: number;
+  last_access: number;
+  file_size: number;
+  file_type: string;
+  favorite: boolean;
   quality_score?: number;
   preview?: Array<Record<string, string | number | boolean | null>>;
 }
@@ -177,4 +181,73 @@ export interface CleaningStep {
 export interface CleaningHistory {
   steps: CleaningStep[];
   length: number;
+}
+
+export type AdvancedChartType =
+  | "box"
+  | "distribution"
+  | "area"
+  | "stacked_bar"
+  | "multi_line"
+  | "radar"
+  | "bubble"
+  | "treemap"
+  | "sunburst"
+  | "pair_plot"
+  | "correlation";
+
+export interface AdvancedChartSpec {
+  chart_type: AdvancedChartType;
+  title: string;
+  description: string;
+  data?: Array<Record<string, unknown>> | Record<string, unknown>;
+  x?: string;
+  y?: string;
+  size?: string;
+  column?: string;
+  series?: string[];
+  columns?: string[];
+  matrix?: Array<Array<number | null>>;
+}
+
+export interface ChartRecommendation {
+  chart_type: AdvancedChartType;
+  title: string;
+  reason: string;
+}
+
+export interface AdvancedChartsPayload {
+  charts: AdvancedChartSpec[];
+  recommendations: ChartRecommendation[];
+}
+
+export interface ExecutiveKpi {
+  label: string;
+  value: string;
+  suffix?: string;
+  hint: string;
+  tone: "good" | "warn" | "bad" | "neutral";
+}
+
+export interface ExecutiveSummary {
+  overview: string;
+  kpis: ExecutiveKpi[];
+  key_takeaways: Array<{ category: string; severity: string; title: string; detail: string }>;
+  anomaly_flags: Array<{
+    category: string;
+    column?: string | null;
+    severity: string;
+    severity_label: string;
+    message: string;
+  }>;
+  correlation_highlights: Array<{
+    col_a: string;
+    col_b: string;
+    correlation: number;
+    strength: string;
+    message: string;
+  }>;
+  recommendations: Array<{ action: string; reason: string; clean_action?: string; column?: string }>;
+  suggested_next: Array<{ title: string; description: string; chart: string; columns: string[] }>;
+  question_suggestions: string[];
 }

@@ -22,12 +22,18 @@ class DatasetSession:
         created_at: float,
         history: list[dict] | None = None,
         conversation: list[dict] | None = None,
+        file_size: int = 0,
+        file_type: str = "",
+        favorite: bool = False,
     ):
         self.id = session_id
         self.name = name
         self.engine = engine
         self.created_at = created_at
         self.last_access = created_at
+        self.file_size = file_size
+        self.file_type = file_type
+        self.favorite = favorite
         # history entries: {"engine": EngineResult, "description": str}
         self.history = history or []
         self.conversation = conversation or []
@@ -67,10 +73,12 @@ class DatasetSession:
 
     @staticmethod
     def from_data(session_id: str, name: str, created_at: float, last_access: float,
-                  df, history: list[dict], conversation: list[dict]) -> "DatasetSession":
+                  df, history: list[dict], conversation: list[dict],
+                  file_size: int = 0, file_type: str = "", favorite: bool = False) -> "DatasetSession":
         """Reconstruct a session from persisted raw data (df + history dfs)."""
         engine = analyze(df)
-        session = DatasetSession(session_id, name, engine, created_at, None, conversation)
+        session = DatasetSession(session_id, name, engine, created_at, None, conversation,
+                                 file_size=file_size, file_type=file_type, favorite=favorite)
         session.last_access = last_access
         session.history = [
             {"engine": analyze(entry["df"]), "description": entry["description"]}
@@ -96,6 +104,9 @@ class SessionStore:
                 session = DatasetSession.from_data(
                     data["id"], data["name"], data["created_at"],
                     data["last_access"], data["df"], data["history"], data["conversation"],
+                    file_size=data.get("file_size", 0),
+                    file_type=data.get("file_type", ""),
+                    favorite=data.get("favorite", False),
                 )
                 if not session.expired(now):
                     self._sessions[session.id] = session
@@ -113,6 +124,9 @@ class SessionStore:
             session.engine.df,
             [{"df": h["engine"].df, "description": h["description"]} for h in session.history],
             session.conversation,
+            file_size=session.file_size,
+            file_type=session.file_type,
+            favorite=session.favorite,
         )
 
     def persist(self, session: DatasetSession) -> None:
@@ -120,10 +134,12 @@ class SessionStore:
         with self._lock:
             self._persist(session)
 
-    def create(self, name: str, engine: EngineResult) -> DatasetSession:
+    def create(self, name: str, engine: EngineResult, file_size: int = 0,
+               file_type: str = "") -> DatasetSession:
         with self._lock:
             session_id = uuid.uuid4().hex
-            session = DatasetSession(session_id, name, engine, time.time())
+            session = DatasetSession(session_id, name, engine, time.time(),
+                                     file_size=file_size, file_type=file_type)
             self._sessions[session_id] = session
             self._persist(session)
             self._evict_expired()
@@ -144,6 +160,46 @@ class SessionStore:
                 storage.delete_session(session_id)
             return deleted
 
+    def rename(self, session_id: str, new_name: str) -> DatasetSession | None:
+        new_name = (new_name or "").strip()
+        if not new_name:
+            raise ValueError("Name cannot be empty.")
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is None:
+                return None
+            session.name = new_name
+            self._persist(session)
+            return session
+
+    def set_favorite(self, session_id: str, favorite: bool) -> DatasetSession | None:
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is None:
+                return None
+            session.favorite = bool(favorite)
+            self._persist(session)
+            return session
+
+    def duplicate(self, session_id: str) -> DatasetSession | None:
+        """Clone an existing session into a new independent session."""
+        with self._lock:
+            source = self._sessions.get(session_id)
+            if source is None:
+                return None
+            new_id = uuid.uuid4().hex
+            dup_name = f"{source.name} (copy)"
+            engine = analyze(source.engine.df.copy())
+            session = DatasetSession(
+                new_id, dup_name, engine, time.time(),
+                conversation=[dict(m) for m in source.conversation],
+                file_size=source.file_size, file_type=source.file_type, favorite=False,
+            )
+            self._sessions[new_id] = session
+            self._persist(session)
+            self._evict_expired()
+            return session
+
     def list_sessions(self) -> list[dict]:
         with self._lock:
             self._evict_expired()
@@ -152,9 +208,13 @@ class SessionStore:
                     "id": s.id,
                     "name": s.name,
                     "created_at": s.created_at,
+                    "last_access": s.last_access,
                     "rows": s.engine.summary["row_count"],
                     "columns": s.engine.summary["column_count"],
                     "quality_score": s.engine.quality["summary"]["quality_score"],
+                    "file_size": s.file_size,
+                    "file_type": s.file_type,
+                    "favorite": s.favorite,
                 }
                 for s in self._sessions.values()
             ]

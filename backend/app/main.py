@@ -118,6 +118,10 @@ def _snapshot(session_id: str) -> dict:
             "rows": engine.summary["row_count"],
             "columns": engine.summary["column_count"],
             "created_at": session.created_at,
+            "last_access": session.last_access,
+            "file_size": session.file_size,
+            "file_type": session.file_type,
+            "favorite": session.favorite,
             "preview": preview_rows(engine.df),
         },
         "summary": engine.summary,
@@ -139,7 +143,7 @@ def _run_analysis_job(job_id: str, data: bytes, filename: str, sheet_name: str |
 
         engine = analyze(df)
         jobs.update(job_id, stage="building", progress=85, message="Building charts and insights…")
-        session = store.create(filename, engine)
+        session = store.create(filename, engine, file_size=len(data), file_type=Path(filename).suffix or "")
         jobs.update(job_id, status="done", stage="done", progress=100,
                     message="Analysis complete", session_id=session.id)
     except DataLoadError as exc:
@@ -213,7 +217,8 @@ async def upload_dataset(
     from .data_engine import analyze
 
     engine = analyze(df)
-    session = store.create(file.filename, engine)
+    session = store.create(file.filename, engine, file_size=len(data),
+                           file_type=Path(file.filename).suffix or "")
     return _snapshot(session.id)
 
 
@@ -230,7 +235,7 @@ def upload_sample_dataset():
     from .data_engine import analyze
 
     engine = analyze(df)
-    session = store.create(SAMPLE_DATA_PATH.name, engine)
+    session = store.create(SAMPLE_DATA_PATH.name, engine, file_size=len(data), file_type=".csv")
     return _snapshot(session.id)
 
 
@@ -249,6 +254,38 @@ def delete_dataset(session_id: str):
     if not store.delete(session_id):
         raise HTTPException(status_code=404, detail="Dataset session not found.")
     return {"ok": True}
+
+
+class UpdateDatasetRequest(BaseModel):
+    name: str | None = None
+    favorite: bool | None = None
+
+
+@app.patch("/api/datasets/{session_id}")
+def update_dataset(session_id: str, request: UpdateDatasetRequest):
+    session = _get_session_or_404(session_id)
+    try:
+        if request.name is not None:
+            updated = store.rename(session.id, request.name)
+            if updated is None:
+                raise HTTPException(status_code=404, detail="Dataset session not found.")
+        if request.favorite is not None:
+            updated = store.set_favorite(session.id, request.favorite)
+            if updated is None:
+                raise HTTPException(status_code=404, detail="Dataset session not found.")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"session": next(
+        (s for s in store.list_sessions() if s["id"] == session.id), None
+    )}
+
+
+@app.post("/api/datasets/{session_id}/duplicate")
+def duplicate_dataset(session_id: str):
+    dup = store.duplicate(session_id)
+    if dup is None:
+        raise HTTPException(status_code=404, detail="Dataset session not found.")
+    return _snapshot(dup.id)
 
 
 @app.get("/api/datasets/{session_id}/overview")
@@ -426,6 +463,27 @@ def get_conversation(session_id: str):
     """Return the stored analyst conversation so it can be restored client-side."""
     session = _get_session_or_404(session_id)
     return {"conversation": session.conversation}
+
+
+@app.get("/api/datasets/{session_id}/executive-summary")
+def get_executive_summary(session_id: str):
+    """Rule-based executive analytics: overview, KPIs, takeaways, recommendations."""
+    session = _get_session_or_404(session_id)
+    from .ai.executive import build_executive_summary
+
+    return build_executive_summary(session.engine)
+
+
+@app.get("/api/datasets/{session_id}/advanced-charts")
+def get_advanced_charts(session_id: str):
+    """Advanced chart specs plus intelligent recommendations for the data."""
+    session = _get_session_or_404(session_id)
+    from .data_engine.advanced_charts import build_advanced_charts, build_chart_recommendations
+
+    return {
+        "charts": build_advanced_charts(session.engine),
+        "recommendations": build_chart_recommendations(session.engine),
+    }
 
 
 @app.exception_handler(Exception)

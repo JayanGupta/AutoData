@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS sessions (
     name TEXT NOT NULL,
     created_at REAL NOT NULL,
     last_access REAL NOT NULL,
-    csv BLOB NOT NULL
+    csv BLOB NOT NULL,
+    file_size INTEGER NOT NULL DEFAULT 0,
+    file_type TEXT NOT NULL DEFAULT '',
+    favorite INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS session_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,8 +50,20 @@ def initialize_db() -> None:
     with _LOCK:
         conn = _get_connection()
         conn.executescript(_SCHEMA)
+        _migrate(conn)
         conn.commit()
         conn.close()
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Add columns introduced after the initial schema, if missing."""
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(sessions)").fetchall()}
+    if "file_size" not in existing:
+        conn.execute("ALTER TABLE sessions ADD COLUMN file_size INTEGER NOT NULL DEFAULT 0")
+    if "file_type" not in existing:
+        conn.execute("ALTER TABLE sessions ADD COLUMN file_type TEXT NOT NULL DEFAULT ''")
+    if "favorite" not in existing:
+        conn.execute("ALTER TABLE sessions ADD COLUMN favorite INTEGER NOT NULL DEFAULT 0")
 
 
 def _df_to_bytes(df: pd.DataFrame) -> bytes:
@@ -60,7 +75,8 @@ def _bytes_to_df(data: bytes) -> pd.DataFrame:
 
 
 def dump_session(session_id: str, name: str, created_at: float, last_access: float,
-                 df: pd.DataFrame, history: list[dict], conversation: list[dict]) -> None:
+                 df: pd.DataFrame, history: list[dict], conversation: list[dict],
+                 file_size: int = 0, file_type: str = "", favorite: bool = False) -> None:
     """Persist a session: current dataframe, cleaning history and conversation.
 
     `history` is a list of {"df": DataFrame, "description": str}.
@@ -68,8 +84,10 @@ def dump_session(session_id: str, name: str, created_at: float, last_access: flo
     with _LOCK:
         conn = _get_connection()
         conn.execute(
-            "REPLACE INTO sessions (id, name, created_at, last_access, csv) VALUES (?, ?, ?, ?, ?)",
-            (session_id, name, created_at, last_access, sqlite3.Binary(_df_to_bytes(df))),
+            "REPLACE INTO sessions (id, name, created_at, last_access, csv, file_size, file_type, favorite)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (session_id, name, created_at, last_access, sqlite3.Binary(_df_to_bytes(df)),
+             file_size, file_type, 1 if favorite else 0),
         )
         conn.execute("DELETE FROM session_history WHERE session_id = ?", (session_id,))
         conn.executemany(
@@ -91,12 +109,14 @@ def dump_session(session_id: str, name: str, created_at: float, last_access: flo
 def load_session(session_id: str) -> dict[str, Any] | None:
     """Load a session as raw data. Returns None if missing.
 
-    Result keys: id, name, created_at, last_access, df, history, conversation.
+    Result keys: id, name, created_at, last_access, df, history, conversation,
+    file_size, file_type, favorite.
     """
     with _LOCK:
         conn = _get_connection()
         row = conn.execute(
-            "SELECT id, name, created_at, last_access, csv FROM sessions WHERE id = ?",
+            "SELECT id, name, created_at, last_access, csv, file_size, file_type, favorite"
+            " FROM sessions WHERE id = ?",
             (session_id,),
         ).fetchone()
         if row is None:
@@ -118,6 +138,9 @@ def load_session(session_id: str) -> dict[str, Any] | None:
         "created_at": row[2],
         "last_access": row[3],
         "df": _bytes_to_df(row[4]),
+        "file_size": row[5] if len(row) > 5 else 0,
+        "file_type": row[6] if len(row) > 6 else "",
+        "favorite": bool(row[7]) if len(row) > 7 else False,
         "history": [
             {"df": _bytes_to_df(h[2]), "description": h[1]}
             for h in hist_rows
@@ -142,10 +165,14 @@ def list_session_records() -> list[dict[str, Any]]:
     with _LOCK:
         conn = _get_connection()
         rows = conn.execute(
-            "SELECT id, name, created_at, last_access FROM sessions ORDER BY created_at DESC"
+            "SELECT id, name, created_at, last_access, file_size, file_type, favorite"
+            " FROM sessions ORDER BY created_at DESC"
         ).fetchall()
         conn.close()
     return [
-        {"id": r[0], "name": r[1], "created_at": r[2], "last_access": r[3]}
+        {"id": r[0], "name": r[1], "created_at": r[2], "last_access": r[3],
+         "file_size": r[4] if len(r) > 4 else 0,
+         "file_type": r[5] if len(r) > 5 else "",
+         "favorite": bool(r[6]) if len(r) > 6 else False}
         for r in rows
     ]

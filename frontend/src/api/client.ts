@@ -1,4 +1,5 @@
 import type {
+  AdvancedChartsPayload,
   AnalysisJob,
   AnalysisSnapshot,
   AnalystResponse,
@@ -6,6 +7,7 @@ import type {
   CleaningHistory,
   CleaningResponse,
   DatasetInfo,
+  ExecutiveSummary,
   Insight,
   ReportResult,
   RowPage,
@@ -141,4 +143,27 @@ export function getConversation(
   id: string,
 ): Promise<{ conversation: Array<{ role: "user" | "assistant"; content: string; intent?: string }> }> {
   return request(`/datasets/${id}/conversation`);
+}
+
+export function updateDataset(
+  id: string,
+  changes: { name?: string; favorite?: boolean },
+): Promise<{ session: DatasetInfo }> {
+  return request<{ session: DatasetInfo }>(`/datasets/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(changes),
+  });
+}
+
+export function duplicateDataset(id: string): Promise<AnalysisSnapshot> {
+  return request<AnalysisSnapshot>(`/datasets/${id}/duplicate`, { method: "POST" });
+}
+
+export function getExecutiveSummary(id: string): Promise<ExecutiveSummary> {
+  return request<ExecutiveSummary>(`/datasets/${id}/executive-summary`);
+}
+
+export function getAdvancedCharts(id: string): Promise<AdvancedChartsPayload> {
+  return request<AdvancedChartsPayload>(`/datasets/${id}/advanced-charts`);
 }

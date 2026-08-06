@@ -235,5 +235,98 @@ class TestRows(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
 
 
+class TestDatasetManagement(unittest.TestCase):
+    def test_list_has_metadata(self):
+        upload_sample(name="orders.csv")
+        res = client.get("/api/datasets")
+        self.assertEqual(res.status_code, 200)
+        datasets = res.json()["datasets"]
+        self.assertTrue(any(d["file_type"] == ".csv" for d in datasets))
+        self.assertTrue(all("favorite" in d and "last_access" in d for d in datasets))
+        self.assertTrue(all(d["file_size"] >= 0 for d in datasets))
+
+    def test_rename(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.patch(f"/api/datasets/{sid}", json={"name": "Q2 Sales"})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["session"]["name"], "Q2 Sales")
+
+    def test_rename_empty_rejected(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.patch(f"/api/datasets/{sid}", json={"name": "   "})
+        self.assertEqual(res.status_code, 400)
+
+    def test_favorite_toggle(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.patch(f"/api/datasets/{sid}", json={"favorite": True})
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.json()["session"]["favorite"])
+        res = client.patch(f"/api/datasets/{sid}", json={"favorite": False})
+        self.assertFalse(res.json()["session"]["favorite"])
+
+    def test_duplicate(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.post(f"/api/datasets/{sid}/duplicate")
+        self.assertEqual(res.status_code, 200)
+        dup = res.json()
+        self.assertNotEqual(dup["dataset"]["id"], sid)
+        self.assertEqual(dup["dataset"]["rows"], snap["dataset"]["rows"])
+        self.assertEqual(dup["dataset"]["columns"], snap["dataset"]["columns"])
+
+    def test_duplicate_unknown_404(self):
+        res = client.post("/api/datasets/nope/duplicate")
+        self.assertEqual(res.status_code, 404)
+
+    def test_snapshot_has_metadata(self):
+        snap = upload_sample()
+        dataset = snap["dataset"]
+        for key in ("file_size", "file_type", "favorite", "last_access"):
+            self.assertIn(key, dataset)
+
+
+class TestExecutiveSummary(unittest.TestCase):
+    def test_executive_summary_shape(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.get(f"/api/datasets/{sid}/executive-summary")
+        self.assertEqual(res.status_code, 200)
+        body = res.json()
+        self.assertIn("overview", body)
+        self.assertIn("kpis", body)
+        self.assertIn("key_takeaways", body)
+        self.assertIn("recommendations", body)
+        self.assertIn("suggested_next", body)
+        self.assertGreaterEqual(len(body["kpis"]), 3)
+
+    def test_executive_summary_unknown_404(self):
+        res = client.get("/api/datasets/nope/executive-summary")
+        self.assertEqual(res.status_code, 404)
+
+
+class TestAdvancedCharts(unittest.TestCase):
+    def test_advanced_charts_shape(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.get(f"/api/datasets/{sid}/advanced-charts")
+        self.assertEqual(res.status_code, 200)
+        body = res.json()
+        types = {c["chart_type"] for c in body["charts"]}
+        self.assertIn("box", types)
+        self.assertIn("distribution", types)
+        self.assertIn("correlation", types)
+        self.assertGreaterEqual(len(body["recommendations"]), 3)
+        for rec in body["recommendations"]:
+            self.assertIn("reason", rec)
+            self.assertIn("title", rec)
+
+    def test_advanced_charts_unknown_404(self):
+        res = client.get("/api/datasets/nope/advanced-charts")
+        self.assertEqual(res.status_code, 404)
+
+
 if __name__ == "__main__":
     unittest.main()
