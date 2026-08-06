@@ -17,14 +17,15 @@ import { ProgressBar } from "../components/ui/ProgressBar";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Button, Spinner } from "../components/ui/Button";
 import { categoryLabel } from "../lib/format";
+import { cn } from "./landing/primitives";
 import type { ColumnProfile, QualityIssue } from "../types";
 
 type Filter = "all" | "high" | "medium" | "low";
 
 const SEVERITY_STYLES: Record<string, string> = {
-  high: "border-red-200 bg-red-50/60",
-  medium: "border-amber-200 bg-amber-50/60",
-  low: "border-emerald-200 bg-emerald-50/60",
+  high: "border-rose-500/25 bg-rose-500/[0.06]",
+  medium: "border-amber-500/25 bg-amber-500/[0.05]",
+  low: "border-emerald-500/25 bg-emerald-500/[0.05]",
 };
 
 interface ColumnOp {
@@ -84,7 +85,7 @@ export function DataQualityPage() {
   if (!quality) return null;
   const s = quality.summary;
   const dataSummary = snapshot?.summary;
-  const scoreColor = s.quality_score >= 80 ? "bg-emerald-500" : s.quality_score >= 60 ? "bg-amber-500" : "bg-red-500";
+  const scoreColor = s.quality_score >= 80 ? "#34d399" : s.quality_score >= 60 ? "#fbbf24" : "#fb7185";
 
   const runQuick = async (key: string, action: string) => {
     setBusy(key);
@@ -159,9 +160,9 @@ export function DataQualityPage() {
           ))}
         </div>
 
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <Wand2 className="h-3.5 w-3.5" /> Guided column operation
+        <div className="mt-5 rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-transparent p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <Wand2 className="h-3.5 w-3.5 text-violet-300" /> Guided column operation
           </p>
           <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.2fr_0.8fr_auto]">
             <select
@@ -170,7 +171,8 @@ export function DataQualityPage() {
                 setColumn(e.target.value);
                 setOp("");
               }}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              aria-label="Column"
+              className="field"
             >
               {columns.map((c) => (
                 <option key={c.name} value={c.name}>
@@ -181,7 +183,8 @@ export function DataQualityPage() {
             <select
               value={op}
               onChange={(e) => setOp(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              aria-label="Operation"
+              className="field"
             >
               <option value="">Choose an operation…</option>
               {availableOps.map((o) => (
@@ -195,7 +198,8 @@ export function DataQualityPage() {
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={op === "rename_column" ? "new column name" : "fill value (e.g. 0)"}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                aria-label="Operation value"
+                className="field"
               />
             )}
             <Button size="sm" disabled={busy !== null || !op || !column} onClick={() => void runColumnOp()}>
@@ -219,8 +223,8 @@ export function DataQualityPage() {
         {cleaningSteps.length > 0 && (
           <ol className="mt-3 space-y-1.5">
             {cleaningSteps.map((step) => (
-              <li key={step.step} className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700">
+              <li key={step.step} className="flex items-center gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 font-mono text-[10px] font-bold text-white">
                   {step.step + 1}
                 </span>
                 {step.description}
@@ -233,11 +237,17 @@ export function DataQualityPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card title="Data quality score" className="md:col-span-1">
           <div className="flex flex-col items-center py-2">
-            <div
-              className={`flex h-28 w-28 items-center justify-center rounded-full border-8 text-3xl font-extrabold text-white shadow-sm ${scoreColor}`}
-              style={{ borderColor: `${scoreColor}` }}
-            >
-              {s.quality_score}
+            <div className="relative">
+              <div
+                className="flex h-28 w-28 items-center justify-center rounded-full font-display text-3xl font-extrabold text-white"
+                style={{ background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18), transparent 60%), ${scoreColor}22`, border: `3px solid ${scoreColor}`, boxShadow: `0 0 40px -6px ${scoreColor}88` }}
+              >
+                {s.quality_score}
+              </div>
+              <span
+                className="absolute inset-0 -z-10 rounded-full animate-ping-soft"
+                style={{ background: `${scoreColor}22` }}
+              />
             </div>
             <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">out of 100</p>
           </div>
@@ -245,28 +255,33 @@ export function DataQualityPage() {
 
         <Card title="Issue summary" className="md:col-span-2">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <SummaryPill label="Total issues" value={s.total_issues} tone="text-slate-900" />
-            <SummaryPill label="High" value={s.high} tone="text-red-600" />
-            <SummaryPill label="Medium" value={s.medium} tone="text-amber-600" />
-            <SummaryPill label="Low" value={s.low} tone="text-emerald-600" />
+            <SummaryPill label="Total issues" value={s.total_issues} tone="text-slate-100" />
+            <SummaryPill label="High" value={s.high} tone="text-rose-300" />
+            <SummaryPill label="Medium" value={s.medium} tone="text-amber-300" />
+            <SummaryPill label="Low" value={s.low} tone="text-emerald-300" />
           </div>
           <div className="mt-6">
             <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
               <span>Breakdown by category</span>
               <span>{Object.values(s.categories).reduce((a, b) => a + b, 0)} flagged</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {Object.entries(s.categories).map(([key, count]) =>
                 count === 0 ? null : (
                   <div key={key} className="flex items-center gap-3">
-                    <span className="w-36 shrink-0 text-xs text-slate-600">{categoryLabel(key)}</span>
-                    <ProgressBar value={count} max={Math.max(...Object.values(s.categories), 1)} className="flex-1" />
-                    <span className="w-6 text-right text-xs font-semibold text-slate-700">{count}</span>
+                    <span className="w-36 shrink-0 text-xs text-slate-400">{categoryLabel(key)}</span>
+                    <ProgressBar
+                      value={count}
+                      max={Math.max(...Object.values(s.categories), 1)}
+                      className="flex-1"
+                      color="bg-gradient-to-r from-violet-500 to-cyan-400"
+                    />
+                    <span className="w-6 text-right font-mono text-xs font-semibold text-slate-200">{count}</span>
                   </div>
                 ),
               )}
               {Object.values(s.categories).every((c) => c === 0) && (
-                <p className="text-xs text-slate-400">No structural issues detected.</p>
+                <p className="text-xs text-slate-500">No structural issues detected.</p>
               )}
             </div>
           </div>
@@ -277,14 +292,15 @@ export function DataQualityPage() {
         title="Issues"
         subtitle={`${issues.length} of ${s.total_issues} issues shown`}
         action={
-          <div className="flex gap-1 rounded-lg bg-slate-100 p-0.5">
+          <div className="flex gap-1 rounded-xl border border-white/[0.08] bg-white/[0.04] p-1">
             {(["all", "high", "medium", "low"] as Filter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors ${
-                  filter === f ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
-                }`}
+                className={cn(
+                  "rounded-lg px-3 py-1 text-xs font-medium capitalize transition-all",
+                  filter === f ? "bg-gradient-to-r from-violet-500/30 to-indigo-500/20 text-white" : "text-slate-500 hover:text-slate-200",
+                )}
               >
                 {f}
               </button>
@@ -327,8 +343,8 @@ function needsValue(ops: ColumnOp[], op: string): boolean {
 
 function SummaryPill({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 text-center">
-      <p className={`text-2xl font-bold ${tone}`}>{value}</p>
+    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 text-center">
+      <p className={cn("font-display text-2xl font-bold", tone)}>{value}</p>
       <p className="mt-0.5 text-xs text-slate-500">{label}</p>
     </div>
   );
@@ -346,11 +362,11 @@ function IssueRow({
   onDropColumn: () => void;
 }) {
   return (
-    <li className={`rounded-lg border p-4 ${SEVERITY_STYLES[issue.severity]}`}>
+    <li className={cn("rounded-xl border p-4 backdrop-blur-sm", SEVERITY_STYLES[issue.severity])}>
       <div className="flex flex-wrap items-center gap-2">
         <SeverityBadge severity={issue.severity} />
-        <Badge className="bg-white text-slate-600 border-slate-200">{categoryLabel(issue.category)}</Badge>
-        {issue.column && <Badge className="bg-slate-800 text-white border-slate-800">{issue.column}</Badge>}
+        <Badge className="border-white/10 bg-white/[0.05] text-slate-300">{categoryLabel(issue.category)}</Badge>
+        {issue.column && <Badge className="border-violet-500/30 bg-violet-500/15 font-mono text-violet-200">{issue.column}</Badge>}
         <span className="ml-auto flex items-center gap-1 text-xs text-slate-500">
           <AlertTriangle className="h-3.5 w-3.5" /> {issue.count.toLocaleString()} affected
         </span>
@@ -360,7 +376,7 @@ function IssueRow({
               onClick={onSelectColumn}
               disabled={busy}
               aria-label={`Open cleaning tools for ${issue.column}`}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-slate-300 transition-colors hover:border-violet-400/40 hover:bg-violet-500/10 hover:text-white disabled:opacity-50"
             >
               <Sparkles className="h-3 w-3" /> Fix column
             </button>
@@ -369,15 +385,15 @@ function IssueRow({
               disabled={busy}
               aria-label={`Drop column ${issue.column}`}
               title={`Drop column ${issue.column}`}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-slate-300 transition-colors hover:border-rose-400/40 hover:bg-rose-500/10 hover:text-rose-200 disabled:opacity-50"
             >
               <Trash2 className="h-3 w-3" /> Drop column
             </button>
           </div>
         )}
       </div>
-      <h4 className="mt-2 text-sm font-semibold text-slate-900">{issue.title}</h4>
-      <p className="mt-1 text-sm text-slate-600">{issue.detail}</p>
+      <h4 className="mt-2.5 text-sm font-semibold text-white">{issue.title}</h4>
+      <p className="mt-1 text-sm text-slate-400">{issue.detail}</p>
     </li>
   );
 }

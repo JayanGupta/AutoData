@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as api from "../../api/client";
 import { DataTable } from "./DataTable";
+import { cn } from "@/views/landing/primitives";
 
 interface PaginatedDataTableProps {
   sessionId: string;
@@ -46,17 +47,16 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
     };
   }, [sessionId, offset, size]);
 
-  const clamp = useCallback(
-    (next: number) => Math.max(0, Math.min(total - 1, next)),
-    [total],
-  );
+  const clamp = useCallback((next: number) => Math.max(0, Math.min(total - 1, next)), [total]);
 
   const lastPageStart = Math.max(0, Math.floor((total - 1) / size) * size);
+
+  const pageBtn = "inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] p-1.5 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-30 disabled:hover:bg-white/[0.03]";
 
   return (
     <div>
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-lg border border-rose-500/25 bg-rose-500/[0.06] px-4 py-3 text-sm text-rose-300">{error}</div>
       ) : (
         <>
           <DataTable columns={columns} rows={rows} maxHeight="420px" emptyMessage={loading ? "Loading rows…" : "No rows"} />
@@ -70,7 +70,7 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
                   value={size}
                   onChange={(e) => setSize(Number(e.target.value))}
                   aria-label="Rows per page"
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                  className={cn("field !w-auto !py-1.5 text-xs")}
                 >
                   {PAGE_SIZES.map((s) => (
                     <option key={s} value={s}>
@@ -80,39 +80,19 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
                 </select>
               </div>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setOffset(0)}
-                  disabled={offset === 0}
-                  aria-label="First page"
-                  className="rounded-md border border-slate-200 bg-white p-1.5 text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
-                >
+                <button onClick={() => setOffset(0)} disabled={offset === 0} aria-label="First page" className={pageBtn}>
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <button
-                  onClick={() => setOffset(clamp(offset - size))}
-                  disabled={offset === 0}
-                  aria-label="Previous page"
-                  className="rounded-md border border-slate-200 bg-white p-1.5 text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
-                >
+                <button onClick={() => setOffset(clamp(offset - size))} disabled={offset === 0} aria-label="Previous page" className={pageBtn}>
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <span className="px-2 text-xs font-medium text-slate-600">
+                <span className="px-2 text-xs font-medium text-slate-400">
                   Page {Math.floor(offset / size) + 1} of {Math.max(1, Math.ceil(total / size))}
                 </span>
-                <button
-                  onClick={() => setOffset(clamp(offset + size))}
-                  disabled={offset >= lastPageStart}
-                  aria-label="Next page"
-                  className="rounded-md border border-slate-200 bg-white p-1.5 text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
-                >
+                <button onClick={() => setOffset(clamp(offset + size))} disabled={offset >= lastPageStart} aria-label="Next page" className={pageBtn}>
                   <ChevronRight className="h-4 w-4" />
                 </button>
-                <button
-                  onClick={() => setOffset(lastPageStart)}
-                  disabled={offset >= lastPageStart}
-                  aria-label="Last page"
-                  className="rounded-md border border-slate-200 bg-white p-1.5 text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
-                >
+                <button onClick={() => setOffset(lastPageStart)} disabled={offset >= lastPageStart} aria-label="Last page" className={pageBtn}>
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>

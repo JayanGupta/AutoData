@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Sparkles } from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
 import { ChartCard } from "../components/charts/ChartCard";
 import { ChartModal } from "../components/charts/ChartModal";
 import { EmptyState } from "../components/ui/EmptyState";
 import { onChartFocus } from "../lib/chartFocus";
+import { cn } from "./landing/primitives";
 import type { ChartSpec } from "../types";
 
 const TYPES = ["all", "bar", "line", "histogram", "scatter", "pie", "heatmap"];
@@ -44,17 +45,20 @@ export function VisualizationsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Visualizations</h2>
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-white">
+            <Sparkles className="h-5 w-5 text-violet-300" /> Visualizations
+          </h2>
           <p className="text-sm text-slate-500">Auto-generated charts based on column types — click any chart to focus it.</p>
         </div>
-        <div className="flex gap-1 rounded-lg bg-slate-100 p-0.5">
+        <div className="flex flex-wrap gap-1 rounded-xl border border-white/[0.08] bg-white/[0.04] p-1">
           {TYPES.map((t) => (
             <button
               key={t}
               onClick={() => setFilter(t)}
-              className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors ${
-                filter === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
-              }`}
+              className={cn(
+                "rounded-lg px-3 py-1 text-xs font-medium capitalize transition-all",
+                filter === t ? "bg-gradient-to-r from-violet-500/30 to-indigo-500/20 text-white" : "text-slate-500 hover:text-slate-200",
+              )}
             >
               {t}
             </button>
@@ -71,7 +75,14 @@ export function VisualizationsPage() {
       ) : (
         <div ref={focusRef} className="grid gap-5 lg:grid-cols-2">
           {filtered.map((chart: ChartSpec) => (
-            <div key={chart.id} id={`chart-${chart.id}`} className={focusedId === chart.id ? "ring-2 ring-brand-500 ring-offset-2 rounded-xl" : ""}>
+            <div
+              key={chart.id}
+              id={`chart-${chart.id}`}
+              className={cn(
+                "rounded-3xl transition-all duration-300",
+                focusedId === chart.id && "ring-2 ring-violet-400/60 ring-offset-4 ring-offset-night-950 shadow-glow-violet",
+              )}
+            >
               <ChartCard chart={chart} onFocus={(id) => setModalChart(charts.find((c) => c.id === id) ?? null)} />
             </div>
           ))}

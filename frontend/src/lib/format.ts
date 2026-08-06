@@ -38,12 +38,12 @@ export const TYPE_LABELS: Record<string, string> = {
 };
 
 export const TYPE_COLORS: Record<string, string> = {
-  integer: "bg-sky-100 text-sky-700 border-sky-200",
-  float: "bg-cyan-100 text-cyan-700 border-cyan-200",
-  datetime: "bg-violet-100 text-violet-700 border-violet-200",
-  boolean: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
-  categorical: "bg-amber-100 text-amber-700 border-amber-200",
-  text: "bg-slate-100 text-slate-600 border-slate-200",
+  integer: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+  float: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+  datetime: "bg-violet-500/15 text-violet-300 border-violet-500/30",
+  boolean: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30",
+  categorical: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  text: "bg-white/[0.06] text-slate-300 border-white/10",
 };
 
 export const SEVERITY_COLORS: Record<string, string> = {

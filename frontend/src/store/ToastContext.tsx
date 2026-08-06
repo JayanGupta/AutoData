@@ -20,9 +20,9 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const KIND_STYLES: Record<ToastKind, { box: string; icon: typeof Info }> = {
-  success: { box: "border-emerald-200 bg-white", icon: CheckCircle2 },
-  error: { box: "border-red-200 bg-white", icon: XCircle },
-  info: { box: "border-sky-200 bg-white", icon: Info },
+  success: { box: "border-emerald-500/25 bg-night-800/95", icon: CheckCircle2 },
+  error: { box: "border-red-500/25 bg-night-800/95", icon: XCircle },
+  info: { box: "border-sky-500/25 bg-night-800/95", icon: Info },
 };
 
 const KIND_ICON_COLOR: Record<ToastKind, string> = {
@@ -73,14 +73,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={t.id}
               role="status"
-              className={`pointer-events-auto flex items-start gap-3 rounded-lg border shadow-lg ${style.box} animate-toast-in`}
+              className={`pointer-events-auto flex items-start gap-3 rounded-2xl border shadow-2xl shadow-black/40 backdrop-blur-xl ${style.box} animate-toast-in`}
             >
               <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${KIND_ICON_COLOR[t.kind]}`} />
-              <p className="flex-1 py-0.5 text-sm text-slate-700">{t.message}</p>
+              <p className="flex-1 py-0.5 text-sm text-slate-200">{t.message}</p>
               <button
                 onClick={() => dismiss(t.id)}
                 aria-label="Dismiss notification"
-                className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-white"
               >
                 <X className="h-4 w-4" />
               </button>

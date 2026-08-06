@@ -24,8 +24,8 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-            <Sparkles className="h-5 w-5 text-brand-600" /> AI Insights
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-white">
+            <Sparkles className="h-5 w-5 text-violet-300" /> AI Insights
           </h2>
           <p className="text-sm text-slate-500">
             Patterns detected automatically from the actual data — every insight links to its evidence.
@@ -38,8 +38,8 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
       </div>
 
       {insightsLoading && insights.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-16 text-slate-500">
-          <Spinner className="mb-3 h-8 w-8 text-brand-600" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.02] py-16 text-slate-500">
+          <Spinner className="mb-3 h-8 w-8 text-violet-400" />
           <p className="text-sm">Scanning the dataset for meaningful patterns…</p>
         </div>
       ) : insights.length === 0 ? (
@@ -63,33 +63,33 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
 
 function InsightCard({ insight, onAsk }: { insight: Insight; onAsk: (q: string) => void }) {
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <article className="group rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.16] hover:bg-white/[0.05] hover:shadow-card-3d">
       <div className="flex flex-wrap items-center gap-2">
         <SeverityBadge severity={insight.severity} />
-        <Badge className="bg-slate-100 text-slate-600 border-slate-200">{categoryLabel(insight.category)}</Badge>
+        <Badge className="border-white/10 bg-white/[0.05] text-slate-300">{categoryLabel(insight.category)}</Badge>
       </div>
-      <h3 className="mt-3 text-sm font-semibold text-slate-900">{insight.title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{insight.detail}</p>
+      <h3 className="mt-3 font-display text-sm font-semibold text-white">{insight.title}</h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{insight.detail}</p>
 
       {insight.numbers.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {insight.numbers.map((n, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 font-mono text-xs"
             >
               <span className="text-slate-500">{n.label}:</span>
-              <strong className="text-slate-900">{n.value}</strong>
+              <strong className="text-cyan-200">{n.value}</strong>
             </span>
           ))}
         </div>
       )}
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-3">
         {insight.evidence.chart_id && (
           <button
             onClick={() => requestChartFocus(insight.evidence.chart_id!)}
-            className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"
+            className="inline-flex items-center gap-1 text-xs font-medium text-violet-300 transition-colors hover:text-violet-200"
           >
             <LineChartIcon className="h-3.5 w-3.5" /> View chart evidence
           </button>
@@ -97,7 +97,7 @@ function InsightCard({ insight, onAsk }: { insight: Insight; onAsk: (q: string) 
         {insight.query_hint && (
           <button
             onClick={() => onAsk(insight.query_hint!)}
-            className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-brand-700"
+            className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition-colors hover:text-white"
           >
             Ask about this <ArrowRight className="h-3.5 w-3.5" />
           </button>

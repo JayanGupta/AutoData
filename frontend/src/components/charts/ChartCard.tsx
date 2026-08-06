@@ -20,15 +20,19 @@ const TYPE_ICON: Record<string, string> = {
 export function ChartCard({ chart, height = 280, onFocus }: ChartCardProps) {
   return (
     <Card
-      className="hover:shadow-md transition-shadow"
+      className="group/chart transition-all duration-300 hover:border-white/[0.16] hover:bg-white/[0.045]"
       title={chart.title}
-      subtitle={chart.chart_type === "heatmap" ? undefined : `${TYPE_ICON[chart.chart_type] ?? chart.chart_type} chart · ${chart.x} / ${chart.y}`}
+      subtitle={
+        chart.chart_type === "heatmap"
+          ? undefined
+          : `${TYPE_ICON[chart.chart_type] ?? chart.chart_type} chart · ${chart.x} / ${chart.y}`
+      }
       action={
         onFocus ? (
           <button
             onClick={() => onFocus(chart.id)}
             aria-label={`Focus ${chart.title}`}
-            className="text-[11px] font-medium text-brand-600 hover:text-brand-700"
+            className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-slate-300 transition-all hover:border-violet-400/40 hover:text-white hover:shadow-[0_0_16px_rgba(139,92,246,0.25)]"
           >
             Focus
           </button>

@@ -69,7 +69,7 @@ export function ChartModal({ chart, onClose }: ChartModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -79,11 +79,11 @@ export function ChartModal({ chart, onClose }: ChartModalProps) {
     >
       <div
         ref={modalRef}
-        className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl animate-modal-in"
+        className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-night-800 shadow-[0_40px_120px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl animate-modal-in"
       >
-        <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4">
+        <div className="flex items-center justify-between gap-4 border-b border-white/[0.07] px-5 py-4">
           <div className="min-w-0">
-            <h3 className="truncate text-base font-bold text-slate-900">{chart.title}</h3>
+            <h3 className="truncate font-display text-base font-bold text-white">{chart.title}</h3>
             <p className="mt-0.5 text-xs text-slate-500">
               {TYPE_ICON[chart.chart_type] ?? chart.chart_type} chart · {chart.x} / {chart.y}
             </p>
@@ -91,7 +91,7 @@ export function ChartModal({ chart, onClose }: ChartModalProps) {
           <div className="flex shrink-0 items-center gap-2">
             <button
               onClick={handleExport}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700"
+              className="btn-gradient inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110"
             >
               <Download className="h-3.5 w-3.5" /> Export PNG
             </button>
@@ -99,7 +99,7 @@ export function ChartModal({ chart, onClose }: ChartModalProps) {
               ref={closeButtonRef}
               onClick={onClose}
               aria-label="Close chart view"
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>

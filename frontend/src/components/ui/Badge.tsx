@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
+import { cn } from "@/views/landing/primitives";
 
 export function Badge({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${className}`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium",
+        className,
+      )}
     >
       {children}
     </span>
@@ -12,9 +16,9 @@ export function Badge({ children, className = "" }: { children: ReactNode; class
 
 export function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
   const colors: Record<string, string> = {
-    high: "bg-red-100 text-red-700 border-red-200",
-    medium: "bg-amber-100 text-amber-700 border-amber-200",
-    low: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    high: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+    medium: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    low: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   };
-  return <Badge className={colors[severity]}>{severity}</Badge>;
+  return <Badge className={cn(colors[severity], "uppercase tracking-wide")}>{severity}</Badge>;
 }
