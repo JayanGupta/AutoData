@@ -17,3 +17,13 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Next.js build artifacts
+.next/
+*.tsbuildinfo
+.eslintcache
+
+# Runtime data (SQLite sessions database)
+backend/app/data/
+backend/app/sessions.db
+backend/app/sessions.db-journal

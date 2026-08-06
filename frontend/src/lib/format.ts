@@ -17,6 +17,17 @@ export function formatTime(ts: number): string {
   return new Date(ts * 1000).toLocaleString();
 }
 
+export function formatTimestamp(ts: number): string {
+  if (!ts) return "—";
+  return new Date(ts * 1000).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export const TYPE_LABELS: Record<string, string> = {
   integer: "Number",
   float: "Decimal",

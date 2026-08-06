@@ -32,6 +32,7 @@ export interface ColumnProfile {
   inferred_type: ColumnType;
   confidence: number;
   semantic?: string | null;
+  sensitive?: boolean;
   null_count: number;
   null_pct: number;
   distinct_count: number;
@@ -155,4 +156,25 @@ export interface AnalysisSnapshot {
   columns: ColumnProfile[];
   quality: QualityReport;
   charts: ChartSpec[];
+}
+
+export interface AnalysisJob {
+  id: string;
+  name: string;
+  status: "queued" | "running" | "done" | "error";
+  stage: string;
+  progress: number;
+  message: string;
+  error: string | null;
+  session_id: string | null;
+}
+
+export interface CleaningStep {
+  step: number;
+  description: string;
+}
+
+export interface CleaningHistory {
+  steps: CleaningStep[];
+  length: number;
 }

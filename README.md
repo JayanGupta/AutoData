@@ -1,37 +1,39 @@
 # AutoData
 
-A production-style, locally-runnable AutoData SaaS application. Upload a CSV or Excel file and get instant data profiling, quality checks, interactive visualizations, natural-language Q&A, AI insights and a downloadable report.
+A production-style, locally-runnable AI data analyst. Upload a CSV or Excel file and get instant data profiling, quality checks, guided cleaning, interactive visualizations, natural-language Q&A, AI insights, export and a downloadable PDF report.
 
 ## Features
 
-- **Upload** — CSV / TSV / Excel (.xlsx), up to 50 MB, with encoding & delimiter sniffing
-- **Auto-profiling** — column type inference, distributions, statistics, semantic hints
+- **Upload** — CSV / TSV / Excel (.xlsx and .xls), up to 50 MB, with encoding & delimiter sniffing and async background jobs for large files
+- **Auto-profiling** — column type inference, distributions, statistics, semantic hints, PII / sensitive-column detection
 - **Data quality** — missing values, duplicates, outliers, type anomalies, constant/empty columns, skew; with a 0–100 quality score
+- **Cleaning studio** — guided column operations (fill missing, convert numeric, trim, lowercase, parse dates, rename, drop) plus one-click quick fixes; every step is tracked in history and reversible with undo
 - **Visualizations** — auto-generated histograms, time series, bar/pie breakdowns, scatter plots and a correlation heatmap
 - **AI Analyst chat** — ask questions in plain English; answers are grounded in the actual dataset (never invented)
 - **AI insights** — deterministic pattern detection (correlations, trends, top performers, outliers), each linked to its chart evidence
-- **Report** — one-click professional report in Markdown or HTML
+- **Export & report** — download the cleaned dataset as CSV or XLSX, or generate a shareable report in Markdown, HTML or PDF
 
 ## Tech stack
 
 | Layer | Tech |
 | --- | --- |
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Recharts |
-| Backend | Python 3.11, FastAPI, pandas, numpy |
-| Storage | In-memory sessions with TTL (nothing persisted, privacy-first) |
+| Frontend | React 18, TypeScript, Next.js, Tailwind CSS, Recharts |
+| Backend | Python 3.11, FastAPI, pandas, numpy, reportlab |
+| Storage | SQLite (sessions + conversation history) with CSV/JSON persistence — portable, no pickling |
 | AI | Optional OpenAI-compatible LLM (SQL generation + interpretation); fully functional **local rule-based mode** without a key |
 
 ## Architecture
 
 ```
-frontend/   React SPA (port 5173) — proxies /api → backend
+frontend/   Next.js app (port 5173) — proxies /api → backend
 backend/    FastAPI app (port 8000)
   app/
-    data_engine/   loader → profiler → quality → analysis → charts
-    ai/            insights, nlu (LLM or local), sql_runner, llm_client
-    sessions/      in-memory session store
-    main.py        REST API
-  tests/           stdlib unittest suite
+    data_engine/   loader → profiler → quality → analysis → charts → cleaning
+    ai/            insights, nlu (LLM or local), sql_runner, llm_client, local_analyst
+    sessions/      SQLite-backed session store
+    data_store/    persistence (SQLite: sessions, history, conversation)
+    main.py        REST API (incl. job runner, export, report, cleaning history)
+  tests/           stdlib unittest suite (unit + API integration)
 sample_data/       sample sales dataset (CSV + Excel)
 ```
 
@@ -53,7 +55,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 — the Vite dev server proxies `/api` to the backend on port 8000.
+Open http://localhost:5173 — the Next.js dev server proxies `/api` to the backend on port 8000.
 
 ### 3. Optional: enable the LLM
 
@@ -81,24 +83,33 @@ Starts both servers and prints the URL. Stop with `Ctrl+C`.
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/datasets` | Upload file → full analysis snapshot |
+| `POST` | `/api/jobs/upload` | Upload file → returns a job id (async background analysis) |
+| `GET` | `/api/jobs/{id}` | Poll job status / progress |
+| `POST` | `/api/datasets` | Upload file → full analysis snapshot (sync) |
+| `GET` | `/api/datasets` | List saved sessions |
 | `GET` | `/api/datasets/{id}` | Fetch snapshot (overview, quality, charts) |
+| `GET` | `/api/datasets/{id}/rows` | Paginated raw rows |
+| `GET` | `/api/datasets/{id}/export?fmt=csv\|xlsx` | Download the cleaned dataset |
+| `POST` | `/api/datasets/{id}/clean` | Apply a cleaning step |
+| `POST` | `/api/datasets/{id}/clean/undo` | Undo the last cleaning step |
+| `GET` | `/api/datasets/{id}/cleaning` | Cleaning history |
 | `GET` | `/api/datasets/{id}/insights` | Auto-generated insights |
 | `POST` | `/api/datasets/{id}/insights/generate` | Re-run insight generation |
+| `GET` | `/api/datasets/{id}/suggested-questions` | Suggested analyst questions |
 | `POST` | `/api/datasets/{id}/ask` | Natural-language question |
-| `GET` | `/api/datasets/{id}/report?fmt=html` | Report (markdown or html) |
+| `GET` | `/api/datasets/{id}/report?fmt=markdown\|html\|pdf` | Report (markdown, html or pdf) |
 | `GET` | `/api/llm/status` | LLM availability |
 
 ## Tests
 
 ```bash
 cd backend
-python -m unittest tests.test_engine -v
+python -m unittest tests.test_engine tests.test_features tests.test_api -v
 ```
 
 ## Privacy note
 
-Datasets are held in memory and automatically expired after 2 hours of inactivity. Nothing is written to disk or shared.
+Datasets are stored locally in a SQLite database under `backend/app/data/` and never leave your machine. Nothing is uploaded to a cloud. When no LLM key is configured, all analysis is computed locally with deterministic rules.
 
 ## Try it with sample data
 

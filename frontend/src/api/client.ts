@@ -1,7 +1,9 @@
 import type {
+  AnalysisJob,
   AnalysisSnapshot,
   AnalystResponse,
   ChartSpec,
+  CleaningHistory,
   CleaningResponse,
   DatasetInfo,
   Insight,
@@ -10,9 +12,16 @@ import type {
 } from "../types";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
+const REQUEST_TIMEOUT_MS = 120_000;
+
+function timeoutSignal(): AbortSignal {
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  return controller.signal;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, init);
+  const res = await fetch(`${BASE}${path}`, { ...init, signal: init?.signal ?? timeoutSignal() });
   if (!res.ok) {
     let message = `Request failed with status ${res.status}`;
     try {
@@ -42,6 +51,16 @@ export function uploadDataset(file: File): Promise<AnalysisSnapshot> {
   return request<AnalysisSnapshot>("/datasets", { method: "POST", body: form });
 }
 
+export function createUploadJob(file: File): Promise<{ job_id: string; name: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  return request<{ job_id: string; name: string }>("/jobs/upload", { method: "POST", body: form });
+}
+
+export function getJob(jobId: string): Promise<AnalysisJob> {
+  return request<AnalysisJob>(`/jobs/${jobId}`);
+}
+
 export function getDataset(id: string): Promise<AnalysisSnapshot> {
   return request<AnalysisSnapshot>(`/datasets/${id}`);
 }
@@ -58,6 +77,10 @@ export function generateInsights(id: string): Promise<{ insights: Insight[] }> {
   return request<{ insights: Insight[] }>(`/datasets/${id}/insights/generate`, { method: "POST" });
 }
 
+export function getSuggestedQuestions(id: string): Promise<{ questions: string[] }> {
+  return request<{ questions: string[] }>(`/datasets/${id}/suggested-questions`);
+}
+
 export function askQuestion(id: string, question: string): Promise<AnalystResponse> {
   return request<AnalystResponse>(`/datasets/${id}/ask`, {
     method: "POST",
@@ -68,6 +91,14 @@ export function askQuestion(id: string, question: string): Promise<AnalystRespon
 
 export function getReport(id: string, fmt: "markdown" | "html" = "markdown"): Promise<ReportResult> {
   return request<ReportResult>(`/datasets/${id}/report?fmt=${fmt}`);
+}
+
+export function getReportPdfUrl(id: string): string {
+  return `${BASE}/datasets/${id}/report?fmt=pdf`;
+}
+
+export function getExportUrl(id: string, fmt: "csv" | "xlsx"): string {
+  return `${BASE}/datasets/${id}/export?fmt=${fmt}`;
 }
 
 export function uploadSampleDataset(): Promise<AnalysisSnapshot> {
@@ -100,4 +131,8 @@ export function cleanDataset(
 
 export function undoClean(id: string): Promise<CleaningResponse> {
   return request<CleaningResponse>(`/datasets/${id}/clean/undo`, { method: "POST" });
+}
+
+export function getCleaningHistory(id: string): Promise<CleaningHistory> {
+  return request<CleaningHistory>(`/datasets/${id}/cleaning`);
 }

@@ -8,6 +8,7 @@ coerce a column to a richer type and measure how many rows succeed.
 from __future__ import annotations
 
 import datetime as _dt
+import re
 
 import numpy as np
 import pandas as pd
@@ -127,6 +128,33 @@ def detect_semantic(name: str) -> str | None:
         if lower.startswith(key) or lower.endswith(key):
             return value
     return None
+
+
+_SENSITIVE_NAME_RE = re.compile(
+    r"(email|mail|phone|telephone|ssn|social|secret|password|passwd|api_?key|token|"
+    r"card|credit|pin|iban|account|aadhaar|passport|licence|license|otp|cvv|secret_key)",
+    re.IGNORECASE,
+)
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_PHONE_RE = re.compile(r"^\+?[\d\s\-().]{7,20}$")
+_SSN_RE = re.compile(r"^\d{3}-\d{2}-\d{4}$")
+_IP_RE = re.compile(r"^\d{1,3}(\.\d{1,3}){3}$")
+
+
+def detect_sensitive_column(name: str, series: pd.Series) -> bool:
+    """Flag columns likely to contain personal or credential data."""
+    if _SENSITIVE_NAME_RE.search(name):
+        return True
+    non_null = series.dropna().astype(str).head(100)
+    if len(non_null) == 0:
+        return False
+    sample = non_null.str.strip()
+    email_hits = sample.str.match(_EMAIL_RE).sum()
+    phone_hits = sample.str.fullmatch(_PHONE_RE).sum()
+    ssn_hits = sample.str.fullmatch(_SSN_RE).sum()
+    ip_hits = sample.str.fullmatch(_IP_RE).sum()
+    hits = email_hits + phone_hits + ssn_hits + ip_hits
+    return bool(hits >= max(2, len(sample) * 0.5))
 
 
 def _detect_type(name: str, series: pd.Series) -> tuple[str, float, pd.Series]:
@@ -272,6 +300,7 @@ def profile_column(name: str, series: pd.Series) -> dict:
         "inferred_type": dtype,
         "confidence": round(confidence, 2),
         "semantic": detect_semantic(name),
+        "sensitive": detect_sensitive_column(name, series),
         "null_count": null_count,
         "null_pct": round(null_count / total * 100, 2),
         "distinct_count": distinct_count,
@@ -291,6 +320,8 @@ def overview_summary(df: pd.DataFrame, columns: list[dict]) -> dict:
     num_cols = [c for c in columns if c["inferred_type"] in NUMERIC_TYPES]
     cat_cols = [c for c in columns if c["inferred_type"] in (TYPE_CATEGORICAL, TYPE_BOOLEAN)]
     date_cols = [c for c in columns if c["inferred_type"] == TYPE_DATETIME]
+    total_cells = int(len(df) * len(df.columns))
+    missing_cells = missing_cell_count(df)
     return {
         "row_count": int(len(df)),
         "column_count": int(len(df.columns)),
@@ -299,7 +330,24 @@ def overview_summary(df: pd.DataFrame, columns: list[dict]) -> dict:
         "datetime_columns": len(date_cols),
         "text_columns": len([c for c in columns if c["inferred_type"] == TYPE_TEXT]),
         "duplicate_count": int(df.duplicated().sum()),
-        "total_cells": int(len(df) * len(df.columns)),
-        "missing_cells": int(df.map(_is_missing).sum().sum()),
-        "missing_pct": round(float(df.map(_is_missing).sum().sum()) / max(len(df) * len(df.columns), 1) * 100, 2),
+        "total_cells": total_cells,
+        "missing_cells": missing_cells,
+        "missing_pct": round(float(missing_cells) / max(total_cells, 1) * 100, 2),
     }
+
+
+_MISSING_STRING_MARKERS = {"", "nan", "NaN", "N/A", "NA", "null", "None", "-", "?", "none", "n/a"}
+
+
+def missing_cell_count(df: pd.DataFrame) -> int:
+    """Count missing cells using vectorised ops (fast on large frames)."""
+    total = int(df.isna().sum().sum())
+    for col in df.columns:
+        series = df[col]
+        if series.dtype == object:
+            try:
+                stripped = series.astype(str).str.strip()
+                total += int(stripped.isin(_MISSING_STRING_MARKERS).sum())
+            except (TypeError, ValueError):
+                pass
+    return total

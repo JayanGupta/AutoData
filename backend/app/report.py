@@ -1,8 +1,9 @@
-"""Professional report generation (Markdown + HTML).
+"""Professional report generation (Markdown + HTML + PDF).
 
 Assembles the dataset overview, quality summary, key insights and supporting
 charts into a single downloadable report. All numbers come from the computed
-analysis - nothing is invented here.
+analysis - nothing is invented here. Columns flagged as sensitive (PII) are
+summarised without their values.
 """
 
 from __future__ import annotations
@@ -19,8 +20,14 @@ def _esc(v) -> str:
     return html.escape(str(v))
 
 
+def _visible_columns(engine) -> list[dict]:
+    return [c for c in engine.columns if not c.get("sensitive")]
+
+
 def build_report_markdown(engine, dataset_name: str, insights: list[dict]) -> str:
     s = engine.summary
+    columns = _visible_columns(engine)
+    sensitive = [c["name"] for c in engine.columns if c.get("sensitive")]
     lines = []
     lines.append(f"# AutoData Report — {dataset_name}")
     lines.append("")
@@ -33,11 +40,15 @@ def build_report_markdown(engine, dataset_name: str, insights: list[dict]) -> st
     lines.append("")
     lines.append("| Column | Type | Confidence | Missing | Distinct |")
     lines.append("| --- | --- | --- | --- | --- |")
-    for c in engine.columns:
+    for c in columns:
         lines.append(
             f"| {c['name']} | {c['inferred_type']} | {c['confidence']} | "
             f"{c['null_pct']}% | {c['distinct_count']} |"
         )
+    if sensitive:
+        lines.append("")
+        lines.append(f"_Note: {len(sensitive)} sensitive column(s) omitted: "
+                     + ", ".join(f"`{c}`" for c in sensitive) + "._")
     lines.append("")
 
     lines.append("## 3. Data Quality")
@@ -112,9 +123,121 @@ def markdown_to_html(markdown_text: str) -> str:
 <style>
 body {{ font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width: 860px; margin: 32px auto; padding: 0 20px; color: #1f2937; line-height: 1.6; }}
 h1 {{ border-bottom: 2px solid #4f46e5; padding-bottom: 8px; }}
-table {{ border-collapse: collapse; width: 100%; }}
+h2 {{ margin-top: 28px; color: #111827; }}
+h3 {{ margin-top: 20px; }}
+table {{ border-collapse: collapse; width: 100%; margin: 12px 0; }}
 td {{ border: 1px solid #e5e7eb; padding: 6px 10px; font-size: 14px; }}
 tr:first-child td {{ background: #f3f4f6; font-weight: 600; }}
 li {{ margin: 4px 0; }}
+hr {{ border: 0; border-top: 1px solid #e5e7eb; margin: 28px 0; }}
 </style></head>
 <body>{body}</body></html>"""
+
+
+def build_report_pdf(engine, dataset_name: str, insights: list[dict]) -> bytes:
+    """Build a real, shareable PDF report (reportlab)."""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import (
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
+    )
+    from reportlab.lib.enums import TA_LEFT
+
+    from io import BytesIO
+
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(
+        name="Tight", parent=styles["Normal"], spaceAfter=6, leading=14,
+    ))
+    styles.add(ParagraphStyle(
+        name="H2Local", parent=styles["Heading2"], textColor=colors.HexColor("#4f46e5"),
+        spaceBefore=14, spaceAfter=6,
+    ))
+    styles.add(ParagraphStyle(
+        name="Muted", parent=styles["Normal"], textColor=colors.HexColor("#6b7280"),
+        fontSize=9, spaceAfter=4,
+    ))
+
+    buf = BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=letter,
+        leftMargin=0.85 * inch, rightMargin=0.85 * inch,
+        topMargin=0.85 * inch, bottomMargin=0.85 * inch,
+    )
+    story = []
+    story.append(Paragraph(f"AutoData Report — {_html(dataset_name)}", styles["Title"]))
+    story.append(Paragraph("Automated data analysis", styles["Muted"]))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("1. Dataset Overview", styles["H2Local"]))
+    story.append(Paragraph(_html(dataset_overview_text(engine)), styles["Tight"]))
+
+    story.append(Paragraph("2. Columns", styles["H2Local"]))
+    columns = _visible_columns(engine)
+    sensitive = [c["name"] for c in engine.columns if c.get("sensitive")]
+    col_data = [["Column", "Type", "Missing", "Distinct"]]
+    for c in columns:
+        col_data.append([_html(c["name"]), c["inferred_type"], f"{c['null_pct']}%", str(c["distinct_count"])])
+    col_table = Table(col_data, colWidths=[2.4 * inch, 1.4 * inch, 1.0 * inch, 1.0 * inch], repeatRows=1)
+    col_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2ff")),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#e5e7eb")),
+        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    story.append(col_table)
+    if sensitive:
+        story.append(Paragraph(
+            f"<i>Sensitive columns omitted from this report: {_html(', '.join(sensitive))}.</i>",
+            styles["Muted"],
+        ))
+    story.append(Spacer(1, 8))
+
+    story.append(Paragraph("3. Data Quality", styles["H2Local"]))
+    q = engine.quality["summary"]
+    story.append(Paragraph(
+        f"Quality score: <b>{q['quality_score']}/100</b> "
+        f"({q['total_issues']} issues: {q['high']} high, {q['medium']} medium, {q['low']} low).",
+        styles["Tight"],
+    ))
+    for issue in engine.quality["issues"][:12]:
+        story.append(Paragraph(f"• <b>[{issue['severity'].upper()}]</b> {_html(issue['title'])} — {_html(issue['detail'])}", styles["Tight"]))
+
+    story.append(Paragraph("4. Key Insights", styles["H2Local"]))
+    if not insights:
+        story.append(Paragraph("No significant patterns were detected in this dataset.", styles["Tight"]))
+    for i in insights:
+        story.append(Paragraph(f"<b>{_html(i['title'])}</b>", styles["Tight"]))
+        story.append(Paragraph(_html(i["detail"]), styles["Tight"]))
+        if i.get("numbers"):
+            parts = ", ".join(f"{_html(n['label'])}: <b>{_html(n['value'])}</b>" for n in i["numbers"])
+            story.append(Paragraph(parts, styles["Muted"]))
+
+    story.append(Paragraph("5. Correlations", styles["H2Local"]))
+    if engine.strong_correlations:
+        for p in engine.strong_correlations[:6]:
+            story.append(Paragraph(
+                f"• {_html(p['col_a'])} & {_html(p['col_b'])}: <b>{p['correlation']:.2f}</b> ({p['strength']})",
+                styles["Tight"],
+            ))
+    else:
+        story.append(Paragraph("No strong correlations were found between numeric columns.", styles["Tight"]))
+
+    story.append(Spacer(1, 16))
+    story.append(Paragraph(
+        f"Generated by AutoData · {engine.summary['row_count']:,} rows × {engine.summary['column_count']} columns",
+        styles["Muted"],
+    ))
+    doc.build(story)
+    return buf.getvalue()
+
+
+def _html(text: str) -> str:
+    return html.escape(str(text))

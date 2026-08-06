@@ -13,6 +13,7 @@ from ..data_engine import analysis
 from ..data_engine.profiler import NUMERIC_TYPES
 
 INTENT_PATTERNS = [
+    ("summary", r"\bsummary|overview|tell me about|describe\b|general info|what is this data"),
     ("median", r"\bmedian|midpoint|middle value|50th percentile|50th pct"),
     ("percentage", r"\bpercentage|percent|share of|fraction|proportion|what %|what pct|how much of"),
     ("compare", r"\bcompare|versus|\bvs\b|between|\bdiffer|difference between"),
@@ -365,6 +366,23 @@ def _answer_compare(question: str, cols: list[dict], engine) -> dict:
     return _unknown_answer(question)
 
 
+def _answer_summary(question: str, engine) -> dict:
+    from .insights import dataset_overview_text
+
+    text = dataset_overview_text(engine)
+    top = engine.cached_insights(limit=3)
+    highlights = "; ".join(i["title"] for i in top) if top else "No standout patterns found."
+    return {
+        "answer": f"{text} Top findings: {highlights}.",
+        "numbers": [
+            {"label": "rows", "value": f"{engine.summary['row_count']:,}"},
+            {"label": "columns", "value": str(engine.summary["column_count"])},
+            {"label": "quality", "value": f"{engine.quality['summary']['quality_score']}/100"},
+        ],
+        "explanation": "Summary compiled from the computed profile and top insights.",
+    }
+
+
 def _unknown_answer(question: str) -> dict:
     return {
         "answer": "I could not confidently match that question to the dataset's statistics. "
@@ -411,6 +429,7 @@ def answer(question: str, engine, memory: list[dict] | None = None) -> dict:
     intent = _detect_intent(question)
 
     handler = {
+        "summary": lambda: _answer_summary(question, engine),
         "highest": lambda: _answer_highest_lowest(question, cols, "highest", engine),
         "lowest": lambda: _answer_highest_lowest(question, cols, "lowest", engine),
         "average": lambda: _answer_average_total(question, cols, "average", engine),
@@ -444,9 +463,7 @@ def answer(question: str, engine, memory: list[dict] | None = None) -> dict:
 
 
 def _related_insights(question: str, intent: str, engine) -> list[dict]:
-    from .insights import generate_insights
-
-    insights = generate_insights(engine, limit=6)
+    insights = engine.cached_insights(limit=6)
     return [
         {"id": i["id"], "title": i["title"], "query_hint": i.get("query_hint")}
         for i in insights if i.get("query_hint")

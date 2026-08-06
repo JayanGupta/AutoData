@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity,
   BarChart3,
+  Download,
   FileText,
   FolderUp,
   Lightbulb,
@@ -12,6 +13,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { getExportUrl, getReportPdfUrl } from "@/api/client";
+import { formatTimestamp } from "@/lib/format";
 import { useDataset } from "@/store/DatasetContext";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
@@ -78,8 +81,7 @@ export function Dashboard() {
                 <div className="flex flex-wrap gap-3">
                   <Button variant="primary" size="md" onClick={() => setSection("insights")}>View insights</Button>
                   <Button variant="outline" size="md" onClick={handleNew}><FolderUp className="h-4 w-4" /> New dataset</Button>
-                </div>
-              </div>
+                </div>              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
@@ -157,19 +159,34 @@ export function Dashboard() {
               </div>
             </Card>
 
+            <Card title="Export" className="rounded-[1.75rem] border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950">
+              <p className="mb-3 text-xs text-slate-500">Download the current (cleaned) dataset or a shareable PDF report.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Button size="sm" variant="outline" onClick={() => { window.open(getExportUrl(ds.id, "csv"), "_blank"); }}>
+                  <Download className="h-4 w-4" /> CSV
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { window.open(getExportUrl(ds.id, "xlsx"), "_blank"); }}>
+                  <Download className="h-4 w-4" /> XLSX
+                </Button>
+                <Button size="sm" variant="outline" className="col-span-2" onClick={() => { window.open(getReportPdfUrl(ds.id), "_blank"); }}>
+                  <FileText className="h-4 w-4" /> Download PDF report
+                </Button>
+              </div>
+            </Card>
+
             <Card title="Dataset details" className="rounded-[1.75rem] border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950">
               <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">Created</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">Today</span>
+                  <span className="text-slate-500">Uploaded</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{formatTimestamp(ds.created_at)}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">Dataset type</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">CSV / Excel</span>
+                  <span className="text-slate-500">Format</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{(ds.name.split(".").pop() ?? "").toUpperCase() || "CSV"}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">Latest refresh</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">Now</span>
+                  <span className="text-slate-500">Analysis</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">Complete</span>
                 </div>
               </div>
             </Card>

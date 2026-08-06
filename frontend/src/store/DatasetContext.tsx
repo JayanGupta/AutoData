@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 import type { ReactNode } from "react";
 import * as api from "../api/client";
 import type {
+  AnalysisJob,
   AnalysisSnapshot,
   ChartSpec,
   CleaningResponse,
@@ -10,6 +11,12 @@ import type {
 } from "../types";
 
 const STORAGE_KEY = "autodata_last_dataset";
+
+interface UploadProgress {
+  progress: number;
+  stage: string;
+  message: string;
+}
 
 interface DatasetContextValue {
   snapshot: AnalysisSnapshot | null;
@@ -20,7 +27,9 @@ interface DatasetContextValue {
   insightsLoading: boolean;
   sessions: DatasetInfo[];
   charts: ChartSpec[];
+  cleaningSteps: CleaningStepLike[];
   upload: (file: File) => Promise<AnalysisSnapshot>;
+  uploadViaJob: (file: File, onProgress?: (p: UploadProgress) => void) => Promise<AnalysisSnapshot>;
   uploadSample: () => Promise<AnalysisSnapshot>;
   load: (id: string) => Promise<void>;
   listSessions: () => Promise<void>;
@@ -33,17 +42,32 @@ interface DatasetContextValue {
   clearError: () => void;
 }
 
+interface CleaningStepLike {
+  step: number;
+  description: string;
+}
+
 const DatasetContext = createContext<DatasetContextValue | null>(null);
 
 export function DatasetProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [sessions, setSessions] = useState<DatasetInfo[]>([]);
+  const [cleaningSteps, setCleaningSteps] = useState<CleaningStepLike[]>([]);
   const [loading, setLoading] = useState(false);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const setErrorSafe = useCallback((message: string | null) => setError(message), []);
+
+  const remember = useCallback((id: string | null) => {
+    try {
+      if (id) localStorage.setItem(STORAGE_KEY, id);
+      else localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* storage may be unavailable; persistence is best-effort */
+    }
+  }, []);
 
   const listSessions = useCallback(async () => {
     try {
@@ -54,41 +78,80 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const upload = useCallback(async (file: File) => {
-    setLoading(true);
-    setErrorSafe(null);
+  const refreshCleaning = useCallback(async (id: string) => {
     try {
-      const snap = await api.uploadDataset(file);
+      const history = await api.getCleaningHistory(id);
+      setCleaningSteps(history.steps);
+    } catch {
+      setCleaningSteps([]);
+    }
+  }, []);
+
+  const adoptSnapshot = useCallback(
+    async (snap: AnalysisSnapshot) => {
       setSnapshot(snap);
       setInsights([]);
-      try {
-        localStorage.setItem(STORAGE_KEY, snap.dataset.id);
-      } catch {
-        /* storage may be unavailable; persistence is best-effort */
-      }
+      remember(snap.dataset.id);
       await listSessions();
-      return snap;
-    } catch (e) {
-      setErrorSafe(e instanceof Error ? e.message : "Upload failed");
-      throw e;
-    } finally {
-      setLoading(false);
-    }
-  }, [listSessions, setErrorSafe]);
+      await refreshCleaning(snap.dataset.id);
+    },
+    [listSessions, refreshCleaning, remember],
+  );
+
+  const upload = useCallback(
+    async (file: File) => {
+      setLoading(true);
+      setErrorSafe(null);
+      try {
+        const snap = await api.uploadDataset(file);
+        await adoptSnapshot(snap);
+        return snap;
+      } catch (e) {
+        setErrorSafe(e instanceof Error ? e.message : "Upload failed");
+        throw e;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [adoptSnapshot, setErrorSafe],
+  );
+
+  const uploadViaJob = useCallback(
+    async (file: File, onProgress?: (p: UploadProgress) => void) => {
+      setLoading(true);
+      setErrorSafe(null);
+      try {
+        const { job_id } = await api.createUploadJob(file);
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          await new Promise((r) => setTimeout(r, 700));
+          const job: AnalysisJob = await api.getJob(job_id);
+          onProgress?.({ progress: job.progress, stage: job.stage, message: job.message });
+          if (job.status === "done" && job.session_id) {
+            const snap = await api.getDataset(job.session_id);
+            await adoptSnapshot(snap);
+            return snap;
+          }
+          if (job.status === "error") {
+            throw new Error(job.error ?? "Analysis failed");
+          }
+        }
+      } catch (e) {
+        setErrorSafe(e instanceof Error ? e.message : "Upload failed");
+        throw e;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [adoptSnapshot, setErrorSafe],
+  );
 
   const uploadSample = useCallback(async () => {
     setLoading(true);
     setErrorSafe(null);
     try {
       const snap = await api.uploadSampleDataset();
-      setSnapshot(snap);
-      setInsights([]);
-      try {
-        localStorage.setItem(STORAGE_KEY, snap.dataset.id);
-      } catch {
-        /* storage may be unavailable; persistence is best-effort */
-      }
-      await listSessions();
+      await adoptSnapshot(snap);
       return snap;
     } catch (e) {
       setErrorSafe(e instanceof Error ? e.message : "Sample dataset failed to load");
@@ -96,34 +159,40 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [listSessions, setErrorSafe]);
+  }, [adoptSnapshot, setErrorSafe]);
 
-  const load = useCallback(async (id: string) => {
-    setLoading(true);
-    setErrorSafe(null);
-    try {
-      const snap = await api.getDataset(id);
-      setSnapshot(snap);
-      return;
-    } catch (e) {
-      setErrorSafe(e instanceof Error ? e.message : "Failed to load dataset");
-      throw e;
-    } finally {
-      setLoading(false);
-    }
-  }, [setErrorSafe]);
-
-  const deleteSession = useCallback(async (id: string) => {
-    try {
-      await api.deleteDataset(id);
-      setSessions((prev) => prev.filter((item) => item.id !== id));
-      if (snapshot?.dataset.id === id) {
-        clear();
+  const load = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      setErrorSafe(null);
+      try {
+        const snap = await api.getDataset(id);
+        await adoptSnapshot(snap);
+      } catch (e) {
+        setErrorSafe(e instanceof Error ? e.message : "Failed to load dataset");
+        throw e;
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      /* ignore delete failures */
-    }
-  }, [snapshot?.dataset.id]);
+    },
+    [adoptSnapshot, setErrorSafe],
+  );
+
+  const deleteSession = useCallback(
+    async (id: string) => {
+      try {
+        await api.deleteDataset(id);
+        setSessions((prev) => prev.filter((item) => item.id !== id));
+        if (snapshot?.dataset.id === id) {
+          clear();
+        }
+      } catch {
+        /* ignore delete failures */
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [snapshot?.dataset.id],
+  );
 
   const refreshInsights = useCallback(async () => {
     if (!snapshot) return;
@@ -142,9 +211,10 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       const next = await api.cleanDataset(snapshot.dataset.id, action, params);
       setSnapshot(next);
       setInsights([]);
+      await refreshCleaning(snapshot.dataset.id);
       return next;
     },
-    [snapshot],
+    [snapshot, refreshCleaning],
   );
 
   const undoClean = useCallback(async () => {
@@ -152,8 +222,9 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     const next = await api.undoClean(snapshot.dataset.id);
     setSnapshot(next);
     setInsights([]);
+    await refreshCleaning(snapshot.dataset.id);
     return next;
-  }, [snapshot]);
+  }, [snapshot, refreshCleaning]);
 
   const resumeRecent = useCallback(async () => {
     let id: string | null = null;
@@ -167,25 +238,18 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       await load(id);
       return true;
     } catch {
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
+      remember(null);
       return false;
     }
-  }, [load]);
+  }, [load, remember]);
 
   const clear = useCallback(() => {
     setSnapshot(null);
     setInsights([]);
+    setCleaningSteps([]);
     setErrorSafe(null);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-  }, [setErrorSafe]);
+    remember(null);
+  }, [setErrorSafe, remember]);
 
   const clearError = useCallback(() => setErrorSafe(null), [setErrorSafe]);
 
@@ -199,7 +263,9 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       insightsLoading,
       sessions,
       charts: snapshot?.charts ?? [],
+      cleaningSteps,
       upload,
+      uploadViaJob,
       uploadSample,
       load,
       listSessions,
@@ -211,7 +277,11 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       clear,
       clearError,
     }),
-    [snapshot, loading, error, insights, insightsLoading, sessions, upload, uploadSample, load, listSessions, deleteSession, refreshInsights, applyClean, undoClean, resumeRecent, clear, clearError],
+    [
+      snapshot, loading, error, insights, insightsLoading, sessions, cleaningSteps,
+      upload, uploadViaJob, uploadSample, load, listSessions, deleteSession,
+      refreshInsights, applyClean, undoClean, resumeRecent, clear, clearError,
+    ],
   );
 
   return <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>;

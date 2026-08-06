@@ -24,7 +24,7 @@ def validate_extension(filename: str) -> None:
     if ext not in config.ALLOWED_EXTENSIONS:
         raise DataLoadError(
             f"Unsupported file type '{ext or 'unknown'}'. "
-            f"Please upload a CSV or Excel (.xlsx) file."
+            f"Please upload a CSV, TSV or Excel (.xlsx / .xls) file."
         )
 
 

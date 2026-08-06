@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
 import { FileText, Loader2 } from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
-import { getReport } from "../api/client";
+import { getReport, getReportPdfUrl } from "../api/client";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
-import jsPDF from "jspdf";
 
 export function ReportPage() {
   const { snapshot } = useDataset();
   const [html, setHtml] = useState<string | null>(null);
-  const [markdown, setMarkdown] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
 
   const sessionId = snapshot?.dataset.id ?? null;
-  const fileName = (snapshot?.dataset.name ?? "dataset").replace(/\.[^.]+$/, "");
 
   useEffect(() => {
     let active = true;
@@ -26,7 +22,6 @@ export function ReportPage() {
       .then((res) => {
         if (!active) return;
         setHtml(res.content);
-        setMarkdown(res.markdown);
       })
       .catch((e) => active && setError(e instanceof Error ? e.message : "Failed to load report"))
       .finally(() => active && setLoading(false));
@@ -36,23 +31,8 @@ export function ReportPage() {
   }, [sessionId]);
 
   const downloadPdf = () => {
-    if (!markdown) return;
-    const doc = new jsPDF({ unit: "pt", format: "letter" });
-    const lines = markdown.split("\n");
-    let y = 40;
-    doc.setFontSize(11);
-    lines.forEach((line) => {
-      const wrapped = doc.splitTextToSize(line, 520);
-      wrapped.forEach((text: string) => {
-        if (y > 750) {
-          doc.addPage();
-          y = 40;
-        }
-        doc.text(text, 40, y);
-        y += 16;
-      });
-    });
-    doc.save(`${fileName}-report.pdf`);
+    if (!sessionId) return;
+    window.open(getReportPdfUrl(sessionId), "_blank");
   };
 
   return (
@@ -67,7 +47,7 @@ export function ReportPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={downloadPdf} disabled={!markdown}>
+          <Button size="sm" onClick={downloadPdf} disabled={!sessionId}>
             <FileText className="h-4 w-4" /> Download PDF
           </Button>
         </div>

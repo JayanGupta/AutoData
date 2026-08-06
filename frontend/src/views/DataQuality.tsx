@@ -1,5 +1,14 @@
-import { useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Eraser, RotateCcw, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Eraser,
+  History,
+  RotateCcw,
+  Sparkles,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
 import { useToast } from "../store/ToastContext";
 import { Card } from "../components/ui/Card";
@@ -8,7 +17,7 @@ import { ProgressBar } from "../components/ui/ProgressBar";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Button, Spinner } from "../components/ui/Button";
 import { categoryLabel } from "../lib/format";
-import type { QualityIssue } from "../types";
+import type { ColumnProfile, QualityIssue } from "../types";
 
 type Filter = "all" | "high" | "medium" | "low";
 
@@ -18,14 +27,55 @@ const SEVERITY_STYLES: Record<string, string> = {
   low: "border-emerald-200 bg-emerald-50/60",
 };
 
+interface ColumnOp {
+  value: string;
+  label: string;
+  needsValue: boolean;
+  extraValue?: string;
+}
+
+const NUMERIC_OPS: ColumnOp[] = [
+  { value: "fill_missing_numeric", label: "Fill missing with mean", needsValue: false, extraValue: "mean" },
+  { value: "fill_missing_numeric", label: "Fill missing with median", needsValue: false, extraValue: "median" },
+  { value: "convert_numeric", label: "Convert to numbers", needsValue: false },
+];
+
+const GENERIC_OPS: ColumnOp[] = [
+  { value: "fill_missing", label: "Fill missing with value…", needsValue: true },
+  { value: "drop_missing_in_column", label: "Drop rows missing this column", needsValue: false },
+  { value: "trim_whitespace", label: "Trim whitespace", needsValue: false },
+  { value: "lowercase_column", label: "Lowercase values", needsValue: false },
+  { value: "standardize_dates", label: "Parse as dates", needsValue: false },
+  { value: "rename_column", label: "Rename column to…", needsValue: true },
+  { value: "drop_column", label: "Drop column", needsValue: false },
+];
+
+const QUICK_FIXES = [
+  { key: "dups", action: "drop_duplicates", label: "Remove duplicates" },
+  { key: "missing", action: "drop_missing_rows", label: "Drop rows with missing values" },
+];
+
 export function DataQualityPage() {
-  const { snapshot, applyClean, undoClean } = useDataset();
+  const { snapshot, applyClean, undoClean, cleaningSteps } = useDataset();
   const { success: toastSuccess, error: toastError } = useToast();
   const [filter, setFilter] = useState<Filter>("all");
   const [busy, setBusy] = useState<string | null>(null);
-  const [canUndo, setCanUndo] = useState(false);
+  const [column, setColumn] = useState<string>("");
+  const [op, setOp] = useState<string>("");
+  const [value, setValue] = useState<string>("");
 
   const quality = snapshot?.quality;
+  const columns = snapshot?.columns ?? [];
+
+  useEffect(() => {
+    if (!column && columns.length > 0) setColumn(columns[0].name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [column, snapshot?.dataset.id]);
+
+  const selectedColumn: ColumnProfile | undefined = columns.find((c) => c.name === column);
+  const numericOps = selectedColumn && (selectedColumn.inferred_type === "integer" || selectedColumn.inferred_type === "float");
+  const availableOps = numericOps ? [...NUMERIC_OPS, ...GENERIC_OPS] : GENERIC_OPS;
+
   const issues = useMemo(() => {
     if (!quality) return [];
     return filter === "all" ? quality.issues : quality.issues.filter((i) => i.severity === filter);
@@ -36,12 +86,41 @@ export function DataQualityPage() {
   const dataSummary = snapshot?.summary;
   const scoreColor = s.quality_score >= 80 ? "bg-emerald-500" : s.quality_score >= 60 ? "bg-amber-500" : "bg-red-500";
 
-  const runClean = async (key: string, action: string, params?: { column?: string }) => {
+  const runQuick = async (key: string, action: string) => {
     setBusy(key);
     try {
-      const next = await applyClean(action, params);
-      setCanUndo((next?.cleaning?.history_length ?? 0) > 0);
+      const next = await applyClean(action);
       toastSuccess(next?.cleaning?.description ?? "Cleaning step applied.");
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Cleaning step failed.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const runColumnOp = async () => {
+    if (!op || !column) return;
+    setBusy("col");
+    const params: { column?: string; value?: string | number } = { column };
+    const selected = availableOps.find((o) => o.value === op);
+    const fillMethod = selected?.extraValue ?? value;
+    if (selected?.needsValue && !fillMethod) {
+      toastError("Please provide a value for this operation.");
+      setBusy(null);
+      return;
+    }
+    if (selected?.needsValue) {
+      if (op === "rename_column") {
+        params.value = String(fillMethod).trim();
+      } else {
+        const num = Number(fillMethod);
+        params.value = Number.isNaN(num) ? String(fillMethod) : num;
+      }
+    }
+    try {
+      const next = await applyClean(op, params);
+      toastSuccess(next?.cleaning?.description ?? "Cleaning step applied.");
+      setValue("");
     } catch (e) {
       toastError(e instanceof Error ? e.message : "Cleaning step failed.");
     } finally {
@@ -55,7 +134,6 @@ export function DataQualityPage() {
       const next = await undoClean();
       if (next?.cleaning?.undone) toastSuccess("Cleaning step undone.");
       else toastSuccess("Nothing to undo.");
-      setCanUndo((next?.cleaning?.history_length ?? 0) > 0);
     } catch (e) {
       toastError(e instanceof Error ? e.message : "Undo failed.");
     } finally {
@@ -65,36 +143,91 @@ export function DataQualityPage() {
 
   return (
     <div className="space-y-6">
-      <Card title="Clean the dataset" subtitle="One-click fixes are applied to your data and can be undone">
+      <Card title="Cleaning studio" subtitle="One-click fixes and guided column operations — every step is tracked and reversible">
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy !== null || (dataSummary?.duplicate_count ?? 0) === 0}
-            onClick={() => void runClean("dups", "drop_duplicates")}
-          >
-            {busy === "dups" ? <Spinner className="h-4 w-4" /> : <Eraser className="h-4 w-4" />}
-            Remove duplicates
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy !== null || (dataSummary?.missing_cells ?? 0) === 0}
-            onClick={() => void runClean("missing", "drop_missing_rows")}
-          >
-            {busy === "missing" ? <Spinner className="h-4 w-4" /> : <Eraser className="h-4 w-4" />}
-            Drop rows with missing values
-          </Button>
-          <div className="ml-auto flex items-center gap-2">
-            <span className={`text-xs ${canUndo ? "text-slate-500" : "text-slate-300"}`}>
-              {canUndo ? "A step can be undone" : "Nothing to undo yet"}
-            </span>
-            <Button size="sm" variant="secondary" disabled={busy !== null || !canUndo} onClick={() => void runUndo()}>
-              {busy === "undo" ? <Spinner className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
-              Undo
+          {QUICK_FIXES.map((fix) => (
+            <Button
+              key={fix.key}
+              size="sm"
+              variant="outline"
+              disabled={busy !== null || (fix.key === "dups" ? (dataSummary?.duplicate_count ?? 0) === 0 : (dataSummary?.missing_cells ?? 0) === 0)}
+              onClick={() => void runQuick(fix.key, fix.action)}
+            >
+              {busy === fix.key ? <Spinner className="h-4 w-4" /> : <Eraser className="h-4 w-4" />}
+              {fix.label}
+            </Button>
+          ))}
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <Wand2 className="h-3.5 w-3.5" /> Guided column operation
+          </p>
+          <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.2fr_0.8fr_auto]">
+            <select
+              value={column}
+              onChange={(e) => {
+                setColumn(e.target.value);
+                setOp("");
+              }}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            >
+              {columns.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({c.inferred_type})
+                </option>
+              ))}
+            </select>
+            <select
+              value={op}
+              onChange={(e) => setOp(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            >
+              <option value="">Choose an operation…</option>
+              {availableOps.map((o) => (
+                <option key={o.label} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            {needsValue(availableOps, op) && (
+              <input
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder={op === "rename_column" ? "new column name" : "fill value (e.g. 0)"}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              />
+            )}
+            <Button size="sm" disabled={busy !== null || !op || !column} onClick={() => void runColumnOp()}>
+              {busy === "col" ? <Spinner className="h-4 w-4" /> : <Wand2 className="h-4 w-4" />}
+              Apply
             </Button>
           </div>
         </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <History className="h-4 w-4" />
+            <span>{cleaningSteps.length === 0 ? "No cleaning steps applied yet" : `${cleaningSteps.length} step${cleaningSteps.length > 1 ? "s" : ""} applied`}</span>
+          </div>
+          <Button size="sm" variant="secondary" disabled={busy !== null || cleaningSteps.length === 0} onClick={() => void runUndo()}>
+            {busy === "undo" ? <Spinner className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
+            Undo last step
+          </Button>
+        </div>
+
+        {cleaningSteps.length > 0 && (
+          <ol className="mt-3 space-y-1.5">
+            {cleaningSteps.map((step) => (
+              <li key={step.step} className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700">
+                  {step.step + 1}
+                </span>
+                {step.description}
+              </li>
+            ))}
+          </ol>
+        )}
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -172,7 +305,12 @@ export function DataQualityPage() {
                 key={issue.id}
                 issue={issue}
                 busy={busy !== null}
-                onDropColumn={() => void runClean(`drop-${issue.column}`, "drop_column", { column: issue.column })}
+                onSelectColumn={() => {
+                  if (issue.column && columns.some((c) => c.name === issue.column)) {
+                    setColumn(issue.column);
+                  }
+                }}
+                onDropColumn={() => void runQuick(`drop-${issue.column}`, "drop_column")}
               />
             ))}
           </ul>
@@ -180,6 +318,11 @@ export function DataQualityPage() {
       </Card>
     </div>
   );
+}
+
+function needsValue(ops: ColumnOp[], op: string): boolean {
+  if (!op) return false;
+  return ops.some((o) => o.value === op && o.needsValue);
 }
 
 function SummaryPill({ label, value, tone }: { label: string; value: number; tone: string }) {
@@ -194,10 +337,12 @@ function SummaryPill({ label, value, tone }: { label: string; value: number; ton
 function IssueRow({
   issue,
   busy,
+  onSelectColumn,
   onDropColumn,
 }: {
   issue: QualityIssue;
   busy: boolean;
+  onSelectColumn: () => void;
   onDropColumn: () => void;
 }) {
   return (
@@ -210,15 +355,25 @@ function IssueRow({
           <AlertTriangle className="h-3.5 w-3.5" /> {issue.count.toLocaleString()} affected
         </span>
         {issue.column && (
-          <button
-            onClick={onDropColumn}
-            disabled={busy}
-            aria-label={`Drop column ${issue.column}`}
-            title={`Drop column ${issue.column}`}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-          >
-            <Trash2 className="h-3 w-3" /> Drop column
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={onSelectColumn}
+              disabled={busy}
+              aria-label={`Open cleaning tools for ${issue.column}`}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50"
+            >
+              <Sparkles className="h-3 w-3" /> Fix column
+            </button>
+            <button
+              onClick={onDropColumn}
+              disabled={busy}
+              aria-label={`Drop column ${issue.column}`}
+              title={`Drop column ${issue.column}`}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+            >
+              <Trash2 className="h-3 w-3" /> Drop column
+            </button>
+          </div>
         )}
       </div>
       <h4 className="mt-2 text-sm font-semibold text-slate-900">{issue.title}</h4>

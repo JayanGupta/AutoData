@@ -49,12 +49,6 @@ const FEATURES = [
   },
 ];
 
-const STATISTICS = [
-  { label: "Datasets analyzed", value: "1.2K+" },
-  { label: "Average ROI growth", value: "+18%" },
-  { label: "Reported time saved", value: "4h+" },
-];
-
 const STEPS = [
   { n: "01", title: "Upload your data", desc: "CSV or Excel, seamless ingestion with smart previews." },
   { n: "02", title: "Review the dashboard", desc: "Quality, charts and insights appear instantly." },
@@ -72,6 +66,8 @@ export function LandingPage() {
   useEffect(() => {
     void listSessions();
   }, [listSessions]);
+
+  const recentSession = sessions[0];
 
   const handleResume = async () => {
     setLoadingResume(true);
@@ -187,12 +183,18 @@ export function LandingPage() {
               </button>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
-              {STATISTICS.map((stat) => (
-                <div key={stat.label} className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
-                  <p className="text-3xl font-semibold text-slate-900 dark:text-white">{stat.value}</p>
-                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
-                </div>
-              ))}
+              <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+                <p className="text-3xl font-semibold text-slate-900 dark:text-white">Local-first</p>
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Your data is processed on your own machine — never uploaded to a cloud.</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+                <p className="text-3xl font-semibold text-slate-900 dark:text-white">100%</p>
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Free and open-source. No account, no credit card, no trial walls.</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+                <p className="text-3xl font-semibold text-slate-900 dark:text-white">50 MB</p>
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Uploads supported, with async background analysis for large files.</p>
+              </div>
             </div>
           </div>
 
@@ -219,12 +221,12 @@ export function LandingPage() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 rounded-3xl bg-slate-50 p-4 dark:bg-slate-900">
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Rows</p>
-                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">19,808</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Dataset</p>
+                    <p className="text-lg font-semibold text-slate-900 dark:text-white">{recentSession?.name ?? "No upload yet"}</p>
                   </div>
                   <div className="space-y-2 rounded-3xl bg-slate-50 p-4 dark:bg-slate-900">
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Columns</p>
-                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">14</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Quality score</p>
+                    <p className="text-lg font-semibold text-slate-900 dark:text-white">{recentSession ? `${recentSession.quality_score ?? "—"}/100` : "—"}</p>
                   </div>
                 </div>
               </div>
@@ -282,8 +284,12 @@ export function LandingPage() {
               <div className="mt-6 space-y-3">
                 <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-900">
                   <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Last dataset</p>
-                  <p className="mt-2 font-semibold text-slate-900 dark:text-white">movies.csv</p>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">19,808 rows · 14 columns · quality score 84</p>
+                  <p className="mt-2 font-semibold text-slate-900 dark:text-white">{recentSession?.name ?? "movies.csv"}</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    {recentSession
+                      ? `${recentSession.rows.toLocaleString()} rows · ${recentSession.columns} columns · quality score ${recentSession.quality_score ?? "—"}`
+                      : "Try the sample dataset to see a live analysis."}
+                  </p>
                 </div>
                 <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-900">
                   <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Coming soon</p>
@@ -367,19 +373,19 @@ export function LandingPage() {
           </div>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">Active datasets</p>
-              <p className="mt-4 text-3xl font-bold text-brand-600">2</p>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Saved reports and dataset sessions ready to continue.</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Saved sessions</p>
+              <p className="mt-4 text-3xl font-bold text-brand-600">{sessions.length}</p>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Datasets you can resume right from this workspace.</p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">Trusted performance</p>
-              <p className="mt-4 text-3xl font-bold text-brand-600">99.9%</p>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Fast uploads, analysis refreshes, and report generation.</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Cleaning steps</p>
+              <p className="mt-4 text-3xl font-bold text-brand-600">11</p>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Guided operations, all reversible with one-click undo.</p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">Launch ready</p>
-              <p className="mt-4 text-3xl font-bold text-brand-600">SaaS MVP</p>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">A polished product experience for early customers and pilots.</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">PII detection</p>
+              <p className="mt-4 text-3xl font-bold text-brand-600">Auto</p>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Sensitive columns are flagged and excluded from reports.</p>
             </div>
           </div>
         </section>

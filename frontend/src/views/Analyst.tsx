@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, Send, Sparkles, User } from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
-import { askQuestion, getInsights } from "../api/client";
+import { askQuestion, getSuggestedQuestions } from "../api/client";
 import { Button, Spinner } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { ChartRenderer } from "../components/charts/ChartRenderer";
@@ -51,9 +51,8 @@ export function AnalystPage({
     const load = async () => {
       if (!sessionId) return;
       try {
-        const { insights: found } = await getInsights(sessionId);
-        const hints = found.map((i) => i.query_hint).filter((h): h is string => !!h);
-        if (hints.length) setSuggested([...hints.slice(0, 4), ...DEFAULT_QUESTIONS].slice(0, 6));
+        const { questions } = await getSuggestedQuestions(sessionId);
+        if (questions.length) setSuggested([...questions, ...DEFAULT_QUESTIONS].slice(0, 6));
       } catch {
         /* keep defaults */
       }

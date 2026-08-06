@@ -1,4 +1,4 @@
-"""Persistent session store using SQLite backing."""
+"""Persistent session store using SQLite backing (CSV + JSON, no pickle)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import time
 import uuid
 
 from .. import config
-from ..data_engine import analyze, preview_rows
+from ..data_engine import analyze
 from ..data_engine.cleaning import OPERATIONS
 from ..data_engine.engine import EngineResult
 from ..data_store import storage
@@ -28,6 +28,7 @@ class DatasetSession:
         self.engine = engine
         self.created_at = created_at
         self.last_access = created_at
+        # history entries: {"engine": EngineResult, "description": str}
         self.history = history or []
         self.conversation = conversation or []
 
@@ -58,30 +59,23 @@ class DatasetSession:
         self.engine = entry["engine"]
         return self.engine, entry["description"]
 
-    def to_serializable(self) -> bytes:
-        payload = {
-            "id": self.id,
-            "name": self.name,
-            "created_at": self.created_at,
-            "last_access": self.last_access,
-            "engine": self.engine,
-            "history": self.history,
-            "conversation": self.conversation,
-        }
-        return storage.pickle_session(payload)
+    def cleaning_history(self) -> list[dict]:
+        return [
+            {"description": h["description"], "step": i}
+            for i, h in enumerate(self.history)
+        ]
 
     @staticmethod
-    def from_serializable(payload: bytes) -> "DatasetSession":
-        record = storage.unpickle_session(payload)
-        session = DatasetSession(
-            record["id"],
-            record["name"],
-            record["engine"],
-            record["created_at"],
-            record.get("history"),
-            record.get("conversation"),
-        )
-        session.last_access = record["last_access"]
+    def from_data(session_id: str, name: str, created_at: float, last_access: float,
+                  df, history: list[dict], conversation: list[dict]) -> "DatasetSession":
+        """Reconstruct a session from persisted raw data (df + history dfs)."""
+        engine = analyze(df)
+        session = DatasetSession(session_id, name, engine, created_at, None, conversation)
+        session.last_access = last_access
+        session.history = [
+            {"engine": analyze(entry["df"]), "description": entry["description"]}
+            for entry in history
+        ]
         return session
 
 
@@ -96,7 +90,13 @@ class SessionStore:
         now = time.time()
         for record in storage.list_session_records():
             try:
-                session = DatasetSession.from_serializable(record["data"])
+                data = storage.load_session(record["id"])
+                if data is None:
+                    continue
+                session = DatasetSession.from_data(
+                    data["id"], data["name"], data["created_at"],
+                    data["last_access"], data["df"], data["history"], data["conversation"],
+                )
                 if not session.expired(now):
                     self._sessions[session.id] = session
                 else:
@@ -105,7 +105,20 @@ class SessionStore:
                 storage.delete_session(record["id"])
 
     def _persist(self, session: DatasetSession) -> None:
-        storage.dump_session(session.id, session.to_serializable())
+        storage.dump_session(
+            session.id,
+            session.name,
+            session.created_at,
+            session.last_access,
+            session.engine.df,
+            [{"df": h["engine"].df, "description": h["description"]} for h in session.history],
+            session.conversation,
+        )
+
+    def persist(self, session: DatasetSession) -> None:
+        """Public helper to persist an in-memory session after mutation."""
+        with self._lock:
+            self._persist(session)
 
     def create(self, name: str, engine: EngineResult) -> DatasetSession:
         with self._lock:

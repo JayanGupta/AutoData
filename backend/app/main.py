@@ -2,33 +2,47 @@
 
 Exposes the data processing engine and the AI layer over HTTP so the frontend
 can consume them. The app runs fully locally; an LLM API key is optional.
+
+Highlights:
+- Async upload jobs with real progress (POST /api/jobs/upload).
+- Sync upload retained for scripting/tests (POST /api/datasets).
+- Export of the current (possibly cleaned) dataset as CSV or XLSX.
+- Reports in Markdown, HTML and PDF.
+- Cleaning pipeline with history + undo.
 """
 
 from __future__ import annotations
 
+import io
 import json
-import os
+import logging
 import tempfile
+import threading
 import time
 import traceback
+import uuid
 
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 from . import config
 from .ai import generate_insights, nlu
 from .data_engine import preview_rows, rows_slice
 from .data_engine.loader import DataLoadError, load_dataframe
-from .report import build_report_markdown, markdown_to_html
+from .report import build_report_markdown, build_report_pdf, markdown_to_html
 from .security import RateLimitMiddleware
 from .sessions.store import store
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("autodata")
+
 SAMPLE_DATA_PATH = Path(__file__).resolve().parents[2] / "sample_data" / "sales_data.csv"
 
-app = FastAPI(title="AI Data Analyst", version="0.1.0")
+app = FastAPI(title="AI Data Analyst", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -50,10 +64,52 @@ class CleanRequest(BaseModel):
     value: str | int | float | None = None
 
 
-def _snapshot(session_id: str) -> dict:
+class _JobStore:
+    """In-memory registry of analysis jobs (status, stage, progress, result)."""
+
+    def __init__(self):
+        self._jobs: dict[str, dict] = {}
+        self._lock = threading.Lock()
+
+    def create(self, name: str) -> str:
+        job_id = uuid.uuid4().hex
+        with self._lock:
+            self._jobs[job_id] = {
+                "id": job_id,
+                "name": name,
+                "status": "queued",
+                "stage": "validating",
+                "progress": 0,
+                "message": "Waiting to start",
+                "error": None,
+                "session_id": None,
+            }
+        return job_id
+
+    def update(self, job_id: str, **fields) -> None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is not None:
+                job.update(fields)
+
+    def get(self, job_id: str) -> dict | None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            return dict(job) if job else None
+
+
+jobs = _JobStore()
+
+
+def _get_session_or_404(session_id: str):
     session = store.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    return session
+
+
+def _snapshot(session_id: str) -> dict:
+    session = _get_session_or_404(session_id)
     engine = session.engine
     snapshot = {
         "dataset": {
@@ -73,6 +129,26 @@ def _snapshot(session_id: str) -> dict:
     return snapshot
 
 
+def _run_analysis_job(job_id: str, data: bytes, filename: str, sheet_name: str | None) -> None:
+    try:
+        jobs.update(job_id, status="running", stage="loading", progress=15,
+                    message="Parsing file…")
+        df = load_dataframe(data, filename, sheet_name)
+        jobs.update(job_id, stage="analyzing", progress=55, message="Profiling columns…")
+        from .data_engine import analyze
+
+        engine = analyze(df)
+        jobs.update(job_id, stage="building", progress=85, message="Building charts and insights…")
+        session = store.create(filename, engine)
+        jobs.update(job_id, status="done", stage="done", progress=100,
+                    message="Analysis complete", session_id=session.id)
+    except DataLoadError as exc:
+        jobs.update(job_id, status="error", error=str(exc))
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Analysis job %s failed", job_id)
+        jobs.update(job_id, status="error", error=f"Analysis failed: {exc}")
+
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "llm_enabled": config.llm_enabled(), "time": time.time()}
@@ -86,6 +162,39 @@ def llm_status():
         "base_url": config.USER_LLM_BASE_URL if config.llm_enabled() else None,
         "mode": "llm" if config.llm_enabled() else "local",
     }
+
+
+@app.post("/api/jobs/upload")
+async def create_upload_job(
+    file: UploadFile = File(...),
+    sheet_name: str | None = Form(default=None),
+):
+    if file.filename is None:
+        raise HTTPException(status_code=400, detail="No file name provided.")
+    data = await file.read()
+    # Fail fast on size before queueing the job.
+    if len(data) > config.MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"File is too large ({len(data) / (1024 * 1024):.1f} MB). "
+                f"Maximum allowed size is {config.MAX_UPLOAD_MB} MB."
+            ),
+        )
+    job_id = jobs.create(file.filename)
+    thread = threading.Thread(
+        target=_run_analysis_job, args=(job_id, data, file.filename, sheet_name), daemon=True
+    )
+    thread.start()
+    return {"job_id": job_id, "name": file.filename}
+
+
+@app.get("/api/jobs/{job_id}")
+def get_job(job_id: str):
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    return job
 
 
 @app.post("/api/datasets")
@@ -149,9 +258,7 @@ def get_overview(session_id: str):
 
 @app.get("/api/datasets/{session_id}/rows")
 def get_rows(session_id: str, offset: int = 0, limit: int = 100):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    session = _get_session_or_404(session_id)
     if offset < 0 or limit < 1 or limit > 1000:
         raise HTTPException(status_code=400, detail="offset >= 0 and 1 <= limit <= 1000 required.")
     total = len(session.engine.df)
@@ -165,11 +272,43 @@ def get_rows(session_id: str, offset: int = 0, limit: int = 100):
     }
 
 
+@app.get("/api/datasets/{session_id}/export")
+def export_dataset(session_id: str, fmt: str = "csv"):
+    session = _get_session_or_404(session_id)
+    base = ".".join(session.name.rsplit(".", 1)[:-1]) if "." in session.name else session.name
+    base = base or "dataset"
+    if fmt == "csv":
+        buf = io.StringIO()
+        session.engine.df.to_csv(buf, index=False)
+        content = buf.getvalue().encode("utf-8")
+        media_type = "text/csv; charset=utf-8"
+        filename = f"{base}-cleaned.csv"
+    elif fmt == "xlsx":
+        buf = io.BytesIO()
+        with pd_writer(buf) as writer:
+            session.engine.df.to_excel(writer, index=False, sheet_name="data")
+        content = buf.getvalue()
+        media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        filename = f"{base}-cleaned.xlsx"
+    else:
+        raise HTTPException(status_code=400, detail="fmt must be 'csv' or 'xlsx'.")
+    return StreamingResponse(
+        io.BytesIO(content),
+        media_type=media_type,
+        headers={"Content-Disposition": f"attachment; filename={json.dumps(filename)}"},
+    )
+
+
+def pd_writer(buf: io.BytesIO):
+    """Context manager for pandas ExcelWriter (compat across pandas versions)."""
+    import pandas as pd
+
+    return pd.ExcelWriter(buf, engine="openpyxl")
+
+
 @app.post("/api/datasets/{session_id}/clean")
 def clean_dataset(session_id: str, request: CleanRequest):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    session = _get_session_or_404(session_id)
     params: dict = {}
     if request.column is not None:
         params["column"] = request.column
@@ -179,6 +318,8 @@ def clean_dataset(session_id: str, request: CleanRequest):
         engine, description = session.apply_clean(request.action, params)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    engine.invalidate()
+    store.persist(session)
     snapshot = _snapshot(session.id)
     snapshot["cleaning"] = {"description": description, "history_length": len(session.history)}
     return snapshot
@@ -186,63 +327,63 @@ def clean_dataset(session_id: str, request: CleanRequest):
 
 @app.post("/api/datasets/{session_id}/clean/undo")
 def undo_clean(session_id: str):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    session = _get_session_or_404(session_id)
     restored = session.undo_clean()
     if restored is None:
         return {"ok": True, "undone": False}
     _engine, description = restored
+    store.persist(session)
     snapshot = _snapshot(session.id)
     snapshot["cleaning"] = {"description": description, "history_length": len(session.history), "undone": True}
     return snapshot
 
 
+@app.get("/api/datasets/{session_id}/cleaning")
+def cleaning_history(session_id: str):
+    session = _get_session_or_404(session_id)
+    return {"steps": session.cleaning_history(), "length": len(session.history)}
+
+
 @app.get("/api/datasets/{session_id}/quality")
 def get_quality(session_id: str):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    session = _get_session_or_404(session_id)
     return {"quality": session.engine.quality}
 
 
 @app.get("/api/datasets/{session_id}/charts")
 def get_charts(session_id: str):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    session = _get_session_or_404(session_id)
     return {"charts": session.engine.chart_suggestions, "correlations": session.engine.correlations}
 
 
 @app.get("/api/datasets/{session_id}/insights")
 def get_insights(session_id: str):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
-    insights = generate_insights(session.engine)
-    return {"insights": insights}
+    session = _get_session_or_404(session_id)
+    return {"insights": session.engine.cached_insights()}
 
 
 @app.post("/api/datasets/{session_id}/insights/generate")
 def regenerate_insights(session_id: str):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
-    insights = generate_insights(session.engine)
-    return {"insights": insights}
+    session = _get_session_or_404(session_id)
+    session.engine.invalidate()
+    return {"insights": session.engine.cached_insights()}
+
+
+@app.get("/api/datasets/{session_id}/suggested-questions")
+def suggested_questions(session_id: str):
+    session = _get_session_or_404(session_id)
+    return {"questions": nlu.suggested_questions(session.engine)}
 
 
 @app.post("/api/datasets/{session_id}/ask")
 def ask_question(session_id: str, request: AskRequest):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
+    session = _get_session_or_404(session_id)
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
     try:
         result = nlu.answer(request.question.strip(), session.engine, memory=session.conversation)
     except Exception as exc:  # noqa: BLE001 - always return a graceful answer
-        traceback.print_exc()
+        logger.exception("Question failed for session %s", session_id)
         result = {
             "answer": f"Sorry, something went wrong while answering ({(type(exc).__name__)}: {exc}). "
                       "Please rephrase your question.",
@@ -258,16 +399,29 @@ def ask_question(session_id: str, request: AskRequest):
     )
     if len(session.conversation) > 20:
         session.conversation = session.conversation[-20:]
+    store.persist(session)
     return result
 
 
 @app.get("/api/datasets/{session_id}/report")
 def get_report(session_id: str, fmt: str = "markdown"):
-    session = store.get(session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Dataset session not found or expired.")
-    insights = generate_insights(session.engine)
+    session = _get_session_or_404(session_id)
+    insights = session.engine.cached_insights()
+    if fmt == "pdf":
+        pdf = build_report_pdf(session.engine, session.name, insights)
+        base = ".".join(session.name.rsplit(".", 1)[:-1]) if "." in session.name else session.name
+        return StreamingResponse(
+            io.BytesIO(pdf),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={json.dumps(base + '-report.pdf')}"},
+        )
     md = build_report_markdown(session.engine, session.name, insights)
     if fmt == "html":
         return {"format": "html", "content": markdown_to_html(md), "markdown": md}
     return {"format": "markdown", "content": md, "markdown": md}
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request, exc: Exception):
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "An unexpected error occurred."})

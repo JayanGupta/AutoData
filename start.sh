@@ -20,7 +20,7 @@ BACKEND_PID=$!
 (
   cd "$ROOT/frontend"
   npm install --silent
-  npm run dev
+  npm run dev -- -p 5173
 ) &
 FRONTEND_PID=$!
 

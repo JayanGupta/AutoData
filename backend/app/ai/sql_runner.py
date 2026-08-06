@@ -52,8 +52,13 @@ def validate_select(sql: str) -> str:
     return sql
 
 
-def _build_schema_map(df: pd.DataFrame) -> dict[str, str]:
+def build_schema_map(df: pd.DataFrame) -> dict[str, str]:
+    """Map safe SQL aliases (c0, c1, ...) to the original column names."""
     return {f"c{i}": str(col) for i, col in enumerate(df.columns)}
+
+
+def _build_schema_map(df: pd.DataFrame) -> dict[str, str]:
+    return build_schema_map(df)
 
 
 def _infer_sql_type(series: pd.Series) -> str:

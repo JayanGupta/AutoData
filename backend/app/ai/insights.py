@@ -14,15 +14,11 @@ TYPE_DATETIME = "datetime"
 TYPE_CATEGORICAL = "categorical"
 TYPE_BOOLEAN = "boolean"
 
-_INSIGHT_COUNTER = {"n": 0}
-
-
 def _mk(category: str, severity: str, title: str, detail: str,
         numbers: list[dict] | None = None, evidence: dict | None = None,
         query_hint: str | None = None) -> dict:
-    _INSIGHT_COUNTER["n"] += 1
     return {
-        "id": f"i{_INSIGHT_COUNTER['n']}",
+        "id": "",
         "category": category,
         "severity": severity,
         "title": title,
@@ -54,7 +50,6 @@ def _chart_lookup(charts: list[dict], predicate) -> str | None:
 
 def generate_insights(engine: "object", limit: int = 12) -> list[dict]:
     """engine is a data_engine.EngineResult instance."""
-    _INSIGHT_COUNTER["n"] = 0
     insights: list[dict] = []
     df = engine.df
     columns = engine.columns
@@ -199,6 +194,8 @@ def generate_insights(engine: "object", limit: int = 12) -> list[dict]:
                 query_hint=f"What is the distribution of {issue['column']}?",
             ))
 
+    for i, ins in enumerate(insights[:limit], start=1):
+        ins["id"] = f"i{i}"
     return insights[:limit]
 
 
