@@ -160,6 +160,53 @@ class TestReport(unittest.TestCase):
         self.assertIn("application/pdf", res.headers["content-type"])
         self.assertGreater(len(res.content), 500)
 
+    def test_report_html_embeds_charts(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.get(f"/api/datasets/{sid}/report?fmt=html")
+        self.assertEqual(res.status_code, 200)
+        content = res.json()["content"]
+        # Real visualisations embedded: at least one chart figure and SVG,
+        # plus a proper table header and the charts section heading.
+        self.assertGreaterEqual(content.count("<svg"), 2)
+        self.assertGreaterEqual(content.count("<figure>"), 1)
+        self.assertIn("<thead>", content)
+        self.assertIn("6. Charts", content)
+
+    def test_report_markdown_notes_charts(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.get(f"/api/datasets/{sid}/report?fmt=markdown")
+        self.assertIn("6. Charts", res.json()["content"])
+
+
+class TestConversation(unittest.TestCase):
+    def test_conversation_lifecycle(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.get(f"/api/datasets/{sid}/conversation")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["conversation"], [])
+
+        res = client.post(
+            f"/api/datasets/{sid}/ask",
+            json={"question": "How many rows are in this dataset?"},
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("6", res.json()["answer"])
+
+        res = client.get(f"/api/datasets/{sid}/conversation")
+        conv = res.json()["conversation"]
+        self.assertEqual(len(conv), 2)
+        self.assertEqual(conv[0]["role"], "user")
+        self.assertEqual(conv[1]["role"], "assistant")
+
+    def test_ask_empty_question(self):
+        snap = upload_sample()
+        sid = snap["dataset"]["id"]
+        res = client.post(f"/api/datasets/{sid}/ask", json={"question": "   "})
+        self.assertEqual(res.status_code, 400)
+
 
 class TestSuggestedQuestions(unittest.TestCase):
     def test_suggested_questions(self):

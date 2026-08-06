@@ -17,6 +17,7 @@ export const BRAND = {
 };
 
 export const NAV_LINKS = [
+  { label: "Upload", href: "#upload" },
   { label: "Features", href: "#features" },
   { label: "Workflow", href: "#workflow" },
   { label: "Analyst", href: "#analyst" },
@@ -111,15 +112,19 @@ export const WORKFLOW_STEPS = [
   },
 ];
 
-export const TRUSTED_WORDS = [
-  "Northwind Retail",
-  "Helios Labs",
-  "Quantex",
-  "Lumen & Co",
-  "Arcadia AI",
-  "Vertex Analytics",
-  "Nimbus Data",
-  "Cobalt Finance",
+export const CAPABILITY_WORDS = [
+  "CSV",
+  "Excel",
+  "TSV",
+  "Delimiter sniffing",
+  "PII detection",
+  "Outlier detection",
+  "Missing values",
+  "Duplicate rows",
+  "Correlations",
+  "Quality scoring",
+  "Local-first",
+  "Private by design",
 ];
 
 export const STATS = [

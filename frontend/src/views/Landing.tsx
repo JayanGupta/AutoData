@@ -6,6 +6,7 @@ import { useDataset } from "@/store/DatasetContext";
 import { useToast } from "@/store/ToastContext";
 import { Navbar } from "@/views/landing/Navbar";
 import { Hero } from "@/views/landing/Hero";
+import { UploadSection } from "@/views/landing/UploadSection";
 import { LogoMarquee } from "@/views/landing/LogoMarquee";
 import { Features } from "@/views/landing/Features";
 import { Workflow } from "@/views/landing/Workflow";
@@ -53,6 +54,7 @@ export function LandingPage() {
 
       <main className="relative z-10 overflow-x-clip">
         <Hero onSample={() => void handleSample()} onResume={() => void handleResume()} loadingSample={loadingSample} />
+        <UploadSection />
         <LogoMarquee />
         <Features />
         <Workflow />

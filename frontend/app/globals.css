@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html {
@@ -12,12 +12,19 @@ html {
 }
 
 body {
-  @apply min-h-screen bg-slate-50 text-slate-900 antialiased;
+  @apply min-h-screen bg-night-950 text-slate-100 antialiased;
 }
 
-body.dark {
-  color-scheme: dark;
-  @apply bg-slate-950 text-slate-100;
+/* Accessible keyboard focus for every interactive element by default. */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(167, 139, 250, 0.75);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 ::selection {

@@ -136,3 +136,9 @@ export function undoClean(id: string): Promise<CleaningResponse> {
 export function getCleaningHistory(id: string): Promise<CleaningHistory> {
   return request<CleaningHistory>(`/datasets/${id}/cleaning`);
 }
+
+export function getConversation(
+  id: string,
+): Promise<{ conversation: Array<{ role: "user" | "assistant"; content: string; intent?: string }> }> {
+  return request(`/datasets/${id}/conversation`);
+}

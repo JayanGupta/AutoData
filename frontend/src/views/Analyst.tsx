@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, Send, Sparkles, User } from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
-import { askQuestion, getSuggestedQuestions } from "../api/client";
+import { askQuestion, getConversation, getSuggestedQuestions } from "../api/client";
 import { Button, Spinner } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { ChartRenderer } from "../components/charts/ChartRenderer";
@@ -13,6 +13,7 @@ interface Message {
   role: "user" | "assistant";
   question?: string;
   response?: AnalystResponse;
+  content?: string;
   error?: string;
 }
 
@@ -60,6 +61,25 @@ export function AnalystPage({
     };
     void load();
   }, [sessionId, insights]);
+
+  useEffect(() => {
+    const loadConversation = async () => {
+      if (!sessionId) return;
+      try {
+        const { conversation } = await getConversation(sessionId);
+        if (!conversation.length) return;
+        const restored: Message[] = conversation.map((c, i) =>
+          c.role === "user"
+            ? { id: `restored-${i}`, role: "user", question: c.content }
+            : { id: `restored-${i}`, role: "assistant", content: c.content },
+        );
+        setMessages(restored);
+      } catch {
+        /* keep an empty chat on failure */
+      }
+    };
+    void loadConversation();
+  }, [sessionId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -197,6 +217,20 @@ function MessageBubble({
         </span>
         <div className="rounded-2xl rounded-bl-sm border border-rose-500/25 bg-rose-500/[0.08] px-4 py-2.5 text-sm text-rose-200">
           {message.error}
+        </div>
+      </div>
+    );
+  }
+
+  if (message.content) {
+    return (
+      <div className="flex max-w-[92%] items-start gap-2">
+        <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/40 to-indigo-500/20 text-violet-200 ring-1 ring-white/10">
+          <Bot className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1 space-y-3 rounded-2xl rounded-bl-sm border border-white/[0.07] bg-white/[0.04] px-4 py-3 backdrop-blur-xl">
+          <Badge className="border-white/10 bg-white/[0.04] text-slate-400">analyst</Badge>
+          <p className="text-sm leading-relaxed text-slate-200">{message.content}</p>
         </div>
       </div>
     );

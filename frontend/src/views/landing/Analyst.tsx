@@ -222,7 +222,7 @@ export function Analyst() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-white">Analyst</p>
-                  <p className="text-[11px] text-slate-500">Local mode · deterministic</p>
+                  <p className="text-[11px] text-slate-500">Demo conversation · local mode</p>
                 </div>
               </div>
               <span className="chip">

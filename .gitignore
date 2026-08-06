@@ -22,6 +22,7 @@ dist/
 .next/
 *.tsbuildinfo
 .eslintcache
+frontend/test-results/
 
 # Runtime data (SQLite sessions database)
 backend/app/data/

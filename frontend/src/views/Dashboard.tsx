@@ -27,16 +27,32 @@ const NAV: Array<{ key: Section; label: string; icon: typeof Activity }> = [
 ];
 
 export function Dashboard() {
-  const { snapshot, clear } = useDataset();
+  const { snapshot, clear, resumeRecent } = useDataset();
   const router = useRouter();
   const [section, setSection] = useState<Section>("overview");
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [restoring, setRestoring] = useState(() => true);
   const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [section]);
+
+  useEffect(() => {
+    if (snapshot) return;
+    let mounted = true;
+    void (async () => {
+      const ok = await resumeRecent();
+      if (!mounted) return;
+      setRestoring(false);
+      if (!ok) router.replace("/");
+    })();
+    return () => {
+      mounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -45,6 +61,19 @@ export function Dashboard() {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  if (restoring) {
+    return (
+      <div className="relative flex min-h-screen items-center justify-center bg-night-950 text-slate-100 antialiased">
+        <Ambient />
+        <div className="relative flex flex-col items-center gap-4">
+          <BrandMark />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-400/30 border-t-violet-400" />
+          <p className="text-sm text-slate-500">Restoring your workspace…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!snapshot) return null;
   const ds = snapshot.dataset;

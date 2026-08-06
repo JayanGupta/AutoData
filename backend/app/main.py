@@ -33,7 +33,7 @@ from . import config
 from .ai import generate_insights, nlu
 from .data_engine import preview_rows, rows_slice
 from .data_engine.loader import DataLoadError, load_dataframe
-from .report import build_report_markdown, build_report_pdf, markdown_to_html
+from .report import build_report_html, build_report_markdown, build_report_pdf
 from .security import RateLimitMiddleware
 from .sessions.store import store
 
@@ -417,8 +417,15 @@ def get_report(session_id: str, fmt: str = "markdown"):
         )
     md = build_report_markdown(session.engine, session.name, insights)
     if fmt == "html":
-        return {"format": "html", "content": markdown_to_html(md), "markdown": md}
+        return {"format": "html", "content": build_report_html(session.engine, session.name, insights), "markdown": md}
     return {"format": "markdown", "content": md, "markdown": md}
+
+
+@app.get("/api/datasets/{session_id}/conversation")
+def get_conversation(session_id: str):
+    """Return the stored analyst conversation so it can be restored client-side."""
+    session = _get_session_or_404(session_id)
+    return {"conversation": session.conversation}
 
 
 @app.exception_handler(Exception)

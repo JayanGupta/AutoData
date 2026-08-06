@@ -1,10 +1,14 @@
 import {
   CalendarRange,
+  Check,
   Columns3,
   Database,
+  FileUp,
+  LayoutGrid,
   Rows3,
   ShieldCheck,
   Tags,
+  Wand2,
 } from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
 import { Card } from "../components/ui/Card";
@@ -18,11 +22,12 @@ import {
   categoryLabel,
   formatDateRange,
   formatNumber,
+  formatTimestamp,
 } from "../lib/format";
 import type { ColumnProfile } from "../types";
 
 export function OverviewPage() {
-  const { snapshot } = useDataset();
+  const { snapshot, cleaningSteps, insights } = useDataset();
   if (!snapshot) return null;
   const { summary, columns, dataset } = snapshot;
 
@@ -69,6 +74,19 @@ export function OverviewPage() {
           icon={<CalendarRange className="h-4 w-4" />}
           accent="bg-gradient-to-br from-violet-500/25 to-cyan-500/10 text-violet-200"
         />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card title="Analysis pipeline" subtitle="Where this dataset sits in your workflow" className="lg:col-span-3">
+          <Pipeline
+            columns={columns.length}
+            rows={summary.row_count}
+            cleaned={cleaningSteps.length}
+            charts={snapshot.charts.length}
+            insights={insights.length}
+            createdAt={dataset.created_at}
+          />
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -156,6 +174,78 @@ function dateRangeSummary(columns: ColumnProfile[]): string {
   if (!dt) return "—";
   const s = dt.stats as { min?: string; max?: string };
   return formatDateRange(s.min, s.max);
+}
+
+interface PipelineStep {
+  key: string;
+  icon: typeof FileUp;
+  label: string;
+  detail: string;
+  done: boolean;
+}
+
+function Pipeline({
+  columns,
+  rows,
+  cleaned,
+  charts,
+  insights,
+  createdAt,
+}: {
+  columns: number;
+  rows: number;
+  cleaned: number;
+  charts: number;
+  insights: number;
+  createdAt: number;
+}) {
+  const steps: PipelineStep[] = [
+    { key: "uploaded", icon: FileUp, label: "Uploaded", detail: "File accepted & parsed", done: true },
+    { key: "profiled", icon: LayoutGrid, label: "Profiled", detail: `${columns} columns · ${rows.toLocaleString()} rows`, done: true },
+    { key: "cleaned", icon: Wand2, label: "Cleaned", detail: cleaned === 0 ? "No cleaning steps yet" : `${cleaned} step${cleaned > 1 ? "s" : ""} applied`, done: cleaned > 0 },
+    { key: "analyzed", icon: Database, label: "Analyzed", detail: `${charts} charts · ${insights} insights`, done: charts > 0 },
+    { key: "report", icon: ShieldCheck, label: "Report", detail: "Markdown · HTML · PDF", done: true },
+  ];
+
+  return (
+    <div>
+      <ol className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0">
+        {steps.map((step, i) => (
+          <li key={step.key} className="relative flex-1 sm:flex sm:flex-col sm:items-center sm:text-center">
+            <div className="flex items-center gap-3 sm:flex-col sm:gap-2">
+              <span
+                className={
+                  step.done
+                    ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-glow-violet"
+                    : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] text-slate-500"
+                }
+              >
+                {step.done ? <Check className="h-4 w-4" /> : <step.icon className="h-4 w-4" />}
+              </span>
+              <div className="sm:mt-2">
+                <p className={`text-sm font-semibold ${step.done ? "text-white" : "text-slate-400"}`}>{step.label}</p>
+                <p className="text-[11px] text-slate-500">{step.detail}</p>
+              </div>
+            </div>
+            {i < steps.length - 1 && (
+              <span
+                aria-hidden
+                className={
+                  step.done
+                    ? "ml-4 hidden h-px flex-1 bg-gradient-to-r from-violet-500/60 to-cyan-400/40 sm:my-3 sm:block"
+                    : "ml-4 hidden h-px flex-1 bg-white/10 sm:my-3 sm:block"
+                }
+              />
+            )}
+          </li>
+        ))}
+      </ol>
+      <p className="mt-4 flex items-center gap-1.5 text-[11px] text-slate-500">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        Started {formatTimestamp(createdAt)} · every step is stored in this session and can be undone.
+      </p>
+    </div>
+  );
 }
 
 function ColumnRow({ col }: { col: ColumnProfile }) {
