@@ -24,6 +24,11 @@ export const NAV_LINKS = [
   { label: "Report", href: "#report" },
 ];
 
+export const ROUTE_LINKS = [
+  { label: "Datasets", href: "/datasets" },
+  { label: "About", href: "/about" },
+];
+
 export const FEATURE_CELLS = [
   {
     id: "analyst",

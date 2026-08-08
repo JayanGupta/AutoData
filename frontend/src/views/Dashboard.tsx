@@ -1,9 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, BarChart3, Download, FileText, FolderUp, Lightbulb, MessagesSquare, ShieldCheck } from "lucide-react";
+import { Activity, BarChart3, Check, ChevronDown, Download, FileText, FolderUp, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getExportUrl, getReportPdfUrl } from "@/api/client";
 import { useDataset } from "@/store/DatasetContext";
 import { BrandMark } from "./landing/Navbar";
@@ -27,13 +28,15 @@ const NAV: Array<{ key: Section; label: string; icon: typeof Activity }> = [
 ];
 
 export function Dashboard() {
-  const { snapshot, clear, resumeRecent } = useDataset();
+  const { snapshot, clear, resumeRecent, sessions, load, loading } = useDataset();
   const router = useRouter();
   const [section, setSection] = useState<Section>("overview");
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
   const [restoring, setRestoring] = useState(() => true);
   const exportRef = useRef<HTMLDivElement>(null);
+  const switchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -57,6 +60,7 @@ export function Dashboard() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
+      if (switchRef.current && !switchRef.current.contains(e.target as Node)) setSwitchOpen(false);
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
@@ -90,6 +94,16 @@ export function Dashboard() {
     setSection("analyst");
   };
 
+  const handleSwitch = async (id: string) => {
+    setSwitchOpen(false);
+    try {
+      await load(id);
+      setSection("overview");
+    } catch {
+      /* error surfaced via load */
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-night-950 text-slate-100 antialiased">
       <Ambient />
@@ -116,6 +130,13 @@ export function Dashboard() {
             exportOpen={exportOpen}
             setExportOpen={setExportOpen}
             exportRef={exportRef}
+            sessions={sessions}
+            currentId={ds.id}
+            switchOpen={switchOpen}
+            setSwitchOpen={setSwitchOpen}
+            switchRef={switchRef}
+            onSwitch={handleSwitch}
+            switching={loading}
           />
           <MobileNav section={section} onSection={setSection} />
 
@@ -206,6 +227,14 @@ function Sidebar({
             </button>
           );
         })}
+        <p className="px-3 pb-2 pt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Manage</p>
+        <Link
+          href="/datasets"
+          className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-all duration-300 hover:bg-white/[0.04] hover:text-slate-100"
+        >
+          <Library className="h-[18px] w-[18px] text-slate-500 transition-colors group-hover:text-violet-300" />
+          <span>Dataset library</span>
+        </Link>
       </nav>
 
       <div className="space-y-3 p-4">
@@ -258,6 +287,13 @@ function Topbar({
   exportOpen,
   setExportOpen,
   exportRef,
+  sessions,
+  currentId,
+  switchOpen,
+  setSwitchOpen,
+  switchRef,
+  onSwitch,
+  switching,
 }: {
   datasetName: string;
   rows: number;
@@ -271,13 +307,84 @@ function Topbar({
   exportOpen: boolean;
   setExportOpen: (v: boolean) => void;
   exportRef: React.RefObject<HTMLDivElement>;
+  sessions: Array<{ id: string; name: string }>;
+  currentId: string;
+  switchOpen: boolean;
+  setSwitchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  switchRef: React.RefObject<HTMLDivElement>;
+  onSwitch: (id: string) => void;
+  switching: boolean;
 }) {
   return (
     <header className="sticky top-0 z-20 border-b border-white/[0.06] bg-night-950/70 backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="truncate font-display text-lg font-semibold tracking-tight text-white">{datasetName}</h1>
+            <div className="relative" ref={switchRef}>
+              <button
+                onClick={() => setSwitchOpen((v) => !v)}
+                disabled={switching}
+                aria-haspopup="menu"
+                aria-expanded={switchOpen}
+                className="group inline-flex max-w-[16rem] items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 transition-colors hover:border-violet-400/40 hover:bg-white/[0.08] disabled:opacity-50"
+                title="Switch dataset"
+              >
+                {switching && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-400/30 border-t-violet-400" />}
+                <span className="truncate font-display text-lg font-semibold tracking-tight text-white">{datasetName}</span>
+                <ChevronDown className={cn("h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200", switchOpen && "rotate-180")} />
+              </button>
+              <AnimatePresence>
+                {switchOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.18 }}
+                    role="menu"
+                    className="absolute left-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-night-800 p-1.5 shadow-2xl shadow-black/50 backdrop-blur-xl"
+                  >
+                    <p className="px-3 pb-1.5 pt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Switch dataset
+                    </p>
+                    <div className="max-h-72 overflow-y-auto">
+                      {sessions.map((s) => {
+                        const active = s.id === currentId;
+                        return (
+                          <button
+                            key={s.id}
+                            role="menuitem"
+                            onClick={() => !active && onSwitch(s.id)}
+                            disabled={active}
+                            className={cn(
+                              "flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors",
+                              active
+                                ? "text-violet-200"
+                                : "text-slate-300 hover:bg-white/[0.06] hover:text-white",
+                            )}
+                          >
+                            <FileText className="h-4 w-4 shrink-0 text-slate-500" />
+                            <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                            {active && <Check className="h-4 w-4 shrink-0 text-violet-300" />}
+                          </button>
+                        );
+                      })}
+                      {sessions.length === 0 && (
+                        <p className="px-3 py-3 text-xs text-slate-500">No other datasets yet.</p>
+                      )}
+                    </div>
+                    <div className="border-t border-white/[0.06] p-1.5">
+                      <Link
+                        href="/datasets"
+                        onClick={() => setSwitchOpen(false)}
+                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                      >
+                        <Library className="h-4 w-4 text-slate-500" /> Open dataset library
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <span className={cn("rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider", qTone)}>
               {quality}/100
             </span>

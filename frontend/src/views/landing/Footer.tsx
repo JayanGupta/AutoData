@@ -1,10 +1,19 @@
 "use client";
 
 import { Github, Globe, Heart, Twitter, Youtube } from "lucide-react";
+import Link from "next/link";
 import { BrandMark } from "./Navbar";
 import { FOOTER_LINKS } from "./constants";
 
 const SOCIALS = [Twitter, Github, Globe, Youtube];
+
+const FOOTER_ROUTES: Record<string, string> = {
+  "Sample datasets": "/datasets",
+  Documentation: "/datasets",
+  Roadmap: "/datasets",
+  About: "/about",
+  Changelog: "/datasets",
+};
 
 export function Footer() {
   return (
@@ -40,16 +49,22 @@ export function Footer() {
               <div key={col.title}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{col.title}</p>
                 <ul className="mt-4 space-y-2.5">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#top"
-                        className="text-sm text-slate-400 transition hover:text-white"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  ))}
+                  {col.links.map((link) => {
+                    const href = FOOTER_ROUTES[link];
+                    return (
+                      <li key={link}>
+                        {href ? (
+                          <Link href={href} className="text-sm text-slate-400 transition hover:text-white">
+                            {link}
+                          </Link>
+                        ) : (
+                          <a href="#top" className="text-sm text-slate-400 transition hover:text-white">
+                            {link}
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}

@@ -3,6 +3,8 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
+  Legend,
   Line,
   LineChart,
   Pie,
@@ -17,17 +19,30 @@ import {
 import type { ChartSpec } from "../../types";
 import { formatNumber } from "../../lib/format";
 
-const PALETTE = ["#a78bfa", "#22d3ee", "#34d399", "#fbbf24", "#f472b6", "#818cf8", "#38bdf8", "#2dd4bf"];
+const PALETTE = [
+  "#a78bfa",
+  "#22d3ee",
+  "#34d399",
+  "#fbbf24",
+  "#f472b6",
+  "#818cf8",
+  "#38bdf8",
+  "#2dd4bf",
+  "#c084fc",
+  "#fb923c",
+  "#a3e635",
+  "#f87171",
+];
 
 const GRID = "rgba(148, 163, 184, 0.12)";
-const TICK = { fontSize: 10, fill: "#64748b" };
-const TOOLTIP = {
+const TOOLTIP_STYLE = {
   fontSize: 12,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.1)",
-  backgroundColor: "#0b0e21",
+  border: "1px solid rgba(255,255,255,0.12)",
+  backgroundColor: "rgba(11, 14, 33, 0.96)",
   color: "#e2e8f0",
   boxShadow: "0 12px 40px -8px rgba(0,0,0,0.6)",
+  padding: "8px 12px",
 };
 
 interface ChartRendererProps {
@@ -45,34 +60,73 @@ export function ChartRenderer({ chart, height = 280 }: ChartRendererProps) {
 }
 
 function renderChart(chart: ChartSpec, height: number) {
-  if (chart.chart_type === "heatmap") {
-    return <Heatmap chart={chart} />;
+  switch (chart.chart_type) {
+    case "heatmap":
+      return <Heatmap chart={chart} />;
+    case "line":
+      return <LineChartView chart={chart} height={height} />;
+    case "scatter":
+      return <ScatterChartView chart={chart} height={height} />;
+    case "pie":
+      return <PieChartView chart={chart} height={height} />;
+    case "histogram":
+      return <HistogramView chart={chart} height={height} />;
+    default:
+      return <BarChartView chart={chart} height={height} />;
   }
-  if (chart.chart_type === "line") {
-    return <LineChartView chart={chart} height={height} />;
-  }
-  if (chart.chart_type === "scatter") {
-    return <ScatterChartView chart={chart} height={height} />;
-  }
-  if (chart.chart_type === "pie") {
-    return <PieChartView chart={chart} height={height} />;
-  }
-  if (chart.chart_type === "histogram") {
-    return <HistogramView chart={chart} height={height} />;
-  }
-  return <BarChartView chart={chart} height={height} />;
+}
+
+function DataTooltip({ active, payload, label, valueName }: any) {
+  if (!active || !payload || !payload.length) return null;
+  const rows = payload.filter((p: any) => p.value !== undefined && p.value !== null);
+  if (!rows.length) return null;
+  return (
+    <div style={TOOLTIP_STYLE}>
+      {label !== undefined && label !== null && <p style={{ margin: 0, fontSize: 11, color: "#94a3b8", paddingBottom: 4 }}>{label}</p>}
+      {rows.map((p: any, i: number) => (
+        <p key={i} style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, lineHeight: 1.7 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 2, background: p.color ?? p.payload?.fill ?? "#a78bfa", display: "inline-block", flexShrink: 0 }} />
+          <span style={{ color: "#94a3b8" }}>{p.name ?? valueName ?? "value"}:</span>
+          <strong style={{ color: "#e2e8f0", fontFamily: "monospace" }}>{formatNumber(Number(p.value))}</strong>
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function YTickLabel({ x, y, payload }: any) {
+  return (
+    <text x={x} y={y} dy={3} textAnchor="end" fontSize={10} fill="#64748b">
+      {formatNumber(payload.value)}
+    </text>
+  );
+}
+
+function XTickLabel(props: any) {
+  const { x, y, payload } = props;
+  const text = String(payload.value);
+  const truncated = text.length > 14 ? `${text.slice(0, 13)}…` : text;
+  return (
+    <text x={x} y={y} dy={10} textAnchor="middle" fontSize={10} fill="#64748b">
+      {truncated}
+    </text>
+  );
 }
 
 function HistogramView({ chart, height }: { chart: ChartSpec; height: number }) {
   const data = chart.data as Array<{ label: string; count: number }>;
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+      <BarChart data={data} margin={{ top: 18, right: 14, left: 4, bottom: 10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={TICK} interval="preserveStartEnd" angle={-35} textAnchor="end" height={50} stroke="rgba(255,255,255,0.06)" />
-        <YAxis tick={TICK} tickFormatter={(v) => formatNumber(v)} width={44} stroke="rgba(255,255,255,0.06)" />
-        <Tooltip contentStyle={TOOLTIP} cursor={{ fill: "rgba(255,255,255,0.04)" }} formatter={(value) => [formatNumber(Number(value)), "count"]} />
-        <Bar dataKey="count" fill="url(#gbar)" radius={[5, 5, 0, 0]} />
+        <XAxis dataKey="label" tick={XTickLabel} interval="preserveStartEnd" angle={-35} textAnchor="end" height={50} stroke="rgba(255,255,255,0.06)" />
+        <YAxis tick={YTickLabel} width={44} stroke="rgba(255,255,255,0.06)" />
+        <Tooltip content={<DataTooltip valueName="count" />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+        <Bar dataKey="count" radius={[5, 5, 0, 0]} maxBarSize={48}>
+          {data.map((_, i) => (
+            <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.9} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
@@ -80,14 +134,27 @@ function HistogramView({ chart, height }: { chart: ChartSpec; height: number }) 
 
 function BarChartView({ chart, height }: { chart: ChartSpec; height: number }) {
   const data = chart.data as Array<{ group: string; value: number }>;
+  const showLabels = data.length <= 14;
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+      <BarChart data={data} margin={{ top: showLabels ? 22 : 8, right: 14, left: 4, bottom: 10 }} barCategoryGap="28%">
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-        <XAxis dataKey="group" tick={{ fontSize: 11, fill: "#64748b" }} interval="preserveStartEnd" angle={-20} textAnchor="end" height={46} stroke="rgba(255,255,255,0.06)" />
-        <YAxis tick={TICK} tickFormatter={(v) => formatNumber(v)} width={52} stroke="rgba(255,255,255,0.06)" />
-        <Tooltip contentStyle={TOOLTIP} cursor={{ fill: "rgba(255,255,255,0.04)" }} formatter={(value) => [formatNumber(Number(value)), chart.y]} />
-        <Bar dataKey="value" fill="url(#gbar)" radius={[5, 5, 0, 0]} maxBarSize={42} />
+        <XAxis dataKey="group" tick={XTickLabel} interval="preserveStartEnd" angle={-20} textAnchor="end" height={46} stroke="rgba(255,255,255,0.06)" />
+        <YAxis tick={YTickLabel} width={52} stroke="rgba(255,255,255,0.06)" />
+        <Tooltip content={<DataTooltip valueName={chart.y} />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+        <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={44}>
+          {data.map((_, i) => (
+            <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.92} />
+          ))}
+          {showLabels && (
+            <LabelList
+              dataKey="value"
+              position="top"
+              formatter={(v: any) => formatNumber(Number(v))}
+              style={{ fontSize: 10, fill: "#94a3b8", fontFamily: "monospace" }}
+            />
+          )}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
@@ -97,12 +164,19 @@ function LineChartView({ chart, height }: { chart: ChartSpec; height: number }) 
   const data = chart.data as Array<{ date: string; value: number }>;
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+      <LineChart data={data} margin={{ top: 8, right: 14, left: 4, bottom: 8 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-        <XAxis dataKey="date" tick={TICK} interval="preserveStartEnd" minTickGap={32} stroke="rgba(255,255,255,0.06)" />
-        <YAxis tick={TICK} tickFormatter={(v) => formatNumber(v)} width={52} stroke="rgba(255,255,255,0.06)" />
-        <Tooltip contentStyle={TOOLTIP} cursor={{ stroke: "rgba(255,255,255,0.15)", strokeDasharray: "3 3" }} formatter={(value) => [formatNumber(Number(value)), chart.y]} />
-        <Line type="monotone" dataKey="value" stroke={PALETTE[2]} strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: PALETTE[2] }} />
+        <XAxis dataKey="date" tick={XTickLabel} interval="preserveStartEnd" minTickGap={40} stroke="rgba(255,255,255,0.06)" />
+        <YAxis tick={YTickLabel} width={52} stroke="rgba(255,255,255,0.06)" />
+        <Tooltip content={<DataTooltip valueName={chart.y} />} cursor={{ stroke: "rgba(255,255,255,0.15)", strokeDasharray: "3 3" }} />
+        <Line
+          type="monotone"
+          dataKey="value"
+          stroke={PALETTE[2]}
+          strokeWidth={2.5}
+          dot={{ r: 2.5, fill: PALETTE[2], strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: PALETTE[2], stroke: "#0b0e21", strokeWidth: 2 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -110,31 +184,62 @@ function LineChartView({ chart, height }: { chart: ChartSpec; height: number }) 
 
 function PieChartView({ chart, height }: { chart: ChartSpec; height: number }) {
   const data = chart.data as Array<{ group: string; value: number }>;
+  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  const innerRadius = Math.min(height, 340) / 4.6;
+  const outerRadius = Math.min(height, 340) / 2.5;
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="value"
-          nameKey="group"
-          cx="50%"
-          cy="50%"
-          outerRadius={Math.min(height, 320) / 2.4}
-          innerRadius={Math.min(height, 320) / 4.4}
-          paddingAngle={2}
-          stroke="rgba(255,255,255,0.06)"
-          label={(p: { group?: string; percent?: number }) =>
-            p.percent && p.percent > 0.04 ? `${Math.round(p.percent * 100)}%` : ""
-          }
-          labelLine={{ stroke: "rgba(255,255,255,0.2)" }}
-        >
-          {data.map((_, i) => (
-            <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
-          ))}
-        </Pie>
-        <Tooltip contentStyle={TOOLTIP} formatter={(v) => [formatNumber(Number(v)), "count"]} />
-      </PieChart>
-    </ResponsiveContainer>
+    <div>
+      <ResponsiveContainer width="100%" height={height}>
+        <PieChart margin={{ top: 24, right: 24, left: 24, bottom: 12 }}>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="group"
+            cx="50%"
+            cy="50%"
+            outerRadius={outerRadius}
+            innerRadius={innerRadius}
+            paddingAngle={2.5}
+            stroke="rgba(255,255,255,0.08)"
+            labelLine={{ stroke: "rgba(255,255,255,0.22)", strokeWidth: 1 }}
+            label={({ cx, cy, midAngle, innerR, outerR, percent, value }: any) => {
+              const pct = percent ?? value / total;
+              if (pct < 0.03) return null;
+              const RADIAN = Math.PI / 180;
+              const radius = (innerR + outerR) / 2 + 16;
+              const x = cx + Math.cos(-midAngle * RADIAN) * radius;
+              const y = cy + Math.sin(-midAngle * RADIAN) * radius;
+              return (
+                <text
+                  x={x}
+                  y={y}
+                  fill="#94a3b8"
+                  textAnchor={x > cx ? "start" : "end"}
+                  dominantBaseline="central"
+                  fontSize={10}
+                  style={{ fontFamily: "monospace" }}
+                >
+                  {`${Math.round(pct * 100)}%`}
+                </text>
+              );
+            }}
+          >
+            {data.map((_, i) => (
+              <Cell key={i} fill={PALETTE[i % PALETTE.length]} stroke="rgba(255,255,255,0.08)" />
+            ))}
+          </Pie>
+          <Tooltip content={<DataTooltip valueName="count" />} />
+          <Legend
+            verticalAlign="bottom"
+            iconType="circle"
+            iconSize={8}
+            formatter={(value: any) => <span style={{ color: "#94a3b8", fontSize: 11 }}>{String(value).length > 18 ? `${String(value).slice(0, 17)}…` : value}</span>}
+            wrapperStyle={{ paddingTop: 14 }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -144,15 +249,11 @@ function ScatterChartView({ chart, height }: { chart: ChartSpec; height: number 
   const yKey = chart.y;
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ScatterChart margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+      <ScatterChart margin={{ top: 8, right: 14, left: 4, bottom: 8 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
-        <XAxis type="number" dataKey={xKey} name={xKey} tick={TICK} tickFormatter={(v) => formatNumber(v)} width={56} height={36} stroke="rgba(255,255,255,0.06)" />
-        <YAxis type="number" dataKey={yKey} name={yKey} tick={TICK} tickFormatter={(v) => formatNumber(v)} width={56} stroke="rgba(255,255,255,0.06)" />
-        <Tooltip
-          contentStyle={TOOLTIP}
-          cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.2)" }}
-          formatter={(value, name) => [formatNumber(Number(value)), name as string]}
-        />
+        <XAxis type="number" dataKey={xKey} name={xKey} tick={YTickLabel} width={56} height={36} stroke="rgba(255,255,255,0.06)" />
+        <YAxis type="number" dataKey={yKey} name={yKey} tick={YTickLabel} width={56} stroke="rgba(255,255,255,0.06)" />
+        <Tooltip content={<DataTooltip />} cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.2)" }} />
         <Scatter data={data} fill={PALETTE[4]} fillOpacity={0.65} />
       </ScatterChart>
     </ResponsiveContainer>
@@ -224,3 +325,5 @@ function cellColor(v: number | null, max: number): string {
   if (v < 0) return `rgba(244, 63, 94, ${0.18 + strength * 0.6})`;
   return "rgba(255,255,255,0.03)";
 }
+
+export { PALETTE };

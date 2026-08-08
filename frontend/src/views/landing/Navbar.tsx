@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Sparkles, UploadCloud, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { NAV_LINKS } from "./constants";
+import Link from "next/link";
+import { NAV_LINKS, ROUTE_LINKS } from "./constants";
 import { cn } from "./primitives";
 import { UploadButton } from "@/components/UploadButton";
 
@@ -64,6 +65,16 @@ export function Navbar({
           </a>
 
           <nav className="hidden items-center gap-1 md:flex">
+            {ROUTE_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-full px-3.5 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <span aria-hidden className="mx-1 h-4 w-px bg-white/10" />
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
@@ -126,6 +137,17 @@ export function Navbar({
             transition={{ duration: 0.22 }}
             className="mx-4 mt-2 rounded-2xl border border-white/10 bg-night-900/95 p-3 backdrop-blur-xl md:hidden"
           >
+            {ROUTE_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/[0.06] hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div aria-hidden className="my-1 h-px bg-white/[0.06]" />
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}

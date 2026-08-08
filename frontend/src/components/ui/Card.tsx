@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { cn } from "@/views/landing/primitives";
 
 interface CardProps {
-  title?: string;
-  subtitle?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
   className?: string;

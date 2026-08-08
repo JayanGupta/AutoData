@@ -90,7 +90,7 @@ def box_spec(engine) -> dict | None:
 
 
 def _kde_points(values: pd.Series, n: int = 80) -> list[dict]:
-    vals = values.dropna().astype(float)
+    vals = pd.to_numeric(values, errors="coerce").dropna()
     if len(vals) < 3:
         return []
     lo, hi = float(vals.min()), float(vals.max())

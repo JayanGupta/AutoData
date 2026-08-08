@@ -16,6 +16,7 @@ import { StatCard } from "../components/ui/StatCard";
 import { PaginatedDataTable } from "../components/ui/PaginatedDataTable";
 import { Badge } from "../components/ui/Badge";
 import { ProgressBar } from "../components/ui/ProgressBar";
+import { ExecutiveSummaryPanel } from "../components/ExecutiveSummaryPanel";
 import {
   TYPE_COLORS,
   TYPE_LABELS,
@@ -75,6 +76,8 @@ export function OverviewPage() {
           accent="bg-gradient-to-br from-violet-500/25 to-cyan-500/10 text-violet-200"
         />
       </div>
+
+      <ExecutiveSummaryPanel />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title="Analysis pipeline" subtitle="Where this dataset sits in your workflow" className="lg:col-span-3">
