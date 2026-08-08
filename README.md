@@ -80,6 +80,43 @@ Without a key, the app runs in **local mode**: the AI analyst still answers ques
 
 Starts both servers and prints the URL. Stop with `Ctrl+C`.
 
+## Deploy to Render (free)
+
+Push this repo to GitHub, then on Render: **New → Blueprint**, pick the repo.
+The `render.yaml` at the repo root defines two **free** web services — no credit
+card required:
+
+| Service | Runtime | What it runs |
+| --- | --- | --- |
+| `autodata-backend` | Python 3.11 | FastAPI + pandas on `$PORT`, health check `/api/health` |
+| `autodata-frontend` | Node 20 | Next.js `next start`, proxies every `/api/*` request to the backend via `BACKEND_URL` |
+
+Open the frontend's `*.onrender.com` URL — the browser only ever talks to the
+frontend, which reverse-proxies `/api` to the backend, so no CORS setup is
+needed.
+
+### Sleep window (23:59 → 07:45)
+
+Render's **free tier** services automatically spin down after 15 minutes
+without traffic and spin back up on the next request (~1 minute cold start).
+This means the app is naturally "asleep" overnight and "wakes up" on demand
+during the day — matching the intended 23:59–07:45 window without any extra
+cost.
+
+Free-tier caveats to know:
+
+- **Cold start**: the first request after idle takes ~1 minute while Render
+  boots the service.
+- **Ephemeral storage**: any uploaded datasets / sessions are lost when a free
+  service spins down or redeploys. For durable storage, upgrade to a paid
+  instance and attach a disk at `/opt/data` (set `AUTODATA_DATA_DIR` in the
+  backend service env — it's already wired up in code).
+- **Always-on**: if you need zero idle spin-down during the day, switch both
+  services to a paid instance type (e.g. `starter`) in the Render dashboard.
+- **LLM**: to enable AI answers, add `USER_LLM_API_KEY` (your own) to the
+  backend service env vars in the Render dashboard. Without it, the app runs
+  in local rule-based mode.
+
 ## API overview
 
 | Method | Endpoint | Purpose |
