@@ -203,6 +203,7 @@ class SessionStore:
     def list_sessions(self) -> list[dict]:
         with self._lock:
             self._evict_expired()
+            from ..ai.executive import build_snippet
             return [
                 {
                     "id": s.id,
@@ -215,6 +216,7 @@ class SessionStore:
                     "file_size": s.file_size,
                     "file_type": s.file_type,
                     "favorite": s.favorite,
+                    "snippet": build_snippet(s.engine),
                 }
                 for s in self._sessions.values()
             ]

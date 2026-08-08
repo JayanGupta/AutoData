@@ -67,6 +67,14 @@ export function AdvancedChartRenderer({ chart, height = 300 }: Props) {
       return <PairPlot chart={chart} height={height} />;
     case "correlation":
       return <CorrelationMatrix chart={chart} height={height} />;
+    case "violin":
+      return <ViolinPlot chart={chart} height={height} />;
+    case "qq":
+      return <QQPlot chart={chart} height={height} />;
+    case "parallel":
+      return <ParallelCoords chart={chart} height={height} />;
+    case "seasonal":
+      return <SeasonalView chart={chart} height={height} />;
     default:
       return <p className="text-sm text-slate-500">Chart type not supported.</p>;
   }
@@ -580,6 +588,186 @@ function cellColor(v: number | null, max: number): string {
   if (v > 0) return `rgba(16, 185, 129, ${0.16 + strength * 0.6})`;
   if (v < 0) return `rgba(244, 63, 94, ${0.16 + strength * 0.6})`;
   return "rgba(255,255,255,0.03)";
+}
+
+/* ------------------------------ Violin ------------------------------ */
+
+function ViolinPlot({ chart, height }: Props) {
+  const data = chart.data as {
+    min: number;
+    q1: number;
+    median: number;
+    q3: number;
+    max: number;
+    density: Array<{ x: number; y: number }>;
+  };
+  if (!data?.density?.length) return <EmptyChart />;
+  const H = height - 34;
+  const density = data.density;
+  const maxD = Math.max(...density.map((d) => d.y), 1e-6);
+  const lo = data.min;
+  const hi = data.max;
+  const span = hi - lo || 1;
+  const pad = span * 0.06;
+  const xMin = lo - pad;
+  const xMax = hi + pad;
+  const xScale = (v: number) => 14 + ((v - xMin) / (xMax - xMin)) * 72;
+  const halfWidth = (d: number) => (d / maxD) * 9;
+  const color = PALETTE[0];
+
+  const right = density
+    .map((p, i) => `${i === 0 ? "M" : "L"}${(xScale(p.x) + halfWidth(p.y)).toFixed(2)},${(H - (p.y / maxD) * H).toFixed(2)}`)
+    .join(" ");
+  const left = [...density]
+    .reverse()
+    .map((p, i) => `${i === 0 ? "L" : "L"}${(xScale(p.x) - halfWidth(p.y)).toFixed(2)},${(H - (p.y / maxD) * H).toFixed(2)}`)
+    .join(" ");
+  const path = `${right} ${left} Z`;
+
+  const medianX = xScale(data.median);
+  const q1X = xScale(data.q1);
+  const q3X = xScale(data.q3);
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="relative flex-1 px-2 pt-2">
+        <svg width="100%" height={H} viewBox={`0 0 100 ${H}`} preserveAspectRatio="none">
+          <line x1={q1X} x2={q1X} y1={0} y2={H} stroke="rgba(148,163,184,0.15)" strokeDasharray="3 3" />
+          <line x1={q3X} x2={q3X} y1={0} y2={H} stroke="rgba(148,163,184,0.15)" strokeDasharray="3 3" />
+          <path d={path} fill={color} fillOpacity={0.45} stroke={color} strokeWidth={1.2} strokeLinejoin="round" />
+          <line x1={medianX} x2={medianX} y1={H * 0.06} y2={H * 0.94} stroke={color} strokeWidth={2.4} />
+          <line x1={q1X - 3} x2={q1X + 3} y1={H * 0.5} y2={H * 0.5} stroke="rgba(255,255,255,0.7)" strokeWidth={1.4} />
+          <line x1={q3X - 3} x2={q3X + 3} y1={H * 0.5} y2={H * 0.5} stroke="rgba(255,255,255,0.7)" strokeWidth={1.4} />
+        </svg>
+        <div className="absolute inset-x-2 top-1 flex justify-between text-[10px] text-slate-500">
+          <span>{formatNumber(xMin)}</span>
+          <span>{formatNumber(xMax)}</span>
+        </div>
+      </div>
+      <div className="mt-1 flex items-center justify-center gap-4 border-t border-white/[0.06] pt-2.5 text-[10px] text-slate-400">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-0.5 w-3 rounded" style={{ background: color }} /> median {formatNumber(data.median)}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-0.5 w-3 rounded bg-white/60" /> IQR {formatNumber(data.q1)}–{formatNumber(data.q3)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------- Q-Q -------------------------------- */
+
+function QQPlot({ chart, height }: Props) {
+  const data = chart.data as Array<{ x: number; y: number }>;
+  if (!data?.length) return <EmptyChart />;
+  const H = height - 22;
+  const xs = data.map((d) => d.x);
+  const ys = data.map((d) => d.y);
+  const xMin = Math.min(...xs);
+  const xMax = Math.max(...xs);
+  const yMin = Math.min(...ys);
+  const yMax = Math.max(...ys);
+  const xSpan = xMax - xMin || 1;
+  const ySpan = yMax - yMin || 1;
+  const sx = (v: number) => 8 + ((v - xMin) / xSpan) * 84;
+  const sy = (v: number) => H - 6 - ((v - yMin) / ySpan) * (H - 14);
+  const color = PALETTE[2];
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="relative flex-1 px-1 pt-3">
+        <svg width="100%" height={H} viewBox={`0 0 100 ${H}`} preserveAspectRatio="none">
+          <line x1={sx(xMin)} y1={sy(yMin)} x2={sx(xMax)} y2={sy(yMax)} stroke="rgba(148,163,184,0.35)" strokeWidth={1.2} strokeDasharray="4 4" />
+          {data.map((d, i) => (
+            <circle key={i} cx={sx(d.x)} cy={sy(d.y)} r={1.7} fill={color} fillOpacity={0.55} />
+          ))}
+        </svg>
+      </div>
+      <div className="mt-1 flex items-center justify-between border-t border-white/[0.06] px-2 pt-2 text-[10px] text-slate-500">
+        <span>Theoretical quantiles (normal)</span>
+        <span>Sample quantiles</span>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------ Parallel coordinates ---------------------- */
+
+function ParallelCoords({ chart, height }: Props) {
+  const columns = chart.columns ?? [];
+  const data = chart.data as Array<Record<string, number>>;
+  if (!columns.length || !data?.length) return <EmptyChart />;
+  const H = height - 26;
+  const step = 100 / columns.length;
+  const xFor = (i: number) => step * i + step / 2;
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="relative flex-1">
+        <svg width="100%" height={H} viewBox={`0 0 100 ${H}`} preserveAspectRatio="none">
+          {columns.map((c, i) => {
+            const x = xFor(i);
+            return (
+              <g key={c}>
+                <line x1={x} x2={x} y1={8} y2={H - 8} stroke="rgba(148,163,184,0.28)" strokeWidth={1} />
+                <text x={x} y={H - 2} textAnchor="middle" fontSize={7.5} fill="#64748b">
+                  {c.length > 14 ? `${c.slice(0, 13)}…` : c}
+                </text>
+              </g>
+            );
+          })}
+          {data.slice(0, 120).map((row, r) => {
+            const pts = columns
+              .map((c, i) => `${xFor(i).toFixed(2)},${(H - 16 - row[c] * (H - 24)).toFixed(2)}`)
+              .join(" ");
+            return <polyline key={r} points={pts} fill="none" stroke={PALETTE[r % PALETTE.length]} strokeWidth={0.7} strokeOpacity={0.28} />;
+          })}
+        </svg>
+      </div>
+      <p className="mt-1 border-t border-white/[0.06] pt-2 text-center text-[10px] text-slate-500">
+        {data.length.toLocaleString()} rows · columns normalized to [0, 1]
+      </p>
+    </div>
+  );
+}
+
+/* ----------------------------- Seasonal ----------------------------- */
+
+function SeasonalView({ chart, height }: Props) {
+  const data = chart.data as Array<Record<string, unknown>>;
+  const xKey = chart.x ?? "date";
+  if (!data?.length) return <EmptyChart />;
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={data} margin={{ top: 8, right: 14, left: 4, bottom: 8 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+        <XAxis dataKey={xKey} tick={XTick} interval="preserveStartEnd" minTickGap={40} stroke="rgba(255,255,255,0.06)" />
+        <YAxis yAxisId="main" tick={YTick} width={52} stroke="rgba(255,255,255,0.06)" />
+        <YAxis yAxisId="seasonal" orientation="right" hide />
+        <Tooltip content={<DataTooltip />} cursor={{ stroke: "rgba(255,255,255,0.15)", strokeDasharray: "3 3" }} />
+        <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 11 }} iconType="circle" iconSize={8} />
+        <Area
+          yAxisId="main"
+          type="monotone"
+          dataKey="actual"
+          name="Actual"
+          stroke={PALETTE[1]}
+          strokeWidth={2.2}
+          fill="url(#seasonal-fill)"
+          dot={false}
+        />
+        <Line yAxisId="main" type="monotone" dataKey="trend" name="Trend" stroke={PALETTE[3]} strokeWidth={2} dot={false} />
+        <Line yAxisId="seasonal" type="monotone" dataKey="seasonal" name="Seasonal" stroke={PALETTE[5]} strokeWidth={1.6} strokeDasharray="4 3" dot={false} />
+        <defs>
+          <linearGradient id="seasonal-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={PALETTE[1]} stopOpacity={0.4} />
+            <stop offset="100%" stopColor={PALETTE[1]} stopOpacity={0.03} />
+          </linearGradient>
+        </defs>
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
 }
 
 function EmptyChart() {

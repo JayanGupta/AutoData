@@ -138,13 +138,36 @@ function BarChartView({ chart, height }: { chart: ChartSpec; height: number }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: showLabels ? 22 : 8, right: 14, left: 4, bottom: 10 }} barCategoryGap="28%">
+        <defs>
+          {data.map((_, i) => (
+            <linearGradient key={i} id={`bar-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={PALETTE[i % PALETTE.length]} stopOpacity={1} />
+              <stop offset="100%" stopColor={PALETTE[i % PALETTE.length]} stopOpacity={0.35} />
+            </linearGradient>
+          ))}
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
         <XAxis dataKey="group" tick={XTickLabel} interval="preserveStartEnd" angle={-20} textAnchor="end" height={46} stroke="rgba(255,255,255,0.06)" />
         <YAxis tick={YTickLabel} width={52} stroke="rgba(255,255,255,0.06)" />
-        <Tooltip content={<DataTooltip valueName={chart.y} />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-        <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={44}>
+        <Tooltip
+          content={<DataTooltip valueName={chart.y} />}
+          cursor={{ fill: "rgba(255,255,255,0.04)" }}
+          labelFormatter={(label: any) => String(label)}
+        />
+        <Bar
+          dataKey="value"
+          radius={[7, 7, 0, 0]}
+          maxBarSize={46}
+          activeBar={{ fillOpacity: 1, stroke: "rgba(255,255,255,0.35)", strokeWidth: 1 }}
+        >
           {data.map((_, i) => (
-            <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.92} />
+            <Cell
+              key={i}
+              fill={`url(#bar-grad-${i})`}
+              fillOpacity={0.9}
+              stroke="rgba(255,255,255,0.08)"
+              style={{ filter: `drop-shadow(0 6px 10px ${PALETTE[i % PALETTE.length]}33)` }}
+            />
           ))}
           {showLabels && (
             <LabelList
@@ -187,13 +210,15 @@ function PieChartView({ chart, height }: { chart: ChartSpec; height: number }) {
   const total = data.reduce((s, d) => s + d.value, 0) || 1;
   const innerRadius = Math.min(height, 340) / 4.6;
   const outerRadius = Math.min(height, 340) / 2.5;
+  const largestIdx = data.reduce((best, d, i, arr) => (d.value > arr[best].value ? i : best), 0);
+  const pieData = data.map((d, i) => ({ ...d, index: i }));
 
   return (
     <div>
       <ResponsiveContainer width="100%" height={height}>
         <PieChart margin={{ top: 24, right: 24, left: 24, bottom: 12 }}>
           <Pie
-            data={data}
+            data={pieData}
             dataKey="value"
             nameKey="group"
             cx="50%"
@@ -201,20 +226,21 @@ function PieChartView({ chart, height }: { chart: ChartSpec; height: number }) {
             outerRadius={outerRadius}
             innerRadius={innerRadius}
             paddingAngle={2.5}
-            stroke="rgba(255,255,255,0.08)"
-            labelLine={{ stroke: "rgba(255,255,255,0.22)", strokeWidth: 1 }}
-            label={({ cx, cy, midAngle, innerR, outerR, percent, value }: any) => {
+            stroke="rgba(11,14,33,0.85)"
+            strokeWidth={1.5}
+            labelLine={{ stroke: "rgba(255,255,255,0.25)", strokeWidth: 1 }}
+            label={({ cx, cy, midAngle, innerR, outerR, percent, value, index }: any) => {
               const pct = percent ?? value / total;
-              if (pct < 0.03) return null;
+              if (pct < 0.04) return null;
               const RADIAN = Math.PI / 180;
-              const radius = (innerR + outerR) / 2 + 16;
+              const radius = (innerR + outerR) / 2 + (index === largestIdx ? 22 : 12);
               const x = cx + Math.cos(-midAngle * RADIAN) * radius;
               const y = cy + Math.sin(-midAngle * RADIAN) * radius;
               return (
                 <text
                   x={x}
                   y={y}
-                  fill="#94a3b8"
+                  fill="#cbd5e1"
                   textAnchor={x > cx ? "start" : "end"}
                   dominantBaseline="central"
                   fontSize={10}
@@ -226,7 +252,12 @@ function PieChartView({ chart, height }: { chart: ChartSpec; height: number }) {
             }}
           >
             {data.map((_, i) => (
-              <Cell key={i} fill={PALETTE[i % PALETTE.length]} stroke="rgba(255,255,255,0.08)" />
+              <Cell
+                key={i}
+                fill={PALETTE[i % PALETTE.length]}
+                fillOpacity={i === largestIdx ? 1 : 0.82}
+                stroke="rgba(11,14,33,0.85)"
+              />
             ))}
           </Pie>
           <Tooltip content={<DataTooltip valueName="count" />} />
@@ -234,7 +265,16 @@ function PieChartView({ chart, height }: { chart: ChartSpec; height: number }) {
             verticalAlign="bottom"
             iconType="circle"
             iconSize={8}
-            formatter={(value: any) => <span style={{ color: "#94a3b8", fontSize: 11 }}>{String(value).length > 18 ? `${String(value).slice(0, 17)}…` : value}</span>}
+            formatter={(value: any, entry: any) => {
+              const idx = entry?.payload?.index ?? 0;
+              const v = data[idx]?.value ?? 0;
+              const label = String(value).length > 18 ? `${String(value).slice(0, 17)}…` : value;
+              return (
+                <span style={{ color: "#94a3b8", fontSize: 11 }}>
+                  {label} <span style={{ color: "#64748b", fontFamily: "monospace" }}>({Math.round((v / total) * 100)}%)</span>
+                </span>
+              );
+            }}
             wrapperStyle={{ paddingTop: 14 }}
           />
         </PieChart>

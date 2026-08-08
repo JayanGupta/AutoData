@@ -25,8 +25,8 @@ export function LandingPage() {
     setLoadingSample(true);
     try {
       await uploadSample();
-      toastSuccess("Sample dataset loaded successfully.");
-      router.push("/dashboard");
+      toastSuccess("Sample dataset added to your library.");
+      router.push("/datasets");
     } catch {
       /* error surfaced via toast */
     } finally {

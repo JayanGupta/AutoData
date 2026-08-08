@@ -89,7 +89,18 @@ export interface DatasetInfo {
   file_type: string;
   favorite: boolean;
   quality_score?: number;
+  snippet?: string;
   preview?: Array<Record<string, string | number | boolean | null>>;
+}
+
+export interface SampleInfo {
+  name: string;
+  title: string;
+  description: string;
+  file: string;
+  file_type: string;
+  size: number;
+  tags: string[];
 }
 
 export interface ChartSpec {
@@ -194,7 +205,11 @@ export type AdvancedChartType =
   | "treemap"
   | "sunburst"
   | "pair_plot"
-  | "correlation";
+  | "correlation"
+  | "violin"
+  | "qq"
+  | "parallel"
+  | "seasonal";
 
 export interface AdvancedChartSpec {
   chart_type: AdvancedChartType;

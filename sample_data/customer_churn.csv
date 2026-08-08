@@ -1,0 +1,1502 @@
+customer_id,tenure_months,monthly_charges,total_charges,plan,contract,payment_method,senior_citizen,support_calls,avg_call_minutes,churn
+C-10000,24,57.77,1431.24,Standard,Month-to-month,Bank transfer,0,7,142.3,No
+C-10001,86,28.19,2411.29,Basic,One year,Bank transfer,1,8,398.3,No
+C-10002,81,78.43,6500.04,Premium Plus,One year,Credit card,0,2,181.3,No
+C-10003,20,91.12,,Standard,Two year,Credit card,0,7,87.4,No
+C-10004,21,56.93,1179.94,Basic,Two year,Bank transfer,1,0,499.1,Yes
+C-10005,9,50.49,438.18,Premium,One year,Credit card,0,0,846.9,Yes
+C-10006,41,41.56,1767.08,Premium Plus,Month-to-month,Credit card,0,7,541.4,Yes
+C-10007,107,98.13,10120.36,Premium Plus,Two year,Credit card,1,7,620.5,Yes
+C-10008,24,52.52,1265.65,Premium Plus,One year,Credit card,0,4,602.6,No
+C-10009,24,22.48,517.14,Premium,Two year,Electronic check,0,8,219.1,No
+C-10010,113,109.69,11798.74,Basic,Two year,Mailed check,1,3,756.9,Yes
+C-10011,99,100.69,10400.78,Premium,One year,Bank transfer,0,6,211.6,No
+C-10012,5,51.74,250.12,Premium,Month-to-month,Mailed check,0,2,274.7,Yes
+C-10013,8,50.68,398.36,Premium Plus,Two year,Electronic check,0,0,310.3,No
+C-10014,9,34.25,296.57,Premium,One year,Mailed check,0,3,691.8,No
+C-10015,32,70.86,2279.57,Premium Plus,Month-to-month,Electronic check,0,7,84.3,Yes
+C-10016,25,46.92,1129.08,Basic,Month-to-month,Credit card,0,7,130.5,No
+C-10017,27,57.33,1611.61,Standard,Month-to-month,Credit card,0,0,60.8,No
+C-10018,116,48.92,5546.08,Standard,Month-to-month,Bank transfer,0,6,899.4,No
+C-10019,34,104.07,3386.21,Premium,Month-to-month,Electronic check,0,6,646.7,No
+C-10020,24,75.65,1870.44,Premium,One year,Bank transfer,0,4,882.9,No
+C-10021,105,44.59,,Premium,One year,Mailed check,0,0,571.4,No
+C-10022,1,87.27,89.56,Premium Plus,Two year,Electronic check,1,1,512.5,No
+C-10023,118,32.34,3918.38,Premium Plus,Two year,Electronic check,0,1,448.7,No
+C-10024,32,20.94,649.41,Basic,One year,Bank transfer,0,3,256.8,No
+C-10025,108,23.68,2479.72,Premium Plus,Two year,Credit card,0,1,790.7,No
+C-10026,102,75.18,7382.66,Standard,Month-to-month,Mailed check,0,8,672.3,No
+C-10027,40,104.77,4266.52,Basic,Two year,Credit card,0,0,847.8,No
+C-10028,3,63.25,189.67,Premium Plus,One year,Electronic check,0,3,99.5,No
+C-10029,90,64.89,5882.04,Basic,One year,Electronic check,0,3,881.6,Yes
+C-10030,75,111.7,8482.47,Standard,Month-to-month,Electronic check,0,7,422.8,Yes
+C-10031,5,99.72,521.48,Premium,One year,Electronic check,0,5,496.5,Yes
+C-10032,26,97.57,2431.68,Premium Plus,Month-to-month,Electronic check,0,0,377.0,No
+C-10033,8,26.2,200.5,Premium Plus,Month-to-month,Electronic check,0,8,103.9,No
+C-10034,85,29.58,2545.48,Premium Plus,Month-to-month,Credit card,1,6,449.9,No
+C-10035,92,81.92,7502.03,Premium,Two year,Bank transfer,1,3,150.7,No
+C-10036,5,91.33,450.05,Standard,Two year,Credit card,0,7,216.2,Yes
+C-10037,13,26.05,347.26,Premium,Two year,Bank transfer,0,8,711.4,No
+C-10038,20,50.87,1026.19,Premium,One year,Mailed check,0,0,259.4,Yes
+C-10039,4,54.38,214.07,Standard,Two year,Credit card,1,7,563.8,No
+C-10040,67,76.61,4930.04,Premium,Two year,Electronic check,0,7,244.3,No
+C-10041,6,42.3,259.75,Standard,One year,Bank transfer,0,6,232.5,Yes
+C-10042,13,56.28,716.32,Basic,One year,Mailed check,0,5,96.9,Yes
+C-10043,2,39.78,78.29,Standard,Month-to-month,Mailed check,1,2,224.6,No
+C-10044,17,111.06,1960.71,Basic,Two year,Bank transfer,0,3,316.3,No
+C-10045,30,100.95,3144.09,Standard,Two year,Electronic check,1,1,181.3,No
+C-10046,16,39.17,656.61,Premium Plus,Two year,Mailed check,0,0,701.0,No
+C-10047,33,49.42,1594.99,Standard,One year,Mailed check,0,8,873.4,No
+C-10048,103,92.73,9444.33,Premium Plus,Two year,Bank transfer,0,7,495.9,Yes
+C-10049,18,91.25,1655.83,Premium Plus,Two year,Electronic check,1,3,244.4,No
+C-10050,32,106.32,3426.52,Premium Plus,Month-to-month,Bank transfer,0,4,522.5,No
+C-10051,14,49.5,701.39,Premium,Month-to-month,Credit card,0,7,452.7,No
+C-10052,84,100.45,8213.18,Premium,One year,Electronic check,0,5,817.2,Yes
+C-10053,45,71.28,3070.11,Basic,One year,Electronic check,1,8,228.3,Yes
+C-10054,35,52.92,1810.43,Premium,Two year,Mailed check,1,8,826.4,No
+C-10055,3,48.18,148.27, ,One year,Electronic check,1,7,609.4,No
+C-10056,19,42.76,816.71,standard,One year,Credit card,0,7,346.2,No
+C-10057,9,104.58,974.44,Premium Plus,Two year,Electronic check,0,5,176.7,Yes
+C-10058,17,114.34,1912.64,Basic,One year,Credit card,1,6,636.0,No
+C-10059,95,73.76,7303.0,Premium,Two year,Mailed check,0,5,537.3,No
+C-10060,85,40.42,3301.24,Premium Plus,Month-to-month,Credit card,0,4,138.3,Yes
+C-10061,12,75.29,876.29,Basic,Two year,Credit card,0,4,232.9,Yes
+C-10062,47,72.44,3345.7,Premium Plus,Month-to-month,Credit card,0,6,191.9,Yes
+C-10063,8,73.65,610.75,Premium Plus,Two year,Mailed check,0,3,320.2,No
+C-10064,102,80.37,8164.09,Premium,Two year,Mailed check,0,0,892.5,No
+C-10065,99,102.46,10134.37,Standard,Two year,Credit card,0,0,679.3,No
+C-10066,47,108.1,4977.79,Premium Plus,One year,Mailed check,0,6,269.3,No
+C-10067,87,58.47,5313.61,Standard,Two year,Mailed check,0,2,290.0,No
+C-10068,47,111.63,5047.88,Standard,One year,Bank transfer,0,1,694.5,No
+C-10069,62,65.09,3863.34,Premium,Month-to-month,Credit card,0,6,348.7,No
+C-10070,79,59.67,4632.43,Basic,One year,Credit card,0,7,447.5,No
+C-10071,11,85.7,910.78,Premium Plus,Month-to-month,Electronic check,0,1,208.9,Yes
+C-10072,11,94.14,1012.06,Standard,Month-to-month,Credit card,0,5,209.5,Yes
+C-10073,6,73.23,440.39,Premium Plus,Two year,Electronic check,0,6,639.9,No
+C-10074,98,79.82,,Basic,One year,Mailed check,0,3,136.8,No
+C-10075,73,118.93,9080.17,Premium,Month-to-month,Electronic check,0,2,668.2,Yes
+C-10076,4,71.25,276.65,Premium,One year,Credit card,0,6,161.5,Yes
+C-10077,26,55.66,1431.12,Standard,Month-to-month,Credit card,0,3,115.5,Yes
+C-10078,47,82.39,3975.93,Basic,Month-to-month,Credit card,1,1,658.5,Yes
+C-10079,17,115.9,2063.37,Premium,Two year,Mailed check,0,5,207.3,No
+C-10080,70,68.21,4718.54,Premium,Month-to-month,Mailed check,0,8,553.5,No
+C-10081,2,22.12,43.11,Basic,One year,Electronic check,0,0,175.5,No
+C-10082,106,40.2,4357.21,Premium Plus,Month-to-month,Credit card,0,5,172.8,Yes
+C-10083,69,98.7,7023.27,Basic,Two year,Electronic check,0,3,771.4,No
+C-10084,59,44.22,2660.19,Basic,Two year,Mailed check,1,6,498.0,No
+C-10085,20,82.98,1681.9,Basic,One year,Mailed check,0,3,165.5,Yes
+C-10086,22,74.88,1641.94,Standard,Month-to-month,Mailed check,0,3,265.7,No
+C-10087,22,44.9,965.26,Premium,Two year,Credit card,0,1,858.9,No
+C-10088,61,57.77,3500.51,Premium Plus,One year,Mailed check,0,7,76.6,No
+C-10089,86,105.4,8770.44,Premium,Two year,Credit card,0,7,316.9,No
+C-10090,43,76.21,3177.32,Premium Plus,Month-to-month,Mailed check,0,0,70.8,No
+C-10091,64,60.46,3865.4,Premium Plus,One year,Electronic check,1,6,803.4,No
+C-10092,10,113.21,1162.81,Standard,Month-to-month,Bank transfer,0,8,655.7,No
+C-10093,71,25.77,1744.5,Premium Plus,One year,Bank transfer,0,0,645.9,No
+C-10094,17,80.54,1391.44,Standard,One year,Mailed check,0,0,158.1,No
+C-10095,12,91.16,1048.01,Premium Plus,One year,Mailed check,0,6,199.3,No
+C-10096,81,89.18,7495.48,Premium Plus,Two year,Electronic check,0,1,594.4,No
+C-10097,53,46.9,2606.76,Standard,Two year,Credit card,0,0,141.4,No
+C-10098,89,61.68,5317.37,Premium,Two year,Mailed check,0,3,468.6,Yes
+C-10099,10,76.71,790.82,Standard,Month-to-month,Mailed check,0,4,885.7,No
+C-10100,87,82.68,7105.21,Basic,Two year,Bank transfer,0,1,347.4,No
+C-10101,32,68.52,2084.59,Basic,Month-to-month,Electronic check,0,1,237.3,No
+C-10102,4,80.3,318.93,Premium,One year,Bank transfer,0,5,899.5,Yes
+C-10103,30,86.51,2551.25,Premium Plus,Two year,Electronic check,0,0,443.8,No
+C-10104,96,103.54,9720.63,Standard,Month-to-month,Mailed check,0,5,439.6,No
+C-10105,113,61.31,7144.61,Standard,Month-to-month,Electronic check,1,5,793.7,No
+C-10106,70,64.43,4441.7,Premium Plus,One year,Credit card,0,1,676.8,No
+C-10107,46,39.51,1856.84,Standard,Two year,Electronic check,1,2,478.3,No
+C-10108,9,103.24,927.5,Premium Plus,Month-to-month,Mailed check,1,3,237.8,No
+C-10109,7,63.49,439.25,Basic,Month-to-month,Bank transfer,1,3,664.1,Yes
+C-10110,118,32.31,3925.26,Standard,Two year,Bank transfer,0,3,842.7,No
+C-10111,12,54.32,675.05,Premium Plus,Two year,Mailed check,0,3,277.6,No
+C-10112,38,31.14,1235.62,Premium,Two year,Bank transfer,0,2,776.8,No
+C-10113,91,93.69,8430.43,Premium,Month-to-month,Credit card,0,5,707.9,Yes
+C-10114,21,86.37,1806.62,Standard,Month-to-month,Mailed check,0,4,763.3,No
+C-10115,118,65.58,7992.07,Premium,Month-to-month,Electronic check,0,5,319.5,No
+C-10116,9,119.68,1099.11,Premium Plus,Two year,Credit card,1,0,884.2,Yes
+C-10117,53,102.79,5576.29,Standard,Two year,Mailed check,1,7,671.0,Yes
+C-10118,47,111.24,5321.29,Standard,Month-to-month,Bank transfer,0,6,388.5,Yes
+C-10119,41,89.64,3539.59,Standard,Two year,Electronic check,1,4,444.3,No
+C-10120,22,33.76,765.33,Premium Plus,One year,Mailed check,1,0,364.3,No
+C-10121,12,98.55,1223.0,Standard,One year,Electronic check,1,1,358.7,No
+C-10122,102,114.51,12228.66,Basic,Two year,Credit card,0,3,88.6,No
+C-10123,31,68.86,2239.51,Standard,Two year,Electronic check,0,7,786.5,No
+C-10124,81,83.23,6486.83,Premium Plus,One year,Mailed check,0,0,553.0,Yes
+C-10125,105,89.37,9519.54,Basic,Two year,Credit card,0,4,540.0,No
+C-10126,9,26.35,238.48,Standard,One year,Credit card,1,1,495.9,Yes
+C-10127,8,116.57,886.43,Basic,Month-to-month,Credit card,1,5,163.4,Yes
+C-10128,22,40.62,852.09,Standard,Month-to-month,Electronic check,0,8,310.8,No
+C-10129,19,117.71,2240.84,Basic,Month-to-month,Bank transfer,0,8,433.7,No
+C-10130,119,51.29,,Premium,Two year,Electronic check,0,3,90.9,No
+C-10131,17,105.61,1770.07,Standard,Month-to-month,Mailed check,0,6,122.5,Yes
+C-10132,41,58.18,2427.49,Standard,One year,Mailed check,0,8,231.2,No
+C-10133,47,89.68,4350.05,Standard,Two year,Mailed check,0,6,750.1,No
+C-10134,62,57.89,3655.21,Standard,Month-to-month,Credit card,0,1,336.7,No
+C-10135,9,110.92,949.35,Premium,Month-to-month,Credit card,1,3,378.1,Yes
+C-10136,7,37.57,263.75,Premium,Two year,Bank transfer,1,8,287.7,No
+C-10137,7,37.07,271.63,Premium Plus,Month-to-month,Credit card,0,7,557.5,No
+C-10138,37,88.67,3358.03,Standard,Two year,Electronic check,0,5,654.3,No
+C-10139,35,80.87,2821.58,Premium Plus,Month-to-month,Bank transfer,0,4,860.2,Yes
+C-10140,29,83.56,2323.92,Basic,One year,Electronic check,0,1,673.2,No
+C-10141,8,77.53,639.36,Basic,Two year,Electronic check,0,6,628.7,No
+C-10142,20,69.78,1441.85,Basic,One year,Electronic check,0,6,650.2,Yes
+C-10143,56,119.42,6975.21,Basic,Two year,Mailed check,0,2,123.1,Yes
+C-10144,21,55.33,1216.51,Basic,One year,Bank transfer,0,3,758.7,Yes
+C-10145,9,49.92,452.37,Premium,One year,Mailed check,0,4,840.5,No
+C-10146,4,109.25,429.51,Premium Plus,Month-to-month,Bank transfer,0,1,64.3,Yes
+C-10147,19,55.45,1055.06,Basic,One year,Mailed check,0,6,164.0,Yes
+C-10148,97,35.56,3402.58,Premium,Month-to-month,Mailed check,0,8,741.7,No
+C-10149,10,85.63,813.98,Premium Plus,Month-to-month,Mailed check,0,1,219.2,No
+C-10150,2,59.45,118.65,Premium,Month-to-month,Bank transfer,0,1,413.7,Yes
+C-10151,118,91.43,11158.86,Premium,One year,Credit card,0,2,152.2,No
+C-10152,7,32.61,218.04,Premium,Two year,Bank transfer,0,6,880.2,No
+C-10153,4,68.02,275.28,Premium,One year,Mailed check,0,3,296.2,Yes
+C-10154,9,119.43,1097.06,Standard,Two year,Electronic check,1,8,573.3,Yes
+C-10155,34,82.89,2754.53,Standard,Month-to-month,Mailed check,0,2,418.1,Yes
+C-10156,26,106.44,2900.31,Premium Plus,One year,Mailed check,0,5,417.9,No
+C-10157,5,62.71,327.44,Basic,One year,Credit card,0,3,328.7,Yes
+C-10158,2,24.09,48.05,Basic,Two year,Electronic check,0,6,215.3,Yes
+C-10159,108,53.43,5926.51,Basic,Month-to-month,Mailed check,0,5,362.9,No
+C-10160,72,97.88,6965.65,Premium,Month-to-month,Electronic check,0,2,588.8,Yes
+C-10161,7,78.66,527.21,Standard,Month-to-month,Bank transfer,0,4,669.3,No
+C-10162,33,92.08,2963.44,Basic,Month-to-month,Bank transfer,0,5,436.7,No
+C-10163,10,26.77,254.9,Premium Plus,Two year,Bank transfer,1,2,303.3,No
+C-10164,6,39.02,245.16,Premium Plus,One year,Mailed check,0,7,690.6,No
+C-10165,90,97.94,8514.91,Premium Plus,Two year,Mailed check,0,0,798.5,Yes
+C-10166,113,90.78,10020.68,Premium,One year,Electronic check,1,2,248.1,No
+C-10167,29,23.91,713.54,Standard,One year,Mailed check,1,3,509.1,No
+C-10168,6,54.75,330.12,Premium,One year,Mailed check,0,6,814.6,No
+C-10169,42,118.53,4817.33,Basic,One year,Electronic check,0,8,612.1,No
+C-10170,12,94.58,1146.8,Premium Plus,Two year,Mailed check,0,7,245.3,No
+C-10171,40,78.17,3106.13,Premium Plus,Month-to-month,Mailed check,0,7,138.7,No
+C-10172,20,38.5,745.39,Standard,Month-to-month,Bank transfer,0,0,320.5,No
+C-10173,19,88.74,1678.48,Standard,Month-to-month,Credit card,0,1,668.4,Yes
+C-10174,24,95.04,2192.01,Basic,Two year,Electronic check,0,0,171.0,No
+C-10175,9,34.26,315.62,Basic,Month-to-month,Bank transfer,1,1,230.0,Yes
+C-10176,115,109.24,12004.66,Standard,One year,Bank transfer,0,8,163.4,Yes
+C-10177,1,74.46,70.75,Basic,Two year,Mailed check,1,0,250.4,Yes
+C-10178,77,55.33,4339.98,Premium,Month-to-month,Electronic check,1,7,202.4,No
+C-10179,8,30.17,237.99,Premium,One year,Electronic check,0,0,567.8,Yes
+C-10180,19,73.05,1413.93,Standard,Two year,Bank transfer,0,5,795.3,No
+C-10181,44,86.17,3928.62,Premium,Two year,Mailed check,0,2,329.0,No
+C-10182,87,92.13,8197.02,Premium Plus,Month-to-month,Mailed check,0,1,331.4,Yes
+C-10183,15,96.75,1519.87,Premium,One year,Bank transfer,0,2,733.8,No
+C-10184,31,61.87,1979.61,Premium Plus,Two year,Credit card,0,1,548.0,No
+C-10185,89,77.79,6717.88,Standard,Two year,Electronic check,0,5,529.0,No
+C-10186,14,25.96,375.03,Premium,One year,Bank transfer,1,7,181.1,No
+C-10187,80,41.07,3349.93,Standard,Month-to-month,Mailed check,0,6,675.8,Yes
+C-10188,84,25.41,2154.49,Basic,Two year,Mailed check,0,0,183.4,No
+C-10189,14,44.5,639.54,Basic,Two year,Credit card,1,2,688.4,No
+C-10190,44,61.15,2633.23,Premium,One year,Mailed check,0,0,800.2,No
+C-10191,5,95.11,496.87,Standard,Month-to-month,Credit card,0,8,657.6,Yes
+C-10192,46,70.19,3096.99,Standard,One year,Credit card,1,2,684.2,No
+C-10193,92,25.6,2379.95,Premium Plus,Month-to-month,Electronic check,1,7,461.0,No
+C-10194,85,36.48,2978.13,Premium,Two year,Bank transfer,0,5,83.6,No
+C-10195,39,74.16,2837.03,Basic,Month-to-month,Mailed check,0,0,261.9,No
+C-10196,11,76.48,825.18,Premium Plus,Month-to-month,Bank transfer,0,4,865.3,Yes
+C-10197,30,95.18,2828.93,Premium,Month-to-month,Electronic check,0,8,738.3,Yes
+C-10198,13,78.72,1001.88,Premium Plus,One year,Mailed check,0,7,126.2,No
+C-10199,12,43.16,500.36,Standard,Two year,Bank transfer,0,7,719.7,No
+C-10200,58,56.03,3213.22,Premium Plus,Month-to-month,Mailed check,1,1,864.7,No
+C-10201,100,100.47,10329.77,Standard,One year,Electronic check,0,7,139.1,No
+C-10202,54,113.41,5872.58,Standard,Month-to-month,Mailed check,0,7,276.7,Yes
+C-10203,105,96.31,10589.54,Premium Plus,Two year,Credit card,1,0,365.3,No
+C-10204,43,60.9,2737.08,Standard,One year,Bank transfer,0,1,633.0,No
+C-10205,105,107.74,11641.44,Basic,Two year,Electronic check,1,2,776.6,Yes
+C-10206,43,35.82,1566.31,Premium Plus,Month-to-month,Bank transfer,0,7,453.5,No
+C-10207,100,28.58,2809.05,Basic,One year,Bank transfer,0,5,897.0,No
+C-10208,103,90.23,8973.75,Premium Plus,Month-to-month,Credit card,0,2,597.8,Yes
+C-10209,67,23.13,1538.88,Premium Plus,Month-to-month,Credit card,1,3,105.4,No
+C-10210,6,62.29,365.29,Premium,Two year,Electronic check,0,4,794.0,Yes
+C-10211,110,72.48,8293.02,Premium,Month-to-month,Bank transfer,1,4,198.2,Yes
+C-10212,62,68.16,4255.64,Standard,Two year,Electronic check,0,8,717.8,No
+C-10213,26,92.27,2455.24,Standard,One year,Bank transfer,0,0,186.4,No
+C-10214,101,69.94,6896.39,Premium,Month-to-month,Electronic check,0,7,852.4,No
+C-10215,23,64.93,1481.47,Basic,Month-to-month,Mailed check,0,6,241.6,No
+C-10216,28,117.17,3410.89,Basic,One year,Electronic check,1,7,605.1,Yes
+C-10217,110,61.04,6604.17,Premium,Two year,Mailed check,0,7,419.8,No
+C-10218,21,79.49,1699.38,Premium Plus,One year,Bank transfer,0,1,896.1,No
+C-10219,7,84.96,620.13,Premium Plus,Month-to-month,Electronic check,0,7,482.8,No
+C-10220,6,48.99,290.44,Premium Plus,Month-to-month,Mailed check,0,7,858.5,Yes
+C-10221,63,61.29,3864.19,Premium Plus,Month-to-month,Bank transfer,1,4,318.2,No
+C-10222,94,44.16,4098.91,Premium Plus,Month-to-month,Bank transfer,0,5,203.1,Yes
+C-10223,80,75.57,5774.5,Premium Plus,Month-to-month,Credit card,0,2,849.1,Yes
+C-10224,96,37.37,3662.87,Premium,Two year,Mailed check,0,8,159.4,No
+C-10225,93,111.67,10320.32,Standard,One year,Mailed check,0,0,579.2,Yes
+C-10226,11,58.24,620.56,Standard,One year,Mailed check,0,4,222.8,No
+C-10227,36,98.0,3681.46,Premium Plus,One year,Electronic check,0,1,153.2,Yes
+C-10228,7,34.18,235.94,Premium,Month-to-month,Mailed check,0,6,144.6,Yes
+C-10229,4,27.36,107.4,Basic,Month-to-month,Credit card,0,2,211.0,Yes
+C-10230,2,85.97,171.66,Basic,Month-to-month,Electronic check,1,2,498.3,No
+C-10231,38,39.28,1440.75,Basic,Two year,Bank transfer,0,1,814.8,No
+C-10232,3,33.86,99.28,Basic,Two year,Mailed check,0,1,352.8,Yes
+C-10233,44,94.52,4031.22,Premium Plus,One year,Mailed check,0,3,637.1,No
+C-10234,43,30.29,1300.89,Premium,Month-to-month,Credit card,0,6,560.9,No
+C-10235,42,82.29,3593.7,Premium Plus,One year,Electronic check,0,7,200.5,No
+C-10236,5,45.31,236.75,Premium Plus,One year,Bank transfer,0,6,85.1,No
+C-10237,18,62.94,1118.38,Standard,One year,Mailed check,0,5,162.7,Yes
+C-10238,71,21.09,1557.1,Premium,Month-to-month,Electronic check,0,6,298.2,No
+C-10239,33,41.75,1427.34,Premium,Two year,Electronic check,0,6,633.0,No
+C-10240,83,101.34,8030.02,Standard,Month-to-month,Bank transfer,0,6,160.2,No
+C-10241,102,80.14,8291.72,Premium Plus,Month-to-month,Electronic check,0,7,298.9,Yes
+C-10242,74,109.58,7780.61,Basic,One year,Credit card,0,4,290.7,Yes
+C-10243,61,27.98,1740.31,Premium,One year,Credit card,0,7,772.9,No
+C-10244,9,113.77,986.94,Basic,Month-to-month,Bank transfer,0,6,250.1,No
+C-10245,8,92.41,766.49,Premium,Two year,Bank transfer,1,0,153.1,No
+C-10246,38,46.37,1776.76,Premium Plus,One year,Electronic check,0,2,328.2,No
+C-10247,22,108.78,2399.76,Premium Plus,Two year,Credit card,0,7,880.1,Yes
+C-10248,72,68.27,4843.19,Basic,One year,Mailed check,0,3,643.8,No
+C-10249,10,26.03,252.18,Basic,Two year,Electronic check,0,5,235.3,No
+C-10250,58,90.85,5488.87,Standard,Two year,Credit card,0,7,789.0,Yes
+C-10251,31,38.8,1247.28,Premium,One year,Electronic check,0,2,447.2,No
+C-10252,12,31.02,378.27,Basic,One year,Credit card,0,5,283.1,Yes
+C-10253,9,63.15,542.95,Standard,One year,Bank transfer,0,5,142.2,No
+C-10254,96,112.8,10586.15,Standard,One year,Credit card,0,8,424.2,Yes
+C-10255,6,44.89,271.37,Basic,Month-to-month,Mailed check,0,1,507.0,No
+C-10256,40,108.26,4470.73,Premium Plus,One year,Bank transfer,0,7,232.8,Yes
+C-10257,30,83.69,2613.08,Premium,Two year,Credit card,0,4,776.2,Yes
+C-10258,27,51.51,1340.96,Basic,Month-to-month,Electronic check,0,7,419.5,No
+C-10259,2,117.44,237.09,Basic,Month-to-month,Credit card,0,0,470.2,No
+C-10260,32,30.94,963.18,Basic,Two year,Mailed check,0,2,711.2,No
+C-10261,9,100.39,907.64,Premium,One year,Credit card,0,4,366.0,Yes
+C-10262,3,50.11,156.38,Premium,Two year,Credit card,0,1,286.7,No
+C-10263,2,117.86,224.66,Standard,Two year,Credit card,1,5,233.3,Yes
+C-10264,8,112.06,907.86,Premium Plus,Two year,Credit card,0,8,207.0,Yes
+C-10265,59,59.1,3493.9,Premium Plus,One year,Bank transfer,0,1,424.1,Yes
+C-10266,115,116.82,14008.26,Premium,One year,Mailed check,0,7,632.0,Yes
+C-10267,46,75.81,3415.68,Standard,One year,Credit card,0,0,242.6,Yes
+C-10268,7,68.84,460.19,Basic,One year,Mailed check,0,5,798.1,No
+C-10269,14,91.32,1224.88,Standard,Two year,Mailed check,0,0,457.5,No
+C-10270,56,101.17,5888.19,Premium Plus,One year,Bank transfer,0,4,205.6,No
+C-10271,94,107.59,10028.82,Standard,Two year,Mailed check,0,4,316.2,Yes
+C-10272,46,112.71,5357.75,Premium Plus,Two year,Electronic check,0,2,502.3,No
+C-10273,65,113.49,7717.25,Premium,One year,Credit card,0,0,826.5,No
+C-10274,4,28.84,116.29,Standard,Two year,Bank transfer,1,2,581.5,No
+C-10275,37,95.53,3643.29,Premium Plus,Month-to-month,Credit card,0,0,131.1,Yes
+C-10276,47,30.7,1495.47,Basic,One year,Electronic check,0,8,681.1,No
+C-10277,6,40.51,236.34,Standard,Two year,Mailed check,0,4,587.7,No
+C-10278,4,82.37,342.0,Standard,Month-to-month,Electronic check,0,3,231.6,Yes
+C-10279,97,103.27,9921.58,Premium Plus,One year,Mailed check,0,3,767.0,Yes
+C-10280,46,88.13,3908.72,Basic,One year,Mailed check,0,2,489.7,Yes
+C-10281,32,68.05,2148.71,Premium,Two year,Bank transfer,0,6,384.1,No
+C-10282,10,61.69,620.86,Premium Plus,Month-to-month,Electronic check,0,4,88.6,Yes
+C-10283,98,110.81,10617.11,Premium,Month-to-month,Mailed check,0,5,480.5,No
+C-10284,30,110.26,3258.8,Premium Plus,Two year,Bank transfer,0,7,660.8,No
+C-10285,17,98.5,1671.78,Premium,One year,Credit card,0,2,543.9,No
+C-10286,39,89.78,3342.08,Premium,Two year,Mailed check,0,3,141.1,No
+C-10287,10,113.42,1169.2,Premium Plus,One year,Mailed check,0,1,815.8,No
+C-10288,24,109.25,2500.71,Premium Plus,Month-to-month,Electronic check,0,7,701.2,Yes
+C-10289,2,52.12,104.83,Premium Plus,One year,Mailed check,0,4,472.5,No
+C-10290,40,40.12,1555.42,Standard,One year,Electronic check,1,1,231.0,No
+C-10291,13,55.96,704.59,Premium Plus,Two year,Credit card,0,3,759.2,Yes
+C-10292,113,55.21,6472.04,Standard,Month-to-month,Electronic check,0,2,717.2,No
+C-10293,38,31.79,1174.68,Standard,Month-to-month,Bank transfer,0,4,388.0,Yes
+C-10294,51,107.24,5662.41,Standard,One year,Bank transfer,0,6,579.7,No
+C-10295,11,67.1,720.45,Premium,Two year,Bank transfer,0,0,177.0,Yes
+C-10296,70,111.23,7835.82,Basic,Month-to-month,Electronic check,0,5,884.1,No
+C-10297,92,93.93,8834.55,Basic,Two year,Electronic check,0,0,477.1,Yes
+C-10298,35,55.03,1873.61,Premium Plus,One year,Electronic check,0,0,709.8,No
+C-10299,33,80.81,2661.98,Premium Plus,Two year,Credit card,0,6,644.2,Yes
+C-10300,95,62.68,6241.93,Standard,Month-to-month,Bank transfer,0,5,222.7,No
+C-10301,74,43.82,3324.58,Basic,Two year,Electronic check,0,0,793.5,No
+C-10302,25,27.66,681.1,Standard,One year,Mailed check,0,4,169.0,Yes
+C-10303,88,85.76,7543.05,Basic,Month-to-month,Bank transfer,0,3,432.6,No
+C-10304,42,98.02,4042.27,Premium,Two year,Electronic check,0,0,351.2,No
+C-10305,95,115.06,11303.9,Premium Plus,One year,Mailed check,0,4,683.2,No
+C-10306,26,57.24,1510.55,Standard,Month-to-month,Credit card,1,1,77.9,No
+C-10307,3,47.8,140.23,Premium Plus,One year,Credit card,1,7,75.8,Yes
+C-10308,85,64.4,5491.79,Standard,Month-to-month,Bank transfer,0,0,514.9,No
+C-10309,49,111.01,5579.42,Premium,One year,Bank transfer,1,6,787.2,No
+C-10310,1,75.33,75.84,Premium,Two year,Bank transfer,0,2,866.7,No
+C-10311,120,119.26,14572.52,Standard,Month-to-month,Bank transfer,1,1,899.0,Yes
+C-10312,42,77.11,3157.82,Basic,Two year,Electronic check,0,1,317.8,No
+C-10313,57,104.76,5694.85,Premium Plus,One year,Bank transfer,0,7,595.7,Yes
+C-10314,31,25.86,838.0,Basic,One year,Credit card,1,2,276.7,No
+C-10315,41,106.91,4435.01,Standard,Month-to-month,Electronic check,0,3,156.1,Yes
+C-10316,2,88.44,172.07,Premium Plus,Two year,Bank transfer,0,4,73.5,No
+C-10317,66,91.83,5826.34,Standard,One year,Electronic check,0,3,231.4,No
+C-10318,70,61.6,4436.26,Premium Plus,One year,Bank transfer,0,6,813.8,No
+C-10319,64,114.25,7159.09,Premium,Two year,Mailed check,0,0,149.2,No
+C-10320,30,71.08,2165.89,Premium,Month-to-month,Mailed check,0,6,700.6,No
+C-10321,7,115.86,814.93,Standard,Two year,Credit card,0,8,675.8,No
+C-10322,5,67.23,329.19,Premium Plus,One year,Mailed check,0,5,264.2,No
+C-10323,56,65.58,3812.12,Basic,Two year,Bank transfer,0,1,355.7,No
+C-10324,9,85.33,793.15,Standard,One year,Mailed check,0,8,265.8,Yes
+C-10325,94,78.48,7239.79,Standard,Two year,Electronic check,0,6,413.7,No
+C-10326,22,69.42,1469.33,Standard,Month-to-month,Bank transfer,1,8,657.6,Yes
+C-10327,120,30.1,3457.77,Basic,One year,Credit card,0,6,357.7,Yes
+C-10328,95,75.69,7073.09,Premium,Month-to-month,Electronic check,0,0,122.0,No
+C-10329,63,111.07,6981.39,Premium Plus,Two year,Mailed check,1,2,667.9,Yes
+C-10330,8,109.56,871.1,Premium,Two year,Bank transfer,0,1,255.1,Yes
+C-10331,107,24.83,2571.37,Premium Plus,One year,Mailed check,0,0,743.7,No
+C-10332,31,71.91,2181.92,Premium,Month-to-month,Credit card,0,7,247.9,Yes
+C-10333,17,113.92,1968.87,Premium,Two year,Mailed check,0,1,233.7,No
+C-10334,13,79.84,1036.71,Basic,Two year,Electronic check,0,5,230.6,Yes
+C-10335,96,64.48,6317.8,Standard,One year,Electronic check,0,7,806.7,Yes
+C-10336,105,28.69,2968.38,Standard,One year,Electronic check,0,3,671.0,Yes
+C-10337,54,70.71,3924.13,Premium,One year,Bank transfer,0,0,424.0,No
+C-10338,55,104.14,5777.15,Basic,Two year,Mailed check,0,3,282.8,Yes
+C-10339,20,101.39,1944.4,Premium Plus,One year,Mailed check,0,0,424.8,No
+C-10340,114,81.12,9136.98,Standard,Month-to-month,Mailed check,0,5,466.8,Yes
+C-10341,17,104.07,1750.12,Premium,Two year,Bank transfer,0,8,464.0,No
+C-10342,8,31.24,253.98,Premium,One year,Electronic check,1,2,450.4,Yes
+C-10343,70,31.35,2269.14,Premium Plus,Two year,Credit card,0,6,637.3,No
+C-10344,3,46.79,137.02,Standard,One year,Bank transfer,0,6,388.8,No
+C-10345,110,59.87,6675.44,Basic,One year,Electronic check,0,4,436.0,Yes
+C-10346,34,107.56,3697.54,Standard,Two year,Mailed check,0,8,76.7,No
+C-10347,4,29.03,117.92,Premium,One year,Mailed check,0,5,509.8,No
+C-10348,21,59.55,1229.48,Standard,One year,Mailed check,1,8,676.0,No
+C-10349,1,104.55,100.96,Basic,Two year,Bank transfer,0,0,253.2,Yes
+C-10350,25,47.25,1209.66,Basic,One year,Bank transfer,0,1,124.3,Yes
+C-10351,73,21.47,1519.39,Standard,Month-to-month,Bank transfer,0,5,417.1,No
+C-10352,3,47.4,141.79,Standard,Month-to-month,Bank transfer,0,6,138.2,No
+C-10353,90,47.86,4099.44,Premium,Two year,Credit card,0,6,859.2,No
+C-10354,10,42.41,423.12,Basic,One year,Electronic check,0,4,339.2,No
+C-10355,7,76.09,527.47,Standard,One year,Credit card,0,8,667.3,Yes
+C-10356,25,96.74,2334.0,Premium,One year,Bank transfer,0,6,792.0,No
+C-10357,48,40.92,1912.25,Premium Plus,Two year,Credit card,0,7,492.1,No
+C-10358,7,62.57,438.86,Basic,One year,Electronic check,0,2,225.8,Yes
+C-10359,7,108.55,732.49,Premium Plus,Month-to-month,Credit card,0,6,67.8,Yes
+C-10360,10,119.57,1203.33,Premium,Two year,Mailed check,0,2,303.8,No
+C-10361,34,115.2,3803.45,Premium,Two year,Bank transfer,0,2,198.0,No
+C-10362,97,51.77,4773.42,Standard,Month-to-month,Mailed check,0,3,643.0,No
+C-10363,107,29.47,3171.94,Premium Plus,Two year,Mailed check,0,5,588.2,No
+C-10364,29,48.42,1441.67,Premium Plus,Two year,Bank transfer,0,8,514.5,No
+C-10365,26,79.26,2073.88,Basic,Two year,Mailed check,0,8,553.3,Yes
+C-10366,83,77.57,6421.19,Premium,Two year,Mailed check,1,0,718.0,No
+C-10367,26,112.95,2884.82,Standard,Month-to-month,Electronic check,0,2,489.8,No
+C-10368,110,86.48,9570.01,Premium,One year,Credit card,0,6,653.2,Yes
+C-10369,58,103.86,5851.54,Premium,Two year,Mailed check,0,4,657.5,No
+C-10370,90,64.16,5862.22,Premium,Two year,Mailed check,0,0,787.6,No
+C-10371,118,54.6,6713.79,Premium Plus,Month-to-month,Mailed check,0,6,374.3,No
+C-10372,2,64.21,133.7,Standard,Month-to-month,Bank transfer,0,8,834.1,Yes
+C-10373,37,84.72,3057.23,Premium Plus,One year,Electronic check,0,0,785.1,No
+C-10374,116,83.22,9895.42,Premium Plus,Month-to-month,Electronic check,0,0,370.4,No
+C-10375,24,93.62,2147.13,Standard,Month-to-month,Electronic check,0,5,141.9,No
+C-10376,40,85.51,3357.63,Basic,One year,Mailed check,1,5,493.7,No
+C-10377,86,103.77,8609.65,Basic,Month-to-month,Bank transfer,0,1,205.0,No
+C-10378,3,80.85,253.25,Premium Plus,Month-to-month,Bank transfer,0,4,530.9,No
+C-10379,9,66.63,624.74,Basic,Two year,Mailed check,1,1,216.0,Yes
+C-10380,2,98.87,202.17,Standard,Two year,Mailed check,0,4,763.3,Yes
+C-10381,36,95.58,3330.09,Standard,One year,Mailed check,0,5,407.7,No
+C-10382,29,108.36,3014.36,Standard,One year,Bank transfer,0,5,353.0,No
+C-10383,117,88.7,10020.59,Standard,Month-to-month,Mailed check,1,6,351.4,No
+C-10384,40,54.22,2107.7,Premium,Month-to-month,Bank transfer,0,0,834.4,Yes
+C-10385,20,33.98,706.87,Premium,One year,Bank transfer,0,1,588.8,No
+C-10386,2,62.14,129.41,Premium,One year,Bank transfer,0,2,452.1,Yes
+C-10387,13,63.9,822.34,Premium Plus,Two year,Mailed check,0,4,667.6,No
+C-10388,64,87.86,5771.02,Premium,Month-to-month,Electronic check,1,6,417.8,No
+C-10389,46,60.08,2870.52,Basic,Month-to-month,Mailed check,0,2,169.1,No
+C-10390,50,117.03,5655.67,Premium,Month-to-month,Electronic check,1,2,228.3,Yes
+C-10391,17,50.75,882.09,Standard,Month-to-month,Mailed check,1,8,770.4,No
+C-10392,49,67.73,3384.74,Premium,Month-to-month,Credit card,0,6,758.3,No
+C-10393,26,58.76,1494.64,Premium,Month-to-month,Credit card,0,6,508.7,Yes
+C-10394,64,86.99,5419.91,Basic,Month-to-month,Bank transfer,1,5,481.2,Yes
+C-10395,5,79.92,387.13,Premium Plus,Month-to-month,Mailed check,0,4,425.7,Yes
+C-10396,61,85.4,5376.77,Premium Plus,Month-to-month,Electronic check,0,4,865.2,Yes
+C-10397,78,36.35,2901.27,Basic,One year,Credit card,1,0,195.1,No
+C-10398,22,70.7,1540.11,Premium Plus,Month-to-month,Electronic check,0,4,417.0,No
+C-10399,11,100.71,1089.54,Premium Plus,Two year,Bank transfer,0,1,719.8,Yes
+C-10400,90,95.96,8815.66,Basic,Month-to-month,Bank transfer,0,3,492.5,No
+C-10401,110,24.85,2697.17,Premium,Month-to-month,Bank transfer,0,4,417.6,No
+C-10402,37,74.27,2699.8,Standard,One year,Electronic check,0,1,360.1,Yes
+C-10403,5,93.87,479.99,Standard,Month-to-month,Credit card,0,6,809.9,Yes
+C-10404,63,88.9,5343.43,Standard,Two year,Bank transfer,1,5,92.2,No
+C-10405,10,71.26,707.08,Basic,One year,Electronic check,1,2,858.3,No
+C-10406,48,85.29,4122.94,Basic,One year,Bank transfer,1,8,512.9,No
+C-10407,36,99.9,3573.72,Premium,Two year,Mailed check,0,4,481.3,No
+C-10408,5,59.87,290.58,Standard,Two year,Credit card,0,2,290.8,Yes
+C-10409,116,99.03,11286.0,Premium,Month-to-month,Electronic check,0,4,671.7,Yes
+C-10410,115,62.08,6791.21,Premium,Two year,Bank transfer,0,5,350.9,No
+C-10411,101,66.19,6611.69,Premium Plus,Month-to-month,Credit card,0,0,615.0,Yes
+C-10412,12,68.65,813.02,Premium,Month-to-month,Bank transfer,0,5,439.3,No
+C-10413,97,35.59,3623.4,Standard,Two year,Electronic check,0,4,527.4,No
+C-10414,104,57.53,5741.99,Standard,One year,Mailed check,0,3,893.4,No
+C-10415,39,106.49,4119.13,Premium Plus,Two year,Bank transfer,0,5,707.2,No
+C-10416,12,108.48,1348.5,Premium,Two year,Credit card,0,7,300.5,No
+C-10417,102,112.39,11273.54,Standard,One year,Credit card,0,2,634.0,No
+C-10418,10,78.02,789.47,Premium Plus,One year,Mailed check,0,8,899.1,No
+C-10419,73,52.5,3675.74,Standard,Month-to-month,Bank transfer,0,0,684.1,No
+C-10420,90,71.13,6234.82,Standard,Month-to-month,Credit card,0,3,331.1,No
+C-10421,38,109.44,4201.66,Standard,Two year,Mailed check,0,2,877.2,Yes
+C-10422,11,103.79,1085.39,Standard,Month-to-month,Electronic check,0,6,788.3,No
+C-10423,109,27.04,3010.96,Premium Plus,One year,Electronic check,1,7,463.9,No
+C-10424,3,101.17,307.43,Basic,One year,Credit card,0,6,721.4,No
+C-10425,8,104.71,824.26,Basic,Two year,Mailed check,0,7,236.5,Yes
+C-10426,9,84.2,738.46,Basic,One year,Bank transfer,1,5,308.0,Yes
+C-10427,107,98.74,10184.86,Premium,Two year,Bank transfer,0,0,245.7,Yes
+C-10428,67,56.27,3820.57,Premium,One year,Credit card,1,7,625.6,Yes
+C-10429,24,100.52,2353.93,Standard,Month-to-month,Mailed check,0,0,774.8,No
+C-10430,39,78.42,3210.11,Premium,One year,Credit card,0,7,579.5,No
+C-10431,18,84.39,1516.78,Premium,Two year,Mailed check,0,8,464.9,No
+C-10432,109,21.42,2253.08,Basic,One year,Electronic check,0,3,359.5,No
+C-10433,115,111.27,12826.91,Basic,Two year,Mailed check,1,3,365.4,No
+C-10434,4,82.64,331.71,Premium,Two year,Electronic check,0,0,435.2,No
+C-10435,28,45.61,1242.39,Standard,Two year,Credit card,1,2,93.8,No
+C-10436,45,47.75,2235.37,Standard,Two year,Bank transfer,1,0,234.5,Yes
+C-10437,34,96.17,3122.99,Premium Plus,One year,Electronic check,0,3,461.8,No
+C-10438,99,67.6,6558.53,Basic,Two year,Electronic check,0,6,783.4,No
+C-10439,12,108.65,1298.1,Standard,Two year,Electronic check,1,4,693.8,No
+C-10440,44,83.11,3709.97,Premium,Two year,Bank transfer,0,8,269.2,No
+C-10441,47,76.13,3737.59,Premium,Two year,Credit card,0,0,328.1,No
+C-10442,112,36.31,4213.95,Basic,One year,Bank transfer,0,8,750.9,Yes
+C-10443,26,96.29,2511.15,Standard,One year,Electronic check,0,4,839.1,No
+C-10444,34,87.19,2867.16,Premium,Month-to-month,Mailed check,0,2,333.6,Yes
+C-10445,117,79.52,9277.77,Premium Plus,Two year,Bank transfer,0,5,181.8,No
+C-10446,72,55.39,4092.84,Premium,One year,Electronic check,0,6,106.5,No
+C-10447,84,84.58,7249.9,Standard,One year,Mailed check,0,4,307.6,Yes
+C-10448,49,52.18,2632.88,Premium Plus,One year,Credit card,0,4,149.7,No
+C-10449,27,52.55,1482.23,Premium Plus,Two year,Credit card,0,7,269.9,No
+C-10450,74,30.14,2182.24,Premium,One year,Credit card,0,2,799.9,No
+C-10451,9,117.72,1067.33,Premium Plus,Month-to-month,Electronic check,1,7,266.0,Yes
+C-10452,45,73.1,3147.39,Premium,Two year,Bank transfer,0,5,820.3,No
+C-10453,120,108.46,12797.86,Standard,One year,Bank transfer,0,4,567.0,No
+C-10454,2,31.92,60.95,Premium Plus,One year,Electronic check,0,8,373.7,No
+C-10455,74,115.98,8697.85,Premium,Two year,Electronic check,0,1,878.4,No
+C-10456,11,35.82,413.44,Basic,Two year,Electronic check,1,6,746.9,No
+C-10457,111,108.94,12183.3,Standard,Two year,Credit card,0,8,716.1,Yes
+C-10458,73,60.15,4175.15,Premium,Month-to-month,Bank transfer,0,6,186.4,Yes
+C-10459,34,87.45,3053.56,Premium,Two year,Bank transfer,0,2,218.6,No
+C-10460,16,50.85,776.13,Basic,Month-to-month,Mailed check,0,8,352.8,No
+C-10461,9,107.06,956.24,Standard,Two year,Bank transfer,0,3,846.5,Yes
+C-10462,30,22.73,678.08,Premium Plus,Month-to-month,Mailed check,1,6,101.3,No
+C-10463,109,39.86,4203.58,Premium Plus,Two year,Electronic check,1,2,695.5,Yes
+C-10464,10,94.06,913.35,Premium,Two year,Electronic check,1,8,362.3,Yes
+C-10465,45,31.2,1390.0,Premium Plus,Month-to-month,Electronic check,0,5,362.7,No
+C-10466,38,63.41,2444.18,Premium,Month-to-month,Credit card,1,7,73.3,Yes
+C-10467,48,84.74,4093.79,Premium,Month-to-month,Mailed check,0,8,190.8,Yes
+C-10468,98,26.12,2537.97,Standard,Two year,Mailed check,0,6,204.8,No
+C-10469,24,100.94,2340.77,Standard,One year,Credit card,1,3,317.1,Yes
+C-10470,57,82.19,4466.62,Basic,Month-to-month,Mailed check,0,6,99.1,No
+C-10471,92,92.25,8251.66,Standard,Month-to-month,Credit card,0,1,154.4,Yes
+C-10472,111,118.34,12479.9,Premium Plus,Month-to-month,Credit card,1,7,815.6,No
+C-10473,39,52.29,2037.84,Premium,Two year,Mailed check,0,2,244.2,Yes
+C-10474,15,42.56,663.1,Basic,Two year,Electronic check,0,3,250.0,No
+C-10475,24,85.94,2066.67,Premium,Two year,Bank transfer,1,2,335.5,No
+C-10476,70,34.52,2307.18,Basic,Two year,Mailed check,1,2,72.0,No
+C-10477,2,36.19,71.25,Premium,Month-to-month,Credit card,0,7,893.9,Yes
+C-10478,116,46.28,5376.26,Premium Plus,Month-to-month,Bank transfer,0,5,897.2,No
+C-10479,17,54.1,952.46,Premium Plus,Two year,Bank transfer,0,1,716.8,Yes
+C-10480,93,22.54,2014.71,Standard,Month-to-month,Bank transfer,0,2,793.6,No
+C-10481,44,63.62,2907.23,Basic,Two year,Mailed check,0,2,765.6,No
+C-10482,25,39.87,1032.63,Premium,Two year,Electronic check,0,8,364.6,Yes
+C-10483,36,114.72,4185.64,Standard,One year,Mailed check,0,2,514.3,No
+C-10484,79,47.84,3749.6,Premium Plus,One year,Credit card,0,7,330.4,No
+C-10485,37,27.49,1063.84,Premium,Month-to-month,Electronic check,1,6,177.9,No
+C-10486,102,96.46,9731.68,Standard,One year,Mailed check,0,3,760.8,No
+C-10487,8,116.34,953.03,Premium,Month-to-month,Mailed check,1,3,432.4,Yes
+C-10488,42,21.08,896.74,Basic,Two year,Credit card,0,3,614.8,Yes
+C-10489,38,74.13,2932.58,Premium Plus,Month-to-month,Bank transfer,0,4,857.6,No
+C-10490,4,103.8,401.43,Premium,Month-to-month,Credit card,0,4,248.7,Yes
+C-10491,7,119.76,866.55,Premium,Month-to-month,Credit card,1,6,107.6,Yes
+C-10492,9,104.23,953.73,Premium,One year,Bank transfer,0,5,129.8,Yes
+C-10493,12,100.6,1227.19,Standard,Two year,Electronic check,0,7,531.0,No
+C-10494,92,71.9,6809.01,Premium Plus,Month-to-month,Electronic check,0,1,158.7,No
+C-10495,30,78.01,2374.72,Premium Plus,One year,Credit card,0,7,541.6,Yes
+C-10496,4,101.32,392.34,Premium Plus,Two year,Bank transfer,1,1,305.5,Yes
+C-10497,73,92.91,7103.63,Premium,One year,Mailed check,1,4,434.6,No
+C-10498,3,65.82,198.39,Premium,Month-to-month,Bank transfer,0,6,692.8,No
+C-10499,20,105.66,2184.25,Premium,One year,Mailed check,0,5,756.1,No
+C-10500,12,29.04,357.42,Premium Plus,One year,Mailed check,0,4,779.0,No
+C-10501,108,53.7,5696.81,Premium Plus,One year,Electronic check,0,3,548.8,No
+C-10502,45,73.83,3186.31,Premium Plus,Two year,Credit card,0,4,182.4,Yes
+C-10503,66,55.38,3770.06,Standard,One year,Bank transfer,0,1,332.0,No
+C-10504,32,102.61,3128.0,Standard,Two year,Mailed check,0,3,266.1,No
+C-10505,32,84.79,2583.25,Standard,Month-to-month,Credit card,0,7,408.2,Yes
+C-10506,31,38.61,1183.4,Premium Plus,Two year,Bank transfer,0,5,734.9,No
+C-10507,43,57.02,2499.23,Standard,One year,Bank transfer,0,3,728.3,Yes
+C-10508,14,118.1,1670.61,Premium Plus,Two year,Bank transfer,0,8,749.7,No
+C-10509,32,46.91,1491.54,Basic,One year,Mailed check,0,0,530.4,No
+C-10510,3,67.66,207.42,Standard,Month-to-month,Bank transfer,0,0,659.4,Yes
+C-10511,110,90.42,9984.39,Standard,One year,Bank transfer,0,5,255.4,No
+C-10512,77,96.63,7629.85,Premium,Month-to-month,Electronic check,1,1,575.6,Yes
+C-10513,96,36.12,3637.29,Standard,Month-to-month,Mailed check,1,0,605.5,No
+C-10514,120,31.95,4006.16,Basic,Month-to-month,Credit card,1,6,380.3,No
+C-10515,101,104.73,10504.07,Standard,Month-to-month,Bank transfer,0,7,136.2,Yes
+C-10516,43,40.06,1765.96,Premium,Two year,Bank transfer,0,0,798.6,No
+C-10517,5,25.91,129.93,Premium,Month-to-month,Electronic check,0,5,383.2,No
+C-10518,5,76.34,369.55,Basic,Month-to-month,Mailed check,0,5,141.5,Yes
+C-10519,22,57.42,1222.5,Standard,One year,Mailed check,0,7,85.5,No
+C-10520,5,108.82,554.06,Basic,One year,Mailed check,1,1,478.0,Yes
+C-10521,22,112.0,2451.17,Premium Plus,Two year,Electronic check,0,8,115.0,No
+C-10522,30,34.14,978.99,Premium Plus,Month-to-month,Credit card,0,1,772.1,Yes
+C-10523,12,85.48,988.37,Premium Plus,Two year,Mailed check,0,4,853.2,No
+C-10524,85,63.51,5431.42,Basic,One year,Credit card,0,4,478.0,Yes
+C-10525,47,89.89,4261.78,Basic,Month-to-month,Mailed check,1,5,681.0,Yes
+C-10526,1,116.68,120.46,Premium Plus,Month-to-month,Credit card,0,8,500.1,Yes
+C-10527,21,57.08,1245.71,Basic,Month-to-month,Bank transfer,0,1,659.8,No
+C-10528,103,77.11,8092.75,Basic,Month-to-month,Bank transfer,1,0,819.7,Yes
+C-10529,54,118.71,6189.78,Standard,One year,Mailed check,1,4,800.8,No
+C-10530,94,77.05,7542.36,Premium,Month-to-month,Credit card,1,0,409.3,No
+C-10531,85,47.81,4142.09,Standard,One year,Electronic check,0,7,168.3,Yes
+C-10532,26,83.76,2108.8,Basic,Month-to-month,Bank transfer,1,2,852.5,No
+C-10533,47,91.5,4330.65,Premium Plus,One year,Electronic check,0,1,391.7,No
+C-10534,26,75.47,1956.13,Premium Plus,Month-to-month,Electronic check,0,1,252.1,No
+C-10535,78,28.36,2264.8,Basic,Month-to-month,Credit card,0,0,616.8,No
+C-10536,28,92.49,2682.82,Basic,Two year,Bank transfer,0,2,354.1,Yes
+C-10537,35,25.64,872.74,Premium Plus,Month-to-month,Mailed check,1,5,612.7,No
+C-10538,97,107.13,10039.44,Basic,Month-to-month,Bank transfer,0,0,153.5,Yes
+C-10539,10,71.8,705.19,Basic,Two year,Electronic check,0,2,817.3,No
+C-10540,25,58.12,1412.97,Basic,One year,Electronic check,0,8,122.1,Yes
+C-10541,115,84.48,9956.2,Premium,Two year,Credit card,0,4,349.9,No
+C-10542,112,111.94,12091.46,Standard,One year,Mailed check,0,6,899.3,No
+C-10543,18,94.0,1727.65,Premium Plus,One year,Mailed check,0,6,165.0,No
+C-10544,55,114.19,6564.56,Premium Plus,One year,Credit card,0,5,343.8,No
+C-10545,77,92.33,6892.29,Standard,Month-to-month,Bank transfer,0,7,520.5,Yes
+C-10546,84,84.4,7197.53,Standard,One year,Bank transfer,0,6,102.7,Yes
+C-10547,30,75.17,2183.01,Standard,Two year,Credit card,0,0,642.9,No
+C-10548,91,86.7,8001.13,Premium,Two year,Mailed check,0,2,405.5,No
+C-10549,104,106.8,11231.96,Standard,One year,Electronic check,0,1,721.0,No
+C-10550,7,20.87,151.96,Basic,One year,Mailed check,1,2,864.7,Yes
+C-10551,38,56.29,2104.5,Premium,Two year,Mailed check,1,4,314.7,No
+C-10552,15,36.33,548.31,Basic,Two year,Credit card,1,4,639.6,No
+C-10553,26,86.39,2331.55,Standard,One year,Credit card,0,6,460.6,Yes
+C-10554,5,88.81,461.55,Premium,One year,Credit card,0,5,803.9,Yes
+C-10555,9,26.89,233.53,Standard,Two year,Mailed check,0,5,305.6,Yes
+C-10556,9,80.28,758.05,Premium Plus,Month-to-month,Bank transfer,0,4,221.3,Yes
+C-10557,45,110.43,5043.59,Basic,One year,Bank transfer,0,4,437.1,Yes
+C-10558,83,24.05,1922.42,Premium Plus,Two year,Electronic check,0,0,314.3,No
+C-10559,32,58.0,1825.49,Basic,Two year,Credit card,0,6,654.1,No
+C-10560,18,91.91,1646.09,Standard,One year,Electronic check,0,5,783.6,Yes
+C-10561,7,101.08,683.08,Basic,Month-to-month,Mailed check,0,1,785.5,Yes
+C-10562,6,21.34,134.0,Premium,Two year,Credit card,0,5,720.4,No
+C-10563,11,32.2,343.06,Standard,Month-to-month,Electronic check,1,0,423.7,No
+C-10564,28,25.0,698.32,Basic,One year,Mailed check,0,7,568.6,No
+C-10565,20,48.81,944.56,Basic,One year,Mailed check,0,4,180.9,Yes
+C-10566,36,32.4,1223.78,Basic,Month-to-month,Mailed check,0,6,593.6,Yes
+C-10567,46,61.23,2882.89,Premium,Month-to-month,Electronic check,0,4,296.4,No
+C-10568,14,26.16,375.6,Premium Plus,One year,Credit card,1,1,626.2,Yes
+C-10569,97,117.72,11260.67,Basic,One year,Electronic check,0,4,670.8,No
+C-10570,63,55.81,3450.45,Premium Plus,One year,Mailed check,0,3,553.3,No
+C-10571,6,55.29,346.51,Premium Plus,One year,Credit card,0,7,789.7,No
+C-10572,111,35.27,4027.83,Premium Plus,One year,Credit card,1,2,395.5,No
+C-10573,4,99.14,380.49,Standard,Month-to-month,Credit card,0,7,185.9,Yes
+C-10574,55,22.17,1225.36,Premium Plus,Month-to-month,Mailed check,0,3,468.7,No
+C-10575,110,63.51,7308.47,Standard,One year,Electronic check,1,5,653.1,Yes
+C-10576,39,43.52,1664.69,Premium Plus,Month-to-month,Mailed check,0,5,589.6,Yes
+C-10577,92,32.18,3051.49,Standard,Two year,Mailed check,0,5,534.9,No
+C-10578,99,21.77,2195.81,Premium,One year,Bank transfer,0,7,720.9,No
+C-10579,67,99.38,6706.58,Standard,Month-to-month,Mailed check,1,3,743.2,No
+C-10580,32,76.33,2503.67,Basic,One year,Bank transfer,0,1,504.6,Yes
+C-10581,116,110.04,13136.45,Premium,Month-to-month,Bank transfer,0,2,365.6,No
+C-10582,4,44.66,179.75,Basic,One year,Bank transfer,0,5,467.1,No
+C-10583,68,108.32,7443.16,Standard,Two year,Bank transfer,0,0,677.8,No
+C-10584,33,99.88,3401.05,Premium,Month-to-month,Electronic check,0,4,279.2,Yes
+C-10585,17,22.53,401.89,Premium Plus,Month-to-month,Credit card,0,6,526.4,No
+C-10586,107,30.77,3277.03,Premium,One year,Mailed check,0,2,331.2,No
+C-10587,1,25.24,26.08,Premium,Two year,Credit card,0,8,81.4,Yes
+C-10588,93,52.39,4942.25,Standard,One year,Bank transfer,0,0,801.9,No
+C-10589,6,91.73,531.2,Standard,One year,Mailed check,0,3,137.2,Yes
+C-10590,60,53.82,3243.77,Premium Plus,One year,Credit card,0,6,643.5,No
+C-10591,8,64.85,528.32,Basic,One year,Electronic check,0,0,600.0,Yes
+C-10592,32,24.24,747.58,Standard,Month-to-month,Bank transfer,1,5,385.5,No
+C-10593,73,71.02,5140.36,Premium,One year,Electronic check,0,0,228.1,No
+C-10594,2,42.95,89.18,Premium Plus,Month-to-month,Mailed check,0,6,238.7,Yes
+C-10595,6,94.43,547.31,Premium,One year,Mailed check,0,4,341.0,Yes
+C-10596,57,59.26,3428.96,Premium,One year,Credit card,0,3,215.3,No
+C-10597,4,100.46,393.75,Standard,Month-to-month,Mailed check,0,4,363.2,No
+C-10598,6,82.61,481.6,Premium,Month-to-month,Mailed check,0,5,233.3,Yes
+C-10599,96,52.74,5053.0,Premium Plus,Two year,Bank transfer,0,3,125.2,No
+C-10600,7,105.27,722.41,Basic,Month-to-month,Credit card,1,2,141.7,No
+C-10601,55,84.58,4613.52,Premium Plus,Two year,Electronic check,1,4,707.2,Yes
+C-10602,9,34.18,321.54,Premium Plus,Month-to-month,Electronic check,0,7,206.6,No
+C-10603,7,92.48,616.45,Premium Plus,Two year,Credit card,0,1,674.4,Yes
+C-10604,16,26.52,422.86,Premium Plus,Month-to-month,Mailed check,0,0,544.5,No
+C-10605,6,26.3,162.56,Premium,Two year,Electronic check,0,4,869.1,No
+C-10606,28,88.97,2580.09,Basic,Two year,Credit card,0,3,661.1,No
+C-10607,3,56.4,167.06,Premium,One year,Bank transfer,1,8,514.2,No
+C-10608,72,83.93,6335.14,Premium Plus,Month-to-month,Bank transfer,0,2,744.0,Yes
+C-10609,118,74.23,8441.75,Premium,One year,Bank transfer,0,7,438.6,No
+C-10610,13,54.35,723.85,Standard,Two year,Mailed check,0,3,752.7,No
+C-10611,75,102.34,7733.42,Basic,Two year,Bank transfer,0,8,618.3,No
+C-10612,24,42.68,1054.73,Premium,One year,Credit card,0,8,611.8,No
+C-10613,80,77.7,6303.32,Premium Plus,Two year,Credit card,0,2,760.9,Yes
+C-10614,36,20.06,754.67,Basic,One year,Mailed check,0,6,314.4,Yes
+C-10615,33,83.82,2685.04,Standard,Month-to-month,Electronic check,0,1,272.9,Yes
+C-10616,10,114.49,1132.05,Premium Plus,Month-to-month,Mailed check,0,4,420.0,Yes
+C-10617,117,81.48,9361.21,Basic,Two year,Electronic check,0,4,648.5,Yes
+C-10618,90,96.98,9120.2,Premium Plus,Two year,Credit card,0,0,379.2,No
+C-10619,99,67.49,6769.24,Basic,Month-to-month,Electronic check,0,7,379.1,No
+C-10620,56,80.36,4591.98,Premium Plus,Month-to-month,Credit card,0,3,575.5,No
+C-10621,7,88.38,616.38,Basic,Two year,Credit card,0,8,609.1,Yes
+C-10622,3,78.57,227.76,Premium Plus,Month-to-month,Bank transfer,1,5,418.5,Yes
+C-10623,14,39.91,575.88,Premium Plus,Month-to-month,Mailed check,0,6,96.9,No
+C-10624,16,54.01,902.88,Premium Plus,Month-to-month,Electronic check,0,1,198.1,No
+C-10625,24,117.88,2809.31,Basic,One year,Bank transfer,0,8,149.3,No
+C-10626,98,47.89,4903.79,Premium Plus,Month-to-month,Bank transfer,0,7,397.1,Yes
+C-10627,27,32.1,862.03,Standard,Month-to-month,Bank transfer,0,8,280.9,No
+C-10628,12,38.55,446.29,Premium Plus,Month-to-month,Mailed check,0,6,69.4,Yes
+C-10629,5,98.81,469.79,Basic,Two year,Mailed check,0,5,833.4,No
+C-10630,103,38.87,3958.71,Premium Plus,One year,Electronic check,0,2,620.3,Yes
+C-10631,14,67.77,940.57,Basic,Two year,Bank transfer,0,3,755.5,No
+C-10632,74,95.24,7168.74,Basic,One year,Bank transfer,0,6,437.9,Yes
+C-10633,36,110.75,3949.73,Premium Plus,Two year,Mailed check,1,3,563.1,No
+C-10634,44,97.31,4103.88,Premium Plus,Two year,Mailed check,0,0,370.4,Yes
+C-10635,81,66.45,5608.15,Premium,One year,Credit card,1,8,469.7,No
+C-10636,20,53.71,1027.25,Premium Plus,One year,Bank transfer,0,4,794.8,No
+C-10637,30,112.68,3314.94,Premium,Month-to-month,Bank transfer,0,8,627.9,Yes
+C-10638,41,79.78,3359.27,Standard,Two year,Bank transfer,1,3,637.2,Yes
+C-10639,71,74.28,5101.64,Premium,Month-to-month,Bank transfer,0,3,232.8,No
+C-10640,54,108.73,5736.81,Premium Plus,One year,Credit card,0,8,346.8,No
+C-10641,46,27.21,1189.49,Basic,One year,Mailed check,1,4,839.4,No
+C-10642,114,78.36,8531.94,Premium,Two year,Credit card,0,7,560.0,Yes
+C-10643,110,58.69,6650.42,Basic,Month-to-month,Electronic check,0,0,771.6,Yes
+C-10644,38,74.85,2897.41,Premium,Month-to-month,Mailed check,0,0,808.7,No
+C-10645,1,31.14,31.51,Premium,One year,Bank transfer,0,8,357.0,Yes
+C-10646,27,22.3,595.07,Premium,Month-to-month,Electronic check,0,2,136.6,No
+C-10647,44,32.46,1380.49,Standard,One year,Mailed check,0,3,294.8,No
+C-10648,2,87.12,173.3,Premium Plus,Two year,Mailed check,1,1,771.7,No
+C-10649,95,64.41,6272.35,Standard,Two year,Electronic check,1,8,702.6,No
+C-10650,35,69.15,2393.12,Premium,One year,Credit card,0,3,373.3,No
+C-10651,11,103.69,1119.4,Premium Plus,Month-to-month,Credit card,0,4,269.0,Yes
+C-10652,40,57.94,2351.32,Premium Plus,Month-to-month,Electronic check,0,7,659.0,No
+C-10653,4,77.17,306.99,Premium,One year,Credit card,0,1,427.4,Yes
+C-10654,56,46.91,2649.42,Premium,One year,Mailed check,0,0,882.5,No
+C-10655,50,96.07,4897.32,Basic,Two year,Electronic check,1,4,126.6,Yes
+C-10656,44,34.9,1494.0,Standard,One year,Bank transfer,0,2,497.2,No
+C-10657,26,82.09,2218.63,Standard,One year,Mailed check,0,0,738.5,No
+C-10658,34,91.25,3113.03,Basic,Month-to-month,Credit card,0,8,699.1,No
+C-10659,15,73.37,1064.43,Standard,Month-to-month,Bank transfer,0,8,743.2,Yes
+C-10660,4,33.49,138.81,Basic,One year,Bank transfer,0,4,448.4,Yes
+C-10661,102,91.02,8882.11,Standard,Month-to-month,Credit card,0,2,60.5,No
+C-10662,113,99.88,11314.71,Premium Plus,Two year,Bank transfer,0,6,691.4,No
+C-10663,78,70.32,5539.7,Premium Plus,Month-to-month,Bank transfer,1,4,157.1,Yes
+C-10664,85,57.59,4658.25,Premium,Month-to-month,Credit card,0,2,437.9,Yes
+C-10665,23,99.38,2378.01,Premium Plus,Month-to-month,Bank transfer,0,7,395.4,No
+C-10666,108,108.24,12213.31,Premium Plus,Month-to-month,Electronic check,0,4,374.2,Yes
+C-10667,63,110.94,6998.0,Premium Plus,Month-to-month,Credit card,0,0,844.5,Yes
+C-10668,99,55.25,5738.92,Standard,One year,Mailed check,1,8,286.5,Yes
+C-10669,5,41.87,211.71,Premium,Month-to-month,Bank transfer,0,5,299.3,Yes
+C-10670,5,78.56,399.33,Premium Plus,One year,Electronic check,0,2,843.7,No
+C-10671,83,86.06,6887.41,Premium Plus,Two year,Mailed check,0,1,578.2,No
+C-10672,43,42.02,1792.11,Basic,One year,Mailed check,0,6,731.6,Yes
+C-10673,19,74.71,1470.43,Premium,Month-to-month,Bank transfer,0,7,721.1,Yes
+C-10674,32,111.51,3553.91,Standard,Two year,Bank transfer,0,5,774.5,Yes
+C-10675,46,75.86,3548.1,Premium,Two year,Bank transfer,0,3,250.0,No
+C-10676,4,68.34,286.79,Premium,Two year,Electronic check,0,4,733.4,No
+C-10677,38,102.41,4049.26,Standard,Month-to-month,Electronic check,1,8,484.9,Yes
+C-10678,96,59.99,5748.2,Premium,One year,Electronic check,0,5,837.9,Yes
+C-10679,4,60.59,238.33,Premium Plus,Month-to-month,Bank transfer,0,1,318.7,No
+C-10680,112,112.78,12296.77,Premium Plus,Two year,Mailed check,0,2,342.3,No
+C-10681,67,57.68,3674.61,Basic,Month-to-month,Credit card,0,7,813.1,No
+C-10682,13,20.21,259.23,Standard,Month-to-month,Bank transfer,0,1,94.0,No
+C-10683,42,30.0,1221.22,Basic,Month-to-month,Mailed check,0,6,752.3,No
+C-10684,100,46.73,4725.68,Premium,Two year,Mailed check,1,1,448.4,Yes
+C-10685,39,84.35,3135.71,Basic,One year,Bank transfer,0,2,643.7,No
+C-10686,108,115.17,12336.33,Premium,One year,Mailed check,0,4,619.7,No
+C-10687,28,66.13,1780.86,Standard,Month-to-month,Electronic check,0,7,165.9,No
+C-10688,9,97.04,865.49,Premium,Two year,Bank transfer,0,3,812.3,Yes
+C-10689,3,35.65,110.73,Standard,One year,Bank transfer,0,6,216.7,Yes
+C-10690,111,85.83,9827.98,Premium Plus,Two year,Credit card,1,5,864.8,No
+C-10691,13,106.92,1457.84,Standard,One year,Mailed check,0,0,802.7,No
+C-10692,33,80.39,2724.73,Premium,Month-to-month,Bank transfer,0,5,732.2,Yes
+C-10693,59,20.27,1217.5,Premium Plus,Two year,Bank transfer,0,8,388.2,Yes
+C-10694,31,96.97,2943.0,Basic,One year,Credit card,1,0,299.0,No
+C-10695,4,78.93,314.57,Basic,One year,Mailed check,1,5,761.2,Yes
+C-10696,32,46.47,1471.4,Basic,Month-to-month,Electronic check,0,8,252.5,No
+C-10697,32,43.9,1447.41,Basic,One year,Credit card,0,0,481.5,Yes
+C-10698,46,86.33,3886.82,Premium Plus,Two year,Electronic check,0,3,837.5,No
+C-10699,90,92.57,8272.56,Standard,Two year,Bank transfer,0,3,855.1,Yes
+C-10700,1,32.99,32.71,Premium,Month-to-month,Credit card,0,3,672.5,No
+C-10701,52,96.51,5088.29,Premium,One year,Electronic check,1,2,793.5,No
+C-10702,2,26.6,51.19,Premium,Month-to-month,Credit card,0,8,162.6,Yes
+C-10703,38,55.63,2123.52,Basic,One year,Bank transfer,0,0,825.2,No
+C-10704,7,36.23,245.85,Premium,Month-to-month,Bank transfer,0,0,345.8,No
+C-10705,86,30.36,2606.63,Premium Plus,Month-to-month,Electronic check,0,3,761.0,No
+C-10706,114,97.08,10560.21,Premium Plus,One year,Credit card,0,3,63.1,Yes
+C-10707,49,118.77,5533.07,Premium,Two year,Bank transfer,0,7,131.6,No
+C-10708,11,72.05,831.87,Basic,Two year,Bank transfer,0,1,585.0,No
+C-10709,6,51.71,321.39,Premium,Two year,Electronic check,1,4,618.5,Yes
+C-10710,24,45.83,1152.86,Premium Plus,Month-to-month,Bank transfer,0,1,478.6,No
+C-10711,43,22.27,922.89,Premium,One year,Electronic check,0,5,155.2,Yes
+C-10712,42,51.83,2085.18,Basic,Month-to-month,Electronic check,0,4,321.7,No
+C-10713,12,74.89,890.02,Premium,Two year,Electronic check,0,4,831.8,Yes
+C-10714,75,85.79,6723.14,Premium,Two year,Electronic check,0,1,808.8,Yes
+C-10715,4,100.95,421.55,Premium Plus,Two year,Mailed check,0,1,340.6,Yes
+C-10716,23,111.82,2630.69,Basic,Two year,Mailed check,1,2,679.8,No
+C-10717,31,20.53,616.54,Premium,Two year,Mailed check,0,0,421.0,No
+C-10718,79,102.5,8025.87,Premium,One year,Bank transfer,0,4,269.2,No
+C-10719,12,62.02,721.26,Premium Plus,Month-to-month,Bank transfer,1,2,544.4,No
+C-10720,12,44.88,551.01,Basic,Month-to-month,Credit card,1,2,870.8,No
+C-10721,38,77.46,2917.98,Standard,Two year,Bank transfer,0,3,435.5,No
+C-10722,24,84.8,2067.67,Basic,One year,Bank transfer,0,7,617.0,No
+C-10723,16,58.92,941.77,Standard,Two year,Bank transfer,1,6,101.1,No
+C-10724,4,66.36,257.58,Basic,Month-to-month,Electronic check,0,4,178.2,Yes
+C-10725,39,62.62,2463.3,Basic,One year,Bank transfer,0,4,601.2,No
+C-10726,103,88.84,9132.54,Premium,One year,Credit card,1,2,74.4,No
+C-10727,35,68.59,2306.98,Standard,Two year,Bank transfer,0,8,274.0,No
+C-10728,9,106.2,999.49,Premium,Two year,Electronic check,0,3,815.0,Yes
+C-10729,40,95.77,3696.38,Standard,Two year,Electronic check,0,5,705.5,No
+C-10730,91,54.13,5034.63,Premium Plus,Month-to-month,Credit card,0,4,644.7,No
+C-10731,46,39.95,1849.47,Premium Plus,Two year,Electronic check,1,6,456.4,No
+C-10732,28,52.47,1444.69,Premium,One year,Mailed check,0,6,864.3,No
+C-10733,6,27.63,165.23,Standard,Month-to-month,Electronic check,0,1,632.0,Yes
+C-10734,119,33.57,3799.76,Standard,Month-to-month,Credit card,0,1,892.7,Yes
+C-10735,103,29.35,3111.05,Standard,Two year,Mailed check,0,0,459.9,No
+C-10736,45,36.7,1636.94,Basic,One year,Bank transfer,1,1,134.5,No
+C-10737,34,47.77,1616.44,Premium Plus,Two year,Mailed check,0,0,680.7,No
+C-10738,6,47.53,276.04,Standard,Month-to-month,Mailed check,0,3,171.4,Yes
+C-10739,98,86.17,8792.78,Standard,Two year,Mailed check,0,5,586.8,Yes
+C-10740,47,63.18,2932.2,Basic,Month-to-month,Mailed check,0,6,151.2,Yes
+C-10741,16,27.32,422.53,Premium Plus,Month-to-month,Bank transfer,0,7,192.2,No
+C-10742,32,62.49,2084.91,Premium Plus,One year,Electronic check,0,3,400.9,No
+C-10743,90,66.49,6223.96,Basic,Two year,Mailed check,0,8,857.6,No
+C-10744,11,67.93,727.19,Standard,Month-to-month,Mailed check,0,3,822.7,Yes
+C-10745,8,73.9,577.08,Basic,One year,Mailed check,0,2,97.0,Yes
+C-10746,103,33.97,3542.59,Standard,Two year,Electronic check,0,6,665.6,No
+C-10747,12,96.01,1133.42,Premium Plus,Month-to-month,Electronic check,0,0,715.2,No
+C-10748,6,23.03,139.37,Premium,Month-to-month,Electronic check,0,3,463.9,No
+C-10749,10,98.36,993.92,Premium,Month-to-month,Mailed check,0,5,322.8,No
+C-10750,11,84.56,897.41,Premium,One year,Credit card,0,4,472.6,No
+C-10751,8,37.57,296.94,Premium,Two year,Electronic check,0,8,425.1,Yes
+C-10752,1,79.92,78.68,Basic,Two year,Bank transfer,0,1,363.6,Yes
+C-10753,45,35.0,1621.89,Premium Plus,Two year,Mailed check,0,5,370.4,No
+C-10754,3,51.01,156.31,Standard,Two year,Credit card,0,0,401.7,Yes
+C-10755,31,80.21,2554.23,Premium Plus,Two year,Mailed check,0,2,114.2,No
+C-10756,37,112.81,4197.26,Premium Plus,One year,Electronic check,1,4,585.5,Yes
+C-10757,47,37.74,1719.48,Premium Plus,One year,Mailed check,1,8,604.1,No
+C-10758,81,44.22,3508.45,Basic,Month-to-month,Mailed check,0,8,540.0,No
+C-10759,43,49.76,2060.62,Basic,Month-to-month,Credit card,1,3,147.4,No
+C-10760,38,66.2,2487.9,Basic,One year,Bank transfer,0,5,696.4,No
+C-10761,2,60.33,122.87,Standard,Two year,Bank transfer,0,3,865.7,Yes
+C-10762,6,28.46,167.18,Premium Plus,One year,Electronic check,0,3,673.9,Yes
+C-10763,56,75.61,4219.63,Standard,One year,Electronic check,0,5,91.5,No
+C-10764,3,43.88,127.62,Standard,Month-to-month,Bank transfer,1,5,802.1,No
+C-10765,10,92.85,924.3,Standard,Month-to-month,Credit card,0,1,517.3,No
+C-10766,28,79.33,2181.93,Standard,One year,Mailed check,0,0,801.2,No
+C-10767,6,27.68,173.75,Basic,Two year,Credit card,0,1,447.8,No
+C-10768,90,92.03,7890.57,Basic,Month-to-month,Electronic check,1,1,341.1,Yes
+C-10769,76,74.97,5775.68,Basic,Month-to-month,Credit card,0,4,672.6,Yes
+C-10770,12,110.79,1344.07,Basic,Two year,Bank transfer,0,2,804.1,No
+C-10771,9,80.37,695.04,Basic,Two year,Bank transfer,0,3,254.3,No
+C-10772,107,103.81,10727.43,Standard,One year,Mailed check,0,8,184.2,No
+C-10773,32,47.5,1449.55,Premium,One year,Bank transfer,0,2,496.5,No
+C-10774,96,24.29,2270.66,Premium,Two year,Credit card,0,6,425.7,No
+C-10775,5,89.37,425.31,Basic,Two year,Electronic check,0,3,794.9,No
+C-10776,5,108.49,559.71,Premium,One year,Electronic check,0,6,189.4,No
+C-10777,99,52.04,5025.24,Standard,Month-to-month,Bank transfer,1,5,103.7,No
+C-10778,89,75.03,6667.83,Premium Plus,Two year,Mailed check,0,3,886.5,No
+C-10779,41,94.97,3701.01,Basic,Month-to-month,Credit card,0,3,347.8,No
+C-10780,32,106.28,3358.21,Standard,One year,Electronic check,0,0,146.1,Yes
+C-10781,63,89.11,5890.8,Basic,Two year,Electronic check,1,4,300.0,No
+C-10782,13,91.47,1219.58,Premium Plus,One year,Credit card,0,6,790.4,Yes
+C-10783,45,84.17,3801.01,Premium Plus,Month-to-month,Bank transfer,1,6,594.9,Yes
+C-10784,27,53.04,1404.81,Basic,One year,Mailed check,0,2,808.1,No
+C-10785,8,103.92,825.53,Standard,One year,Electronic check,0,6,582.7,No
+C-10786,5,67.3,352.39,Premium Plus,Two year,Electronic check,0,7,206.1,No
+C-10787,29,76.17,2244.83,Standard,Two year,Bank transfer,0,3,814.8,No
+C-10788,23,109.71,2639.41,Basic,One year,Electronic check,1,2,817.9,No
+C-10789,83,22.99,1941.86,Standard,One year,Credit card,0,4,138.5,No
+C-10790,91,57.83,5007.26,Premium Plus,Two year,Credit card,0,6,142.5,No
+C-10791,16,100.72,1550.31,Premium,Two year,Mailed check,0,4,394.9,No
+C-10792,16,78.76,1304.85,Premium,Two year,Mailed check,0,7,692.0,No
+C-10793,1,86.77,82.97,Premium Plus,Two year,Electronic check,0,1,760.3,No
+C-10794,89,40.21,3694.48,Basic,Two year,Electronic check,0,0,854.1,No
+C-10795,89,25.6,2359.93,Premium,Month-to-month,Bank transfer,0,0,440.6,No
+C-10796,23,72.18,1698.32,Premium Plus,Two year,Mailed check,0,4,286.9,Yes
+C-10797,111,64.27,7097.6,Premium,One year,Mailed check,0,6,700.9,No
+C-10798,94,33.0,3178.27,Standard,One year,Credit card,0,7,835.2,No
+C-10799,2,76.54,155.75,Basic,One year,Bank transfer,0,1,875.0,No
+C-10800,28,65.39,1870.27,Basic,Month-to-month,Mailed check,1,3,349.6,Yes
+C-10801,76,66.72,5273.1,Basic,One year,Mailed check,0,1,126.0,No
+C-10802,13,57.98,766.53,Standard,One year,Mailed check,0,7,476.4,No
+C-10803,61,32.13,1920.09,Standard,One year,Bank transfer,0,0,669.8,No
+C-10804,22,52.3,1187.13,Standard,One year,Credit card,0,4,299.2,Yes
+C-10805,2,65.17,135.91,Premium,Month-to-month,Credit card,0,7,620.5,Yes
+C-10806,15,27.52,426.04,Standard,Two year,Mailed check,0,1,587.7,No
+C-10807,45,113.06,5255.47,Premium Plus,Month-to-month,Credit card,0,3,696.6,Yes
+C-10808,33,44.3,1435.36,Basic,Two year,Electronic check,0,5,252.3,No
+C-10809,120,22.29,2662.38,Premium Plus,One year,Electronic check,0,6,783.2,No
+C-10810,104,110.03,11489.6,Standard,Month-to-month,Electronic check,0,2,211.6,Yes
+C-10811,59,87.39,4905.86,Basic,One year,Bank transfer,0,8,890.7,No
+C-10812,12,46.49,582.26,Standard,Two year,Electronic check,0,2,335.0,No
+C-10813,87,95.5,8116.17,Basic,Two year,Credit card,0,8,302.6,No
+C-10814,2,32.69,66.63,Basic,One year,Mailed check,0,8,423.8,No
+C-10815,45,116.91,5384.81,Standard,One year,Electronic check,1,1,298.2,No
+C-10816,117,74.57,8599.87,Premium Plus,Month-to-month,Mailed check,0,3,812.0,No
+C-10817,87,59.05,4893.95,Standard,Two year,Credit card,0,4,379.6,No
+C-10818,11,26.35,291.07,Premium Plus,One year,Credit card,0,8,477.7,No
+C-10819,15,52.01,791.33,Standard,One year,Bank transfer,1,8,60.5,Yes
+C-10820,23,82.52,1808.74,Standard,One year,Bank transfer,0,6,380.0,No
+C-10821,70,65.66,4779.94,Basic,Month-to-month,Mailed check,0,5,776.1,Yes
+C-10822,41,38.26,1545.6,Premium Plus,One year,Bank transfer,0,2,596.2,No
+C-10823,23,73.27,1759.46,Premium,One year,Electronic check,1,5,400.1,Yes
+C-10824,38,88.45,3525.59,Premium,Month-to-month,Credit card,0,2,827.7,Yes
+C-10825,61,36.77,2286.62,Standard,One year,Bank transfer,1,8,570.7,No
+C-10826,52,42.36,2098.24,Basic,Two year,Credit card,0,8,280.8,No
+C-10827,90,52.44,4607.14,Premium,One year,Electronic check,0,3,317.6,No
+C-10828,12,109.39,1268.68,Basic,Month-to-month,Mailed check,1,8,759.7,No
+C-10829,67,43.6,2864.99,Basic,Month-to-month,Bank transfer,1,4,441.1,Yes
+C-10830,59,40.23,2305.8,Standard,Two year,Credit card,0,7,671.4,No
+C-10831,8,99.88,780.32,Premium Plus,One year,Mailed check,0,1,298.1,No
+C-10832,7,97.63,717.42,Standard,One year,Credit card,0,8,110.5,Yes
+C-10833,20,20.67,415.79,Premium,Month-to-month,Bank transfer,0,6,196.7,No
+C-10834,18,75.74,1400.53,Premium Plus,One year,Credit card,0,7,512.7,No
+C-10835,41,106.26,4567.15,Standard,One year,Bank transfer,0,8,591.0,No
+C-10836,84,99.66,8373.14,Premium,Two year,Bank transfer,1,1,872.8,No
+C-10837,83,22.54,1846.97,Basic,Month-to-month,Mailed check,0,3,121.1,No
+C-10838,27,84.27,2162.79,Basic,One year,Bank transfer,1,7,88.4,Yes
+C-10839,35,83.3,3017.87,Standard,Two year,Credit card,0,6,552.6,No
+C-10840,101,69.96,7024.32,Standard,One year,Bank transfer,0,6,185.8,No
+C-10841,2,56.63,108.39,Standard,One year,Mailed check,0,2,654.4,No
+C-10842,12,33.37,414.1,Basic,Month-to-month,Electronic check,0,4,584.2,Yes
+C-10843,4,93.83,362.56,Basic,Two year,Credit card,0,5,80.3,Yes
+C-10844,20,60.4,1256.3,Basic,Two year,Credit card,0,7,329.5,No
+C-10845,66,82.77,5704.35,Premium Plus,Month-to-month,Bank transfer,0,2,579.6,No
+C-10846,109,109.97,12429.08,Standard,Two year,Credit card,0,1,602.2,Yes
+C-10847,14,65.72,894.07,Standard,Month-to-month,Mailed check,0,0,333.7,No
+C-10848,15,77.66,1118.4,Standard,Two year,Credit card,0,5,612.1,Yes
+C-10849,12,50.32,595.61,Standard,Month-to-month,Mailed check,1,8,230.7,Yes
+C-10850,41,61.79,2630.29,Premium Plus,Two year,Mailed check,0,2,738.9,No
+C-10851,40,114.19,4774.55,Premium,One year,Credit card,1,1,211.6,No
+C-10852,116,102.49,11377.48,Premium Plus,Month-to-month,Electronic check,0,5,267.1,Yes
+C-10853,113,111.07,12333.62,Basic,Month-to-month,Mailed check,0,2,185.4,No
+C-10854,8,99.32,798.37,Premium Plus,Two year,Mailed check,0,0,802.0,No
+C-10855,45,68.89,3080.94,Premium Plus,Two year,Mailed check,0,5,620.6,No
+C-10856,54,43.68,2427.2,Premium Plus,Month-to-month,Electronic check,0,3,74.6,No
+C-10857,40,112.25,4314.66,Basic,Two year,Electronic check,1,5,761.6,No
+C-10858,16,107.2,1658.17,Basic,Month-to-month,Bank transfer,0,0,137.7,No
+C-10859,32,47.72,1451.44,Standard,Month-to-month,Credit card,0,7,129.4,Yes
+C-10860,99,80.87,8191.68,Basic,Month-to-month,Electronic check,0,3,192.2,No
+C-10861,110,66.66,7459.77,Standard,Month-to-month,Electronic check,0,1,381.4,No
+C-10862,8,111.33,858.22,Basic,Month-to-month,Bank transfer,0,8,698.4,Yes
+C-10863,28,112.55,3113.67,Standard,Month-to-month,Mailed check,0,8,71.3,Yes
+C-10864,20,85.06,1664.12,Premium,Two year,Electronic check,0,1,298.9,No
+C-10865,93,72.48,6494.36,Premium,Month-to-month,Bank transfer,0,6,168.2,Yes
+C-10866,36,104.69,3885.85,Premium,Two year,Electronic check,0,3,661.2,No
+C-10867,53,97.92,5165.75,Premium Plus,Month-to-month,Mailed check,0,4,220.2,Yes
+C-10868,66,52.66,3375.47,Premium,One year,Electronic check,0,4,850.9,No
+C-10869,13,34.08,428.06,Premium Plus,Month-to-month,Mailed check,0,8,475.7,No
+C-10870,2,79.91,158.72,Basic,One year,Electronic check,0,6,251.7,No
+C-10871,17,73.1,1200.27,Basic,One year,Electronic check,0,3,649.0,No
+C-10872,37,44.97,1648.17,Basic,Month-to-month,Credit card,0,7,369.6,No
+C-10873,46,26.49,1202.94,Premium Plus,Two year,Credit card,0,2,854.4,No
+C-10874,44,104.16,4374.11,Standard,One year,Electronic check,0,1,729.7,Yes
+C-10875,7,40.72,278.66,Premium Plus,Two year,Electronic check,0,7,196.0,No
+C-10876,5,21.31,102.8,Basic,Two year,Electronic check,0,1,878.3,No
+C-10877,4,28.44,113.33,Basic,One year,Mailed check,0,5,127.0,Yes
+C-10878,3,56.11,162.86,Premium,One year,Mailed check,0,0,74.6,No
+C-10879,78,54.89,4175.99,Premium,One year,Electronic check,0,3,161.2,No
+C-10880,3,39.9,124.72,Standard,Two year,Credit card,0,4,764.2,No
+C-10881,86,102.32,9090.51,Basic,One year,Credit card,0,0,87.0,No
+C-10882,43,61.48,2518.05,Basic,One year,Electronic check,1,1,102.5,No
+C-10883,118,66.74,7942.7,Premium,Month-to-month,Electronic check,0,4,542.3,No
+C-10884,56,86.77,4912.84,Basic,One year,Electronic check,0,4,603.1,Yes
+C-10885,109,98.33,10678.58,Premium Plus,Two year,Credit card,0,1,743.5,Yes
+C-10886,92,75.65,6681.11,Premium,Month-to-month,Mailed check,0,7,300.8,Yes
+C-10887,4,67.99,267.13,Premium,Month-to-month,Mailed check,0,3,679.1,Yes
+C-10888,46,76.85,3609.86,Basic,Two year,Bank transfer,0,2,802.1,Yes
+C-10889,13,41.43,557.13,Basic,Two year,Electronic check,0,1,405.0,No
+C-10890,23,86.54,1909.82,Basic,Two year,Electronic check,1,3,370.3,No
+C-10891,101,109.74,11125.31,Basic,One year,Bank transfer,1,8,85.7,No
+C-10892,11,112.81,1193.79,Premium,One year,Bank transfer,0,8,491.0,Yes
+C-10893,34,118.29,3845.59,Premium,One year,Electronic check,1,4,513.7,No
+C-10894,88,52.02,4387.84,Basic,Month-to-month,Credit card,1,1,702.3,Yes
+C-10895,8,71.09,549.69,Premium Plus,Two year,Credit card,1,8,819.2,Yes
+C-10896,20,92.62,1916.85,Premium Plus,Two year,Electronic check,1,4,96.2,No
+C-10897,56,91.34,5040.67,Premium,Month-to-month,Electronic check,0,7,815.7,Yes
+C-10898,27,68.75,1908.05,Standard,One year,Credit card,0,6,212.6,No
+C-10899,5,112.62,575.51,Premium,Two year,Credit card,0,0,283.1,Yes
+C-10900,39,26.48,995.78,Basic,Month-to-month,Bank transfer,0,3,753.4,Yes
+C-10901,81,74.26,6189.1,Standard,Month-to-month,Mailed check,0,4,509.1,No
+C-10902,34,24.11,791.16,Premium Plus,Month-to-month,Credit card,1,1,416.9,No
+C-10903,7,49.99,357.8,Standard,Month-to-month,Bank transfer,0,2,898.8,No
+C-10904,36,60.74,2077.4,Standard,Month-to-month,Mailed check,0,3,96.8,No
+C-10905,42,75.63,3024.6,Basic,One year,Mailed check,0,5,821.4,No
+C-10906,41,69.56,2894.82,Premium,Month-to-month,Mailed check,0,4,289.8,No
+C-10907,85,104.51,9103.23,Premium Plus,Two year,Mailed check,0,4,559.4,No
+C-10908,5,74.1,355.57,Basic,One year,Electronic check,0,7,287.5,No
+C-10909,8,103.97,835.58,Standard,One year,Mailed check,0,6,645.0,No
+C-10910,106,113.03,11490.31,Premium Plus,Two year,Bank transfer,0,4,882.3,No
+C-10911,1,32.41,33.53,Standard,Two year,Credit card,0,5,267.0,Yes
+C-10912,95,24.45,2375.75,Basic,Month-to-month,Mailed check,0,8,692.3,No
+C-10913,79,62.12,4711.18,Standard,One year,Bank transfer,1,5,372.8,No
+C-10914,4,68.55,268.75,Basic,Month-to-month,Mailed check,0,4,505.5,Yes
+C-10915,39,24.7,1002.12,Premium Plus,One year,Credit card,0,6,477.9,No
+C-10916,3,98.92,291.14,Premium,Month-to-month,Credit card,0,5,471.6,No
+C-10917,107,73.75,8102.74,Basic,Two year,Mailed check,0,3,716.3,No
+C-10918,4,33.09,136.11,Premium,One year,Mailed check,0,6,342.7,No
+C-10919,37,30.84,1090.15,Premium,Two year,Credit card,0,2,778.7,No
+C-10920,8,35.22,287.22,Standard,One year,Credit card,0,4,397.0,No
+C-10921,68,26.73,1905.52,Basic,Month-to-month,Electronic check,0,5,825.0,Yes
+C-10922,45,99.69,4502.58,Premium Plus,Month-to-month,Electronic check,0,7,554.6,No
+C-10923,88,91.1,8093.38,Standard,Month-to-month,Bank transfer,1,7,841.8,Yes
+C-10924,3,64.61,192.38,Premium Plus,One year,Mailed check,1,1,832.4,No
+C-10925,2,72.88,141.79,Standard,Two year,Bank transfer,0,6,787.8,Yes
+C-10926,4,75.41,291.83,Standard,One year,Mailed check,1,1,624.3,No
+C-10927,33,52.43,1690.11,Premium,One year,Electronic check,0,6,273.8,No
+C-10928,58,85.22,5130.61,Premium,Two year,Electronic check,0,2,853.4,Yes
+C-10929,24,118.47,2978.95,Premium,Two year,Electronic check,0,7,428.2,No
+C-10930,79,44.29,3495.16,Premium,Two year,Electronic check,0,3,788.8,No
+C-10931,94,36.97,3490.09,Basic,One year,Electronic check,0,6,868.3,Yes
+C-10932,3,52.9,166.3,Standard,Month-to-month,Bank transfer,0,8,482.6,No
+C-10933,17,82.41,1332.58,Standard,One year,Electronic check,1,8,118.1,No
+C-10934,87,67.42,5774.82,Premium,Two year,Mailed check,1,4,273.4,No
+C-10935,57,46.19,2596.4,Basic,Two year,Electronic check,0,7,566.3,No
+C-10936,32,90.46,3013.5,Basic,Month-to-month,Bank transfer,0,3,600.7,No
+C-10937,8,73.66,593.28,Premium,Two year,Credit card,0,8,492.2,No
+C-10938,24,79.89,1982.07,Premium,One year,Electronic check,0,4,765.4,No
+C-10939,17,57.68,984.53,Basic,Month-to-month,Credit card,1,4,207.0,No
+C-10940,16,103.16,1607.36,Standard,Two year,Electronic check,0,2,879.7,No
+C-10941,97,59.19,5952.1,Standard,Two year,Electronic check,0,8,836.3,Yes
+C-10942,15,32.11,457.67,Basic,Month-to-month,Electronic check,0,8,384.2,Yes
+C-10943,85,31.46,2772.46,Basic,Two year,Credit card,1,6,162.2,No
+C-10944,9,38.94,341.18,Premium Plus,Month-to-month,Bank transfer,0,5,605.9,No
+C-10945,11,71.03,802.15,Basic,One year,Mailed check,0,3,324.5,No
+C-10946,91,51.64,4931.66,Basic,Month-to-month,Credit card,0,6,829.4,No
+C-10947,3,101.74,303.31,Premium,One year,Electronic check,1,5,76.4,No
+C-10948,4,63.29,263.41,Premium Plus,One year,Credit card,0,5,311.2,Yes
+C-10949,12,29.03,342.23,Standard,One year,Credit card,0,4,708.8,No
+C-10950,98,72.28,7033.78,Basic,One year,Mailed check,0,4,525.3,No
+C-10951,90,92.56,7926.73,Premium Plus,Month-to-month,Mailed check,0,8,424.1,No
+C-10952,10,72.91,751.18,Premium Plus,Two year,Credit card,0,2,364.9,Yes
+C-10953,11,65.45,685.56,Premium Plus,Month-to-month,Electronic check,0,2,422.6,Yes
+C-10954,63,104.93,6645.82,Standard,One year,Electronic check,0,5,845.0,No
+C-10955,10,56.12,572.76,Premium,Month-to-month,Mailed check,0,7,309.3,Yes
+C-10956,14,29.66,411.2,Standard,One year,Mailed check,0,6,283.7,No
+C-10957,15,80.32,1150.99,Premium Plus,One year,Bank transfer,0,5,283.8,Yes
+C-10958,14,102.33,1480.61,Premium,Two year,Bank transfer,0,6,714.8,No
+C-10959,13,104.49,1403.26,Standard,Month-to-month,Electronic check,1,0,113.2,Yes
+C-10960,80,112.53,8706.83,Premium,One year,Mailed check,0,4,772.0,Yes
+C-10961,102,70.31,6854.93,Premium,Two year,Credit card,1,8,607.6,No
+C-10962,15,88.88,1276.2,Premium Plus,Month-to-month,Bank transfer,0,0,464.4,No
+C-10963,3,114.3,325.79,Basic,Month-to-month,Mailed check,0,7,804.2,Yes
+C-10964,12,28.62,351.82,Standard,One year,Mailed check,0,7,104.7,No
+C-10965,16,24.39,397.28,Premium Plus,Month-to-month,Electronic check,1,7,275.4,No
+C-10966,11,77.4,828.16,Premium,Two year,Mailed check,0,8,453.4,No
+C-10967,31,54.46,1673.64,Premium,One year,Electronic check,1,8,837.6,No
+C-10968,103,100.48,9905.16,Basic,Month-to-month,Bank transfer,1,5,98.1,No
+C-10969,66,86.4,5926.16,Premium Plus,Month-to-month,Mailed check,0,5,427.8,Yes
+C-10970,30,107.14,3141.24,Standard,One year,Credit card,0,0,686.1,No
+C-10971,103,78.83,8469.4,Standard,Two year,Mailed check,1,8,315.1,No
+C-10972,18,100.02,1875.08,Premium Plus,Two year,Electronic check,1,5,340.6,No
+C-10973,111,112.7,12325.11,Basic,One year,Bank transfer,0,6,193.9,No
+C-10974,24,102.47,2416.13,Basic,Two year,Electronic check,1,7,588.3,No
+C-10975,48,22.76,1048.79,Basic,Month-to-month,Credit card,0,1,564.9,Yes
+C-10976,2,52.85,100.99,Premium,Two year,Mailed check,1,2,592.4,No
+C-10977,95,82.1,7954.42,Standard,One year,Electronic check,1,2,898.5,No
+C-10978,12,33.52,396.5,Premium Plus,One year,Electronic check,0,0,192.6,No
+C-10979,95,111.9,10863.81,Basic,One year,Mailed check,0,5,872.0,Yes
+C-10980,44,83.37,3791.08,Premium,Month-to-month,Electronic check,0,7,651.5,Yes
+C-10981,20,79.5,1568.72,Basic,One year,Electronic check,0,3,619.8,No
+C-10982,7,20.97,153.69,Premium Plus,One year,Electronic check,1,3,639.6,No
+C-10983,7,47.74,334.4,Standard,Month-to-month,Bank transfer,1,1,120.5,Yes
+C-10984,47,81.34,3867.09,Basic,Month-to-month,Mailed check,1,8,361.7,Yes
+C-10985,30,88.6,2533.94,Premium,Month-to-month,Credit card,0,7,538.3,Yes
+C-10986,6,21.92,134.38,Premium Plus,Two year,Credit card,0,4,97.0,No
+C-10987,32,70.1,2174.52,Standard,Two year,Bank transfer,1,4,548.1,Yes
+C-10988,56,22.05,1277.59,Premium Plus,One year,Bank transfer,0,5,66.8,No
+C-10989,23,54.79,1236.62,Basic,Month-to-month,Mailed check,0,6,214.3,No
+C-10990,10,73.72,770.15,Standard,Two year,Mailed check,0,3,723.0,Yes
+C-10991,42,105.6,4231.11,Basic,Month-to-month,Credit card,0,0,359.2,Yes
+C-10992,6,96.43,600.94,Premium Plus,Two year,Electronic check,0,1,382.6,Yes
+C-10993,104,99.46,10835.46,Basic,One year,Credit card,1,5,693.6,No
+C-10994,107,105.72,11618.67,Standard,Month-to-month,Bank transfer,0,2,392.0,No
+C-10995,28,61.91,1710.95,Standard,Month-to-month,Mailed check,1,1,274.9,Yes
+C-10996,97,89.49,8941.95,Standard,Month-to-month,Mailed check,1,3,659.5,Yes
+C-10997,2,38.9,79.05,Standard,Month-to-month,Electronic check,0,5,821.8,Yes
+C-10998,11,77.29,815.71,Premium Plus,Two year,Electronic check,0,1,482.6,Yes
+C-10999,33,57.14,1932.69,Basic,Two year,Credit card,0,2,651.3,No
+C-11000,10,75.6,743.88,Basic,Two year,Mailed check,0,7,509.4,No
+C-11001,26,74.75,1959.41,Premium Plus,Two year,Mailed check,1,8,291.9,No
+C-11002,37,85.74,3014.15,Standard,Month-to-month,Mailed check,0,8,239.6,No
+C-11003,45,32.75,1437.2,Standard,Month-to-month,Bank transfer,0,4,469.3,Yes
+C-11004,47,41.14,1849.67,Standard,Two year,Bank transfer,1,3,648.9,No
+C-11005,24,82.73,1896.31,Basic,Month-to-month,Mailed check,0,3,776.0,Yes
+C-11006,24,63.89,1513.88,Premium,Month-to-month,Mailed check,0,0,814.7,Yes
+C-11007,21,29.35,585.71,Premium,Month-to-month,Electronic check,0,5,660.8,No
+C-11008,32,65.69,2109.91,Premium,One year,Mailed check,1,1,634.4,Yes
+C-11009,22,28.97,608.08,Basic,One year,Mailed check,0,8,243.3,No
+C-11010,3,44.79,129.68,Premium,Month-to-month,Electronic check,0,3,848.7,Yes
+C-11011,88,21.4,1971.49,Basic,One year,Credit card,0,6,446.8,No
+C-11012,4,43.39,171.72,Premium Plus,Month-to-month,Bank transfer,0,0,314.7,Yes
+C-11013,41,50.05,1989.74,Basic,One year,Bank transfer,1,3,662.5,No
+C-11014,84,20.85,1693.42,Premium Plus,Month-to-month,Mailed check,0,6,800.9,Yes
+C-11015,7,49.55,334.27,Standard,One year,Bank transfer,0,8,644.2,Yes
+C-11016,47,35.13,1666.65,Basic,Two year,Electronic check,0,6,183.9,No
+C-11017,36,51.11,1796.48,Basic,Two year,Mailed check,0,8,344.6,No
+C-11018,27,92.02,2451.16,Premium,One year,Electronic check,1,5,506.6,Yes
+C-11019,28,46.07,1235.61,Standard,Month-to-month,Bank transfer,1,8,479.6,Yes
+C-11020,3,118.01,350.15,Premium,One year,Bank transfer,1,7,337.9,No
+C-11021,109,78.68,8692.52,Premium,Two year,Mailed check,0,5,872.3,No
+C-11022,84,76.43,6597.91,Premium,One year,Credit card,0,1,422.0,No
+C-11023,39,27.91,1132.93,Premium,One year,Bank transfer,0,4,486.8,No
+C-11024,54,96.04,5124.59,Standard,One year,Bank transfer,0,7,212.6,No
+C-11025,25,65.32,1647.45,Premium,Month-to-month,Electronic check,0,4,212.5,No
+C-11026,9,25.26,233.99,Premium,Two year,Mailed check,0,6,745.9,Yes
+C-11027,42,108.61,4521.77,Standard,Two year,Credit card,1,3,147.6,No
+C-11028,1,73.42,76.5,Basic,One year,Mailed check,1,1,126.7,No
+C-11029,99,111.62,11569.15,Premium,One year,Bank transfer,0,2,423.7,No
+C-11030,105,46.71,5132.55,Premium Plus,Month-to-month,Electronic check,0,8,405.2,Yes
+C-11031,72,102.04,7295.43,Standard,One year,Bank transfer,0,6,218.2,Yes
+C-11032,97,31.15,3060.62,Basic,Two year,Bank transfer,1,2,743.5,No
+C-11033,7,112.76,753.46,Premium,One year,Electronic check,0,2,466.4,No
+C-11034,24,32.8,822.26,Premium,Month-to-month,Electronic check,0,6,82.2,No
+C-11035,40,116.77,4730.37,Basic,Month-to-month,Electronic check,0,7,894.5,No
+C-11036,2,32.16,64.44,Premium Plus,Two year,Credit card,0,2,821.4,No
+C-11037,5,84.49,442.15,Premium Plus,Month-to-month,Bank transfer,0,3,824.0,No
+C-11038,15,35.08,527.37,Premium Plus,Month-to-month,Mailed check,0,0,301.4,Yes
+C-11039,119,89.35,10554.84,Standard,One year,Bank transfer,0,0,454.4,Yes
+C-11040,7,75.12,525.73,Premium Plus,Month-to-month,Electronic check,0,8,737.8,Yes
+C-11041,31,23.86,728.88,Basic,One year,Mailed check,0,8,629.3,No
+C-11042,24,28.96,724.44,Premium Plus,Two year,Bank transfer,0,8,782.0,No
+C-11043,88,40.03,3688.16,Premium Plus,One year,Mailed check,0,2,179.0,No
+C-11044,24,70.84,1674.0,Basic,Two year,Mailed check,0,2,210.1,No
+C-11045,61,25.72,1548.77,Standard,Two year,Electronic check,1,6,263.5,No
+C-11046,104,26.67,2854.94,Basic,Two year,Bank transfer,0,1,755.2,No
+C-11047,4,86.9,352.93,Standard,Two year,Bank transfer,1,2,71.4,No
+C-11048,8,97.48,763.22,Standard,One year,Credit card,0,3,539.6,Yes
+C-11049,118,56.54,6368.18,Basic,One year,Bank transfer,0,4,537.7,No
+C-11050,23,85.97,1892.69,Premium,Month-to-month,Bank transfer,0,5,419.7,No
+C-11051,5,113.33,550.3,Basic,Two year,Bank transfer,0,7,519.6,No
+C-11052,54,26.02,1472.02,Basic,Month-to-month,Electronic check,0,1,583.1,Yes
+C-11053,100,33.6,3384.05,Basic,Month-to-month,Credit card,0,6,448.7,No
+C-11054,109,23.63,2676.94,Premium Plus,Month-to-month,Mailed check,0,1,730.2,No
+C-11055,15,63.78,941.31,Premium Plus,Two year,Credit card,0,8,413.1,No
+C-11056,35,113.6,4083.34,Premium,Month-to-month,Bank transfer,0,4,218.2,Yes
+C-11057,54,43.32,2304.65,Standard,Month-to-month,Electronic check,0,5,468.5,No
+C-11058,81,119.32,9182.82,Premium Plus,One year,Credit card,0,8,450.0,No
+C-11059,41,74.48,3082.11,Premium Plus,One year,Bank transfer,0,1,412.6,No
+C-11060,31,109.05,3323.29,Premium Plus,Two year,Electronic check,1,6,265.2,Yes
+C-11061,71,42.06,2918.29,Standard,Month-to-month,Credit card,0,2,868.8,No
+C-11062,99,30.99,3013.12,Premium,Month-to-month,Electronic check,0,5,558.6,No
+C-11063,2,56.8,115.58,Basic,Month-to-month,Credit card,0,4,257.2,Yes
+C-11064,9,81.41,726.39,Premium,Two year,Credit card,0,3,310.8,No
+C-11065,57,107.47,6300.72,Premium,Two year,Bank transfer,0,1,392.2,No
+C-11066,34,44.25,1515.77,Premium,One year,Bank transfer,0,6,281.6,No
+C-11067,15,42.45,635.29,Premium,Two year,Mailed check,0,8,599.7,No
+C-11068,38,44.92,1697.66,Basic,Month-to-month,Electronic check,1,2,156.7,No
+C-11069,98,67.89,6792.77,Premium,Two year,Credit card,0,5,342.8,No
+C-11070,15,23.73,368.35,Basic,Month-to-month,Credit card,0,1,184.6,No
+C-11071,34,25.46,831.59,Basic,Month-to-month,Electronic check,1,3,676.4,No
+C-11072,107,105.85,11134.28,Premium,Two year,Bank transfer,0,7,869.6,No
+C-11073,75,112.27,8250.45,Standard,Month-to-month,Bank transfer,0,5,393.1,Yes
+C-11074,26,27.25,686.08,Premium,Month-to-month,Credit card,1,2,843.5,Yes
+C-11075,13,105.8,1362.55,Standard,One year,Electronic check,0,0,313.1,Yes
+C-11076,119,77.94,9545.19,Premium Plus,Two year,Bank transfer,1,2,538.0,Yes
+C-11077,43,95.33,4159.3,Basic,Month-to-month,Credit card,1,7,807.0,No
+C-11078,10,46.35,447.52,Basic,One year,Bank transfer,0,0,197.2,Yes
+C-11079,43,59.08,2604.94,Standard,One year,Mailed check,0,3,228.9,No
+C-11080,22,99.32,2201.13,Basic,Month-to-month,Electronic check,0,3,231.7,Yes
+C-11081,2,22.2,45.44,Standard,One year,Electronic check,0,6,718.0,No
+C-11082,49,63.75,3076.07,Premium Plus,Month-to-month,Bank transfer,0,3,814.9,No
+C-11083,2,47.8,92.47,Premium,Month-to-month,Mailed check,0,8,706.4,No
+C-11084,102,43.5,4273.63,Standard,One year,Mailed check,0,8,308.6,No
+C-11085,11,100.95,1073.07,Basic,Month-to-month,Mailed check,0,4,103.8,Yes
+C-11086,50,63.93,3269.91,Premium Plus,One year,Electronic check,0,7,599.4,No
+C-11087,107,102.48,11443.14,Premium Plus,Month-to-month,Mailed check,0,4,102.0,No
+C-11088,69,74.16,4937.09,Premium Plus,Month-to-month,Electronic check,0,2,190.7,No
+C-11089,5,98.19,501.39,Premium,One year,Mailed check,0,3,467.8,No
+C-11090,32,77.34,2593.51,Basic,Month-to-month,Electronic check,0,8,444.6,Yes
+C-11091,2,89.69,186.39,Premium Plus,Two year,Electronic check,0,7,778.2,No
+C-11092,106,89.36,9918.89,Standard,Two year,Bank transfer,0,5,209.7,Yes
+C-11093,72,108.57,8133.88,Basic,One year,Credit card,0,4,269.8,Yes
+C-11094,102,36.35,3587.63,Premium,One year,Bank transfer,0,4,556.5,Yes
+C-11095,79,110.88,9176.62,Basic,Two year,Bank transfer,0,4,432.0,Yes
+C-11096,3,70.22,200.37,Premium Plus,Two year,Credit card,0,0,735.7,No
+C-11097,3,81.38,250.64,Premium Plus,Two year,Bank transfer,0,3,721.9,Yes
+C-11098,112,45.74,4948.68,Standard,One year,Bank transfer,0,6,255.9,No
+C-11099,20,112.13,2210.91,Premium Plus,One year,Mailed check,0,0,411.4,Yes
+C-11100,84,74.27,6284.04,Standard,Two year,Mailed check,0,2,557.7,No
+C-11101,7,52.26,359.08,Premium Plus,Month-to-month,Credit card,0,3,426.1,Yes
+C-11102,118,92.02,11100.2,Standard,Two year,Mailed check,0,0,422.4,No
+C-11103,9,86.32,753.15,Basic,Two year,Electronic check,0,3,609.9,Yes
+C-11104,1,47.26,47.93,Standard,Two year,Mailed check,1,2,139.3,Yes
+C-11105,14,57.21,817.86,Premium,Two year,Mailed check,0,6,516.5,No
+C-11106,109,49.8,5334.14,Basic,Month-to-month,Electronic check,0,6,319.8,Yes
+C-11107,39,103.72,4218.24,Basic,Month-to-month,Credit card,0,7,596.2,Yes
+C-11108,104,103.19,10497.56,Premium,Two year,Credit card,1,4,711.1,No
+C-11109,11,63.53,706.55,Standard,Month-to-month,Credit card,0,2,210.4,Yes
+C-11110,27,21.71,588.04,Basic,Month-to-month,Electronic check,0,4,675.5,No
+C-11111,7,67.11,474.91,Premium Plus,Month-to-month,Bank transfer,1,8,141.1,Yes
+C-11112,21,89.83,1957.21,Basic,Two year,Credit card,0,6,77.6,Yes
+C-11113,24,20.21,486.94,Basic,One year,Mailed check,1,8,392.7,No
+C-11114,7,52.18,379.37,Basic,One year,Mailed check,1,8,656.2,Yes
+C-11115,66,88.91,6024.92,Premium Plus,Two year,Electronic check,0,0,438.9,No
+C-11116,78,102.26,8020.8,Premium Plus,Month-to-month,Mailed check,1,8,571.9,Yes
+C-11117,94,98.96,9531.99,Standard,Month-to-month,Bank transfer,1,1,801.9,Yes
+C-11118,78,59.76,4790.38,Basic,Month-to-month,Electronic check,0,1,219.5,Yes
+C-11119,16,110.01,1800.84,Standard,Month-to-month,Mailed check,0,5,814.1,No
+C-11120,120,80.01,9854.92,Basic,Two year,Electronic check,0,6,860.2,No
+C-11121,112,58.56,6772.22,Basic,One year,Mailed check,0,0,593.2,No
+C-11122,12,101.32,1209.1,Standard,Month-to-month,Credit card,0,1,446.9,Yes
+C-11123,9,116.99,1057.23,Premium Plus,Two year,Bank transfer,1,5,615.0,No
+C-11124,24,87.56,2196.71,Standard,Two year,Credit card,0,8,383.0,No
+C-11125,22,106.99,2381.26,Basic,Month-to-month,Mailed check,0,5,334.0,Yes
+C-11126,47,63.52,3009.12,Basic,One year,Electronic check,0,7,285.2,No
+C-11127,101,96.48,9318.58,Premium Plus,One year,Credit card,0,6,466.9,No
+C-11128,5,98.18,493.8,Premium Plus,One year,Bank transfer,0,6,291.7,Yes
+C-11129,34,100.2,3522.25,Premium,Month-to-month,Bank transfer,0,3,394.9,Yes
+C-11130,10,49.3,498.17,Basic,One year,Credit card,0,0,334.4,Yes
+C-11131,14,103.57,1383.15,Basic,Month-to-month,Credit card,0,4,524.4,No
+C-11132,1,103.99,104.2,Standard,One year,Mailed check,0,0,527.3,Yes
+C-11133,35,100.45,3533.7,Premium,One year,Credit card,0,4,760.1,No
+C-11134,11,54.76,619.73,Standard,Month-to-month,Electronic check,0,0,60.5,No
+C-11135,6,54.49,339.02,Premium Plus,Two year,Bank transfer,0,3,74.5,No
+C-11136,61,49.28,3018.51,Premium,Two year,Bank transfer,0,6,437.0,No
+C-11137,5,96.12,476.49,Basic,Two year,Electronic check,0,0,154.9,Yes
+C-11138,31,57.24,1739.49,Basic,Month-to-month,Bank transfer,0,2,565.2,No
+C-11139,4,68.39,282.27,Premium,One year,Bank transfer,0,2,312.7,No
+C-11140,4,34.18,138.05,Standard,Month-to-month,Credit card,0,2,325.0,Yes
+C-11141,78,38.42,2911.49,Standard,Month-to-month,Bank transfer,0,7,726.2,Yes
+C-11142,44,50.73,2193.21,Premium Plus,One year,Mailed check,0,6,334.1,No
+C-11143,8,73.44,566.2,Premium,Month-to-month,Bank transfer,0,5,243.3,Yes
+C-11144,24,102.89,2508.48,Basic,Month-to-month,Electronic check,0,1,840.6,Yes
+C-11145,104,112.31,11593.34,Standard,Two year,Bank transfer,1,8,599.7,No
+C-11146,34,54.65,1796.96,Premium,Two year,Bank transfer,0,2,632.3,No
+C-11147,53,91.28,4754.48,Premium,Month-to-month,Bank transfer,0,1,436.8,No
+C-11148,3,111.62,333.13,Basic,One year,Bank transfer,0,4,456.2,Yes
+C-11149,69,41.48,2931.77,Standard,One year,Bank transfer,0,1,759.9,No
+C-11150,100,55.64,5396.77,Premium,Two year,Bank transfer,1,3,90.8,No
+C-11151,32,71.05,2255.7,Basic,Month-to-month,Electronic check,0,3,261.3,No
+C-11152,19,113.63,2248.27,Premium Plus,Two year,Electronic check,0,5,727.3,Yes
+C-11153,114,67.52,7555.63,Basic,One year,Electronic check,1,5,212.5,No
+C-11154,119,50.57,5853.2,Premium,Two year,Electronic check,0,1,490.0,No
+C-11155,9,62.49,562.22,Premium Plus,Month-to-month,Credit card,0,7,683.5,No
+C-11156,22,100.91,2139.33,Basic,One year,Bank transfer,0,6,588.4,No
+C-11157,81,117.17,9766.28,Premium,Month-to-month,Electronic check,0,1,100.5,No
+C-11158,64,42.79,2788.88,Basic,Two year,Bank transfer,1,2,140.0,No
+C-11159,11,79.45,854.46,Premium,One year,Bank transfer,0,7,549.6,Yes
+C-11160,102,76.1,7644.63,Premium,One year,Mailed check,0,8,683.2,No
+C-11161,2,34.35,69.45,Premium Plus,Two year,Electronic check,0,2,311.4,No
+C-11162,35,80.84,2900.31,Premium Plus,Month-to-month,Bank transfer,0,4,837.4,No
+C-11163,9,99.48,897.39,Standard,One year,Credit card,0,8,148.0,No
+C-11164,24,41.76,995.67,Basic,Month-to-month,Electronic check,0,1,545.6,Yes
+C-11165,114,27.98,3265.6,Premium,Two year,Mailed check,0,1,434.0,No
+C-11166,3,51.56,159.16,Premium Plus,One year,Electronic check,0,5,685.4,Yes
+C-11167,6,66.47,394.61,Basic,Two year,Electronic check,0,1,543.6,Yes
+C-11168,7,44.86,318.61,Standard,Two year,Bank transfer,1,5,161.9,Yes
+C-11169,74,77.4,5851.99,Premium,Two year,Electronic check,0,4,335.3,No
+C-11170,17,41.22,731.06,Premium Plus,Month-to-month,Credit card,0,3,378.5,No
+C-11171,77,111.5,8671.0,Basic,Month-to-month,Mailed check,0,3,356.7,No
+C-11172,6,20.71,127.38,Premium,Two year,Credit card,0,1,368.0,No
+C-11173,44,86.57,3761.68,Basic,Two year,Credit card,0,2,359.9,No
+C-11174,7,57.98,412.35,Standard,One year,Mailed check,1,7,468.4,No
+C-11175,97,105.53,10660.31,Premium Plus,Two year,Bank transfer,0,2,497.8,Yes
+C-11176,81,45.64,3881.38,Premium Plus,Month-to-month,Credit card,0,5,593.1,Yes
+C-11177,30,73.54,2178.25,Premium,One year,Electronic check,1,0,218.7,Yes
+C-11178,2,69.04,134.06,Standard,Month-to-month,Mailed check,0,8,792.8,Yes
+C-11179,47,45.92,2099.95,Premium,One year,Bank transfer,0,3,838.3,No
+C-11180,91,99.73,9402.66,Premium Plus,One year,Electronic check,0,2,205.4,No
+C-11181,46,70.91,3377.88,Premium,One year,Mailed check,0,5,511.6,No
+C-11182,101,104.59,10713.39,Basic,One year,Credit card,0,8,866.3,Yes
+C-11183,7,95.76,657.25,Premium,Two year,Mailed check,0,8,698.4,Yes
+C-11184,11,69.34,763.65,Premium Plus,One year,Mailed check,0,3,400.0,Yes
+C-11185,111,21.39,2258.53,Premium,Month-to-month,Electronic check,0,5,222.1,Yes
+C-11186,73,38.63,2726.04,Standard,One year,Electronic check,0,4,117.0,No
+C-11187,16,109.44,1686.94,Basic,Two year,Bank transfer,0,4,115.7,No
+C-11188,6,89.01,527.18,Premium,Month-to-month,Mailed check,0,8,600.3,Yes
+C-11189,5,68.27,329.2,Premium,Month-to-month,Bank transfer,1,8,859.8,No
+C-11190,5,93.02,482.1,Premium Plus,Month-to-month,Credit card,0,3,214.0,No
+C-11191,51,119.19,6280.73,Premium,Month-to-month,Mailed check,0,2,412.1,Yes
+C-11192,11,102.84,1123.5,Basic,Month-to-month,Credit card,0,3,102.2,Yes
+C-11193,2,74.62,155.66,Premium Plus,Two year,Electronic check,0,0,559.4,Yes
+C-11194,31,109.33,3286.4,Premium Plus,Two year,Electronic check,0,0,344.7,No
+C-11195,116,51.3,6221.75,Basic,Month-to-month,Electronic check,0,0,730.8,Yes
+C-11196,34,66.15,2157.68,Standard,Month-to-month,Mailed check,0,8,742.9,Yes
+C-11197,6,70.93,409.41,Basic,Two year,Bank transfer,0,5,790.9,Yes
+C-11198,48,60.75,3005.74,Basic,One year,Electronic check,0,7,760.8,Yes
+C-11199,105,50.64,5171.29,Premium Plus,Month-to-month,Bank transfer,1,4,779.7,Yes
+C-11200,15,56.05,813.94,Basic,Two year,Bank transfer,0,1,179.2,Yes
+C-11201,5,47.16,224.54,Premium Plus,One year,Mailed check,1,6,598.9,Yes
+C-11202,59,29.44,1754.79,Standard,One year,Bank transfer,0,8,80.2,No
+C-11203,17,114.8,1861.25,Premium,Two year,Electronic check,0,1,543.0,Yes
+C-11204,9,115.51,1029.67,Basic,Month-to-month,Bank transfer,1,8,803.3,Yes
+C-11205,44,75.6,3179.64,Premium Plus,Month-to-month,Electronic check,0,8,501.4,Yes
+C-11206,44,45.88,1935.66,Standard,One year,Electronic check,1,0,472.2,No
+C-11207,14,63.72,915.64,Basic,Month-to-month,Mailed check,0,6,570.7,No
+C-11208,16,98.54,1540.44,Standard,One year,Electronic check,0,8,192.5,No
+C-11209,34,116.55,4047.67,Premium Plus,One year,Electronic check,0,2,115.4,Yes
+C-11210,16,94.35,1436.32,Premium Plus,Two year,Bank transfer,1,0,798.1,Yes
+C-11211,25,26.1,638.91,Basic,Two year,Credit card,0,7,261.0,No
+C-11212,11,20.48,214.08,Basic,Month-to-month,Electronic check,0,6,536.9,Yes
+C-11213,16,33.89,546.68,Premium Plus,Month-to-month,Credit card,1,0,386.1,No
+C-11214,58,74.33,4263.07,Basic,Two year,Electronic check,0,0,79.4,No
+C-11215,47,41.91,1919.41,Premium Plus,Month-to-month,Credit card,1,1,840.8,No
+C-11216,9,29.25,270.07,Premium,Two year,Bank transfer,0,2,877.1,No
+C-11217,35,45.98,1567.33,Basic,Month-to-month,Credit card,0,6,85.2,Yes
+C-11218,61,114.34,7228.08,Premium,One year,Credit card,0,7,184.5,No
+C-11219,1,25.86,26.66,Standard,One year,Electronic check,1,8,187.9,No
+C-11220,23,42.25,923.27,Premium Plus,Two year,Credit card,1,2,88.3,No
+C-11221,65,108.72,7043.88,Premium Plus,One year,Bank transfer,0,3,405.7,No
+C-11222,16,54.44,881.47,Premium Plus,Month-to-month,Mailed check,0,8,649.0,Yes
+C-11223,11,31.62,364.33,Premium Plus,Month-to-month,Bank transfer,0,0,301.0,No
+C-11224,76,108.34,8039.93,Basic,One year,Credit card,0,0,105.2,Yes
+C-11225,21,44.23,964.03,Standard,One year,Mailed check,0,3,886.2,Yes
+C-11226,22,93.5,2088.86,Premium Plus,Month-to-month,Bank transfer,0,8,660.9,Yes
+C-11227,4,93.54,388.8,Premium Plus,One year,Bank transfer,0,4,380.7,No
+C-11228,3,85.51,259.97,Standard,One year,Credit card,0,0,149.9,Yes
+C-11229,9,43.66,411.92,Premium,One year,Bank transfer,0,7,770.1,No
+C-11230,40,54.97,2126.04,Premium Plus,Month-to-month,Bank transfer,0,1,689.5,No
+C-11231,20,86.82,1717.64,Standard,One year,Credit card,0,6,845.4,Yes
+C-11232,77,105.59,8083.22,Premium,Month-to-month,Credit card,1,8,431.3,No
+C-11233,46,49.35,2301.68,Premium Plus,Month-to-month,Bank transfer,0,0,90.7,No
+C-11234,11,50.33,543.29,Premium Plus,One year,Bank transfer,1,3,318.4,Yes
+C-11235,48,61.93,2849.83,Premium Plus,Two year,Credit card,0,4,567.9,Yes
+C-11236,54,55.69,2940.02,Standard,Month-to-month,Bank transfer,1,1,703.8,No
+C-11237,12,91.03,1053.77,Premium Plus,Month-to-month,Mailed check,0,0,780.0,Yes
+C-11238,80,50.67,4205.38,Premium,Two year,Mailed check,0,1,503.7,No
+C-11239,46,100.14,4384.54,Basic,One year,Electronic check,0,1,894.1,No
+C-11240,14,36.1,484.29,Premium,One year,Mailed check,0,3,785.1,No
+C-11241,12,60.14,685.9,Premium,Two year,Mailed check,0,7,179.5,No
+C-11242,74,118.75,8440.42,Standard,Month-to-month,Credit card,0,8,755.6,No
+C-11243,1,28.95,30.16,Premium,Month-to-month,Credit card,1,1,262.2,Yes
+C-11244,120,29.89,3676.19,Premium Plus,Two year,Credit card,0,2,698.9,Yes
+C-11245,70,91.53,6501.93,Basic,Two year,Credit card,0,8,336.1,Yes
+C-11246,49,82.87,3994.72,Basic,Month-to-month,Mailed check,1,1,79.0,Yes
+C-11247,21,72.85,1572.59,Premium Plus,Two year,Electronic check,0,3,453.1,No
+C-11248,76,62.68,4587.32,Basic,Two year,Mailed check,0,6,271.1,No
+C-11249,100,73.55,7633.24,Premium Plus,One year,Electronic check,1,0,212.9,Yes
+C-11250,45,21.49,921.74,Premium,One year,Mailed check,0,4,622.1,No
+C-11251,40,99.84,3858.72,Standard,Month-to-month,Electronic check,1,6,551.5,No
+C-11252,92,86.89,7912.67,Premium Plus,Two year,Credit card,0,0,386.7,No
+C-11253,118,88.26,10495.98,Basic,One year,Bank transfer,0,2,135.1,Yes
+C-11254,6,31.54,179.86,Premium Plus,One year,Electronic check,1,3,226.0,Yes
+C-11255,6,72.27,444.38,Premium,Month-to-month,Electronic check,0,8,787.2,Yes
+C-11256,17,74.18,1236.02,Premium,Two year,Electronic check,0,6,564.6,Yes
+C-11257,7,51.64,345.98,Standard,Month-to-month,Credit card,0,5,701.5,Yes
+C-11258,95,49.08,4831.62,Standard,Month-to-month,Mailed check,0,4,522.0,No
+C-11259,7,52.59,378.02,Basic,One year,Mailed check,1,7,484.7,Yes
+C-11260,76,52.01,4116.56,Standard,Two year,Electronic check,0,2,518.6,No
+C-11261,10,110.76,1136.96,Premium,Month-to-month,Credit card,0,8,142.7,Yes
+C-11262,57,35.48,1967.17,Basic,Two year,Credit card,1,0,188.9,No
+C-11263,43,95.84,3973.31,Premium,One year,Bank transfer,0,1,430.9,No
+C-11264,4,40.36,165.55,Premium Plus,Month-to-month,Credit card,0,8,895.7,No
+C-11265,32,86.46,2899.16,Basic,Month-to-month,Electronic check,0,2,806.5,Yes
+C-11266,38,104.05,3775.9,Premium,Two year,Mailed check,0,5,278.0,Yes
+C-11267,94,72.81,6707.43,Standard,One year,Electronic check,0,7,410.0,No
+C-11268,39,21.03,784.71,Premium Plus,Two year,Mailed check,0,5,234.9,No
+C-11269,88,61.76,5450.65,Standard,One year,Credit card,0,0,401.4,Yes
+C-11270,3,71.7,219.27,Premium Plus,Two year,Bank transfer,0,3,278.2,Yes
+C-11271,49,88.73,4166.82,Standard,One year,Bank transfer,0,7,420.4,No
+C-11272,37,51.43,1902.95,Premium,One year,Credit card,0,7,657.0,No
+C-11273,57,35.88,2112.89,Basic,Two year,Bank transfer,0,2,769.9,Yes
+C-11274,103,106.03,11146.25,Standard,One year,Mailed check,0,2,465.0,Yes
+C-11275,7,103.59,697.63,Premium,Two year,Credit card,1,1,415.3,Yes
+C-11276,3,35.76,106.25,Premium,Month-to-month,Mailed check,0,0,374.8,No
+C-11277,10,115.54,1119.26,Basic,Month-to-month,Mailed check,0,6,895.7,No
+C-11278,1,119.69,123.63,Premium,Month-to-month,Electronic check,0,6,518.9,Yes
+C-11279,10,66.46,692.77,Basic,Month-to-month,Credit card,1,0,806.1,Yes
+C-11280,1,49.12,47.57,Standard,Month-to-month,Bank transfer,0,6,545.2,No
+C-11281,10,35.99,361.89,Premium,One year,Mailed check,0,0,682.8,Yes
+C-11282,57,26.09,1494.57,Premium,Two year,Electronic check,0,3,680.1,No
+C-11283,27,66.2,1726.64,Standard,One year,Electronic check,0,6,246.7,No
+C-11284,3,117.49,349.64,Premium Plus,Month-to-month,Credit card,0,5,752.2,Yes
+C-11285,102,75.3,7499.93,Premium,One year,Bank transfer,1,0,440.2,No
+C-11286,5,105.92,529.34,Premium Plus,One year,Bank transfer,1,6,771.0,Yes
+C-11287,2,24.46,51.17,Basic,Two year,Mailed check,0,0,199.4,Yes
+C-11288,9,97.66,882.65,Premium,Month-to-month,Electronic check,0,3,205.6,Yes
+C-11289,18,115.71,2029.6,Standard,Month-to-month,Electronic check,0,0,189.3,No
+C-11290,69,100.54,6747.35,Premium,Month-to-month,Bank transfer,0,4,336.0,No
+C-11291,2,105.53,216.44,Premium,Two year,Mailed check,0,3,795.1,No
+C-11292,40,59.41,2385.29,Standard,Two year,Bank transfer,0,8,899.8,Yes
+C-11293,26,32.63,810.84,Premium,One year,Bank transfer,0,6,323.0,No
+C-11294,13,31.79,411.61,Standard,One year,Bank transfer,0,4,194.4,Yes
+C-11295,4,38.23,152.13,Premium,Two year,Electronic check,0,2,211.9,Yes
+C-11296,99,90.3,8607.24,Basic,One year,Credit card,0,4,457.7,No
+C-11297,23,105.3,2335.16,Premium Plus,One year,Electronic check,0,6,161.2,No
+C-11298,25,20.45,499.42,Standard,Two year,Mailed check,0,4,111.3,No
+C-11299,24,30.59,698.18,Premium,Two year,Electronic check,0,4,236.3,No
+C-11300,14,78.19,1096.57,Basic,One year,Credit card,0,7,830.6,No
+C-11301,117,33.97,4070.37,Premium Plus,Two year,Mailed check,1,2,875.4,No
+C-11302,36,101.86,3700.22,Premium,Two year,Electronic check,1,4,708.2,No
+C-11303,112,24.14,2828.49,Premium Plus,Two year,Mailed check,0,2,554.7,No
+C-11304,84,29.53,2521.58,Basic,Month-to-month,Credit card,0,4,108.2,No
+C-11305,69,70.35,4970.08,Premium,Two year,Mailed check,0,5,647.6,Yes
+C-11306,101,60.45,6094.62,Standard,Month-to-month,Mailed check,0,5,316.3,Yes
+C-11307,35,107.49,3783.01,Premium,Month-to-month,Mailed check,0,2,790.4,Yes
+C-11308,1,73.33,72.64,Premium,Two year,Bank transfer,0,7,204.6,No
+C-11309,79,78.9,6510.95,Premium,Month-to-month,Mailed check,0,3,834.5,Yes
+C-11310,9,76.97,706.73,Standard,Two year,Credit card,0,6,203.0,Yes
+C-11311,98,33.44,3225.57,Premium Plus,Month-to-month,Electronic check,0,5,421.5,No
+C-11312,14,67.72,958.94,Premium,Two year,Electronic check,0,1,542.9,No
+C-11313,30,96.3,2771.6,Standard,Month-to-month,Mailed check,0,6,775.8,No
+C-11314,4,116.51,461.38,Standard,One year,Credit card,0,1,835.7,Yes
+C-11315,74,67.4,5000.43,Premium Plus,Month-to-month,Bank transfer,0,0,72.4,Yes
+C-11316,56,66.3,3685.18,Standard,One year,Mailed check,0,3,625.6,No
+C-11317,28,98.65,2695.62,Basic,Month-to-month,Electronic check,0,6,311.7,No
+C-11318,36,29.91,1121.49,Premium,One year,Mailed check,1,7,210.1,No
+C-11319,118,109.48,13244.26,Premium,One year,Credit card,1,3,723.6,No
+C-11320,39,82.37,3203.88,Basic,One year,Bank transfer,1,1,489.7,No
+C-11321,97,119.8,11387.93,Premium Plus,Two year,Mailed check,0,0,801.1,Yes
+C-11322,45,41.92,1885.69,Premium,One year,Mailed check,0,4,350.1,Yes
+C-11323,55,70.1,4047.29,Premium Plus,Two year,Mailed check,0,5,794.3,No
+C-11324,72,42.54,3120.53,Standard,One year,Mailed check,0,3,493.2,Yes
+C-11325,38,85.28,3187.89,Basic,Two year,Bank transfer,0,7,683.2,No
+C-11326,39,29.14,1081.46,Premium,Month-to-month,Electronic check,0,3,460.6,No
+C-11327,9,87.2,777.78,Basic,One year,Electronic check,0,4,246.6,No
+C-11328,41,41.23,1733.1,Basic,One year,Bank transfer,0,6,275.4,Yes
+C-11329,87,33.14,2998.89,Premium Plus,Month-to-month,Electronic check,0,5,613.7,No
+C-11330,11,57.28,642.42,Basic,Month-to-month,Electronic check,0,0,712.7,Yes
+C-11331,42,24.1,963.66,Premium Plus,Two year,Mailed check,1,5,406.0,No
+C-11332,74,53.75,4142.51,Basic,Month-to-month,Mailed check,0,3,82.7,No
+C-11333,117,64.0,7706.24,Standard,Month-to-month,Electronic check,1,8,843.7,No
+C-11334,24,38.34,945.57,Premium Plus,One year,Electronic check,1,8,439.8,No
+C-11335,83,41.8,3430.27,Premium,Two year,Mailed check,0,6,231.7,No
+C-11336,24,71.5,1767.28,Premium Plus,One year,Bank transfer,0,0,768.8,No
+C-11337,46,33.81,1610.7,Basic,Two year,Credit card,0,1,517.9,No
+C-11338,94,92.33,8298.18,Basic,One year,Electronic check,0,6,700.9,Yes
+C-11339,4,39.17,164.44,Standard,Two year,Mailed check,1,7,160.8,Yes
+C-11340,19,90.24,1785.61,Standard,Month-to-month,Electronic check,0,8,415.2,No
+C-11341,46,46.24,2173.4,Premium Plus,Two year,Mailed check,0,1,626.6,Yes
+C-11342,30,50.25,1524.16,Basic,Month-to-month,Credit card,0,7,82.5,No
+C-11343,92,37.96,3407.97,Premium,Two year,Mailed check,0,4,254.9,Yes
+C-11344,47,98.63,4718.26,Basic,Two year,Electronic check,0,7,668.7,No
+C-11345,10,67.15,656.13,Basic,One year,Mailed check,0,1,348.7,No
+C-11346,1,57.96,60.29,Premium,Two year,Electronic check,1,5,61.2,No
+C-11347,98,31.44,3018.99,Basic,Two year,Credit card,1,0,231.0,No
+C-11348,5,84.06,406.25,Basic,One year,Credit card,0,8,206.0,Yes
+C-11349,41,104.24,4123.1,Premium,Month-to-month,Bank transfer,0,2,598.9,Yes
+C-11350,117,47.56,5615.9,Basic,One year,Electronic check,0,6,781.2,No
+C-11351,20,60.61,1253.5,Standard,Month-to-month,Mailed check,0,1,443.3,No
+C-11352,19,39.46,756.85,Premium,One year,Mailed check,0,4,340.6,No
+C-11353,97,28.12,2845.05,Basic,Two year,Mailed check,0,4,196.3,No
+C-11354,55,60.78,3495.61,Basic,Two year,Credit card,0,5,268.9,No
+C-11355,21,110.95,2227.15,Premium Plus,One year,Credit card,1,7,60.6,No
+C-11356,40,57.54,2237.69,Standard,Two year,Credit card,0,4,481.0,No
+C-11357,12,73.28,836.82,Premium Plus,One year,Mailed check,0,6,754.7,No
+C-11358,45,74.68,3527.98,Basic,One year,Mailed check,1,8,370.3,No
+C-11359,86,35.23,3000.46,Standard,Month-to-month,Credit card,0,8,402.5,Yes
+C-11360,8,57.28,474.52,Premium,Two year,Mailed check,1,2,688.7,No
+C-11361,39,80.48,3176.35,Premium Plus,Month-to-month,Electronic check,0,6,410.2,Yes
+C-11362,10,114.86,1161.27,Premium Plus,Month-to-month,Mailed check,0,8,268.3,Yes
+C-11363,66,93.48,6139.41,Premium Plus,Two year,Mailed check,0,5,829.7,No
+C-11364,73,50.11,3821.74,Standard,One year,Bank transfer,0,3,140.3,Yes
+C-11365,34,72.79,2450.72,Standard,Two year,Electronic check,0,0,813.3,No
+C-11366,41,24.97,1049.06,Premium Plus,One year,Electronic check,0,4,682.6,No
+C-11367,25,107.07,2681.19,Basic,Month-to-month,Credit card,0,5,187.9,Yes
+C-11368,101,23.32,2307.54,Premium Plus,Two year,Mailed check,0,4,823.2,No
+C-11369,68,116.96,8217.05,Standard,Month-to-month,Electronic check,0,7,894.4,Yes
+C-11370,92,114.24,10636.66,Basic,Two year,Mailed check,1,8,833.8,No
+C-11371,6,118.77,683.06,Premium,One year,Bank transfer,0,3,587.5,No
+C-11372,4,81.57,320.84,Premium Plus,Month-to-month,Credit card,1,2,696.5,Yes
+C-11373,37,50.96,1851.2,Premium,One year,Electronic check,0,3,465.0,No
+C-11374,61,29.69,1751.24,Basic,One year,Credit card,0,5,112.2,No
+C-11375,75,95.76,7269.63,Standard,Month-to-month,Electronic check,0,3,493.1,Yes
+C-11376,28,65.96,1911.85,Standard,One year,Bank transfer,0,4,771.2,No
+C-11377,45,80.89,3807.04,Premium,One year,Credit card,0,2,710.6,No
+C-11378,51,112.3,5484.59,Basic,Two year,Electronic check,1,7,589.1,No
+C-11379,51,68.33,3431.55,Standard,Two year,Bank transfer,0,5,382.2,No
+C-11380,37,80.5,2932.13,Basic,Two year,Electronic check,0,1,329.6,No
+C-11381,105,47.12,4758.09,Premium Plus,Two year,Credit card,0,0,603.2,No
+C-11382,97,25.06,2312.34,Basic,Two year,Bank transfer,0,5,809.9,No
+C-11383,11,47.63,526.34,Basic,Month-to-month,Mailed check,0,1,735.6,No
+C-11384,6,40.9,251.25,Premium Plus,One year,Electronic check,0,3,491.5,No
+C-11385,94,114.85,10419.72,Basic,Two year,Bank transfer,0,2,570.8,No
+C-11386,51,117.08,5795.92,Premium Plus,One year,Mailed check,0,3,347.7,No
+C-11387,77,40.01,3188.6,Standard,Two year,Electronic check,1,6,469.4,No
+C-11388,98,79.66,7896.56,Basic,Two year,Bank transfer,0,3,126.2,No
+C-11389,35,105.62,3710.42,Standard,One year,Bank transfer,0,8,99.5,Yes
+C-11390,19,44.1,820.75,Basic,Month-to-month,Credit card,0,2,183.3,No
+C-11391,56,80.06,4381.42,Premium Plus,Two year,Bank transfer,0,4,463.4,No
+C-11392,5,87.89,450.47,Standard,Two year,Bank transfer,1,6,686.6,Yes
+C-11393,72,44.39,3160.12,Premium,One year,Credit card,1,2,793.1,No
+C-11394,16,52.67,812.2,Premium Plus,Month-to-month,Credit card,0,1,681.5,No
+C-11395,37,32.97,1269.52,Premium Plus,Two year,Credit card,1,0,337.7,Yes
+C-11396,4,43.65,172.35,Premium Plus,One year,Mailed check,0,8,805.2,No
+C-11397,12,83.33,951.06,Premium,Month-to-month,Mailed check,0,0,557.6,No
+C-11398,13,100.55,1244.84,Standard,Two year,Bank transfer,0,5,192.8,No
+C-11399,32,95.7,2943.61,Premium Plus,Two year,Mailed check,0,6,95.0,Yes
+C-11400,74,33.3,2571.26,Premium Plus,One year,Bank transfer,1,4,741.5,No
+C-11401,13,51.9,675.63,Premium,Two year,Electronic check,0,8,73.7,No
+C-11402,12,74.8,878.16,Premium Plus,One year,Bank transfer,0,5,394.4,No
+C-11403,78,106.7,7950.02,Premium,Month-to-month,Credit card,0,6,70.1,No
+C-11404,76,101.09,7306.75,Standard,One year,Credit card,0,2,696.5,Yes
+C-11405,73,33.11,2313.34,Premium,Month-to-month,Mailed check,0,0,117.0,No
+C-11406,35,92.58,3215.43,Basic,One year,Bank transfer,0,8,429.6,Yes
+C-11407,3,32.89,96.96,Premium,One year,Credit card,0,4,107.6,Yes
+C-11408,81,93.19,7695.13,Premium,Month-to-month,Credit card,0,0,328.2,No
+C-11409,100,77.27,7751.35,Basic,Two year,Credit card,1,4,772.0,No
+C-11410,91,41.48,3659.48,Premium,One year,Bank transfer,1,7,281.6,No
+C-11411,109,74.69,7885.36,Basic,One year,Mailed check,0,7,772.0,Yes
+C-11412,11,46.54,487.65,Basic,Two year,Bank transfer,0,6,470.6,Yes
+C-11413,28,105.03,2856.35,Standard,Two year,Mailed check,0,3,535.0,No
+C-11414,82,45.91,3863.66,Standard,Two year,Credit card,1,7,375.9,No
+C-11415,17,36.53,603.86,Premium Plus,Month-to-month,Bank transfer,0,2,99.3,No
+C-11416,35,38.24,1328.13,Basic,One year,Mailed check,0,3,699.4,Yes
+C-11417,21,47.89,962.51,Standard,Month-to-month,Mailed check,1,0,731.7,No
+C-11418,107,101.99,10505.7,Basic,One year,Credit card,1,0,828.5,No
+C-11419,107,63.64,6489.06,Basic,Month-to-month,Credit card,0,4,887.1,Yes
+C-11420,35,35.47,1195.3,Premium Plus,Two year,Credit card,0,7,452.2,Yes
+C-11421,26,61.42,1593.43,Basic,One year,Credit card,0,0,234.2,No
+C-11422,50,43.8,2190.75,Basic,One year,Bank transfer,0,2,589.3,Yes
+C-11423,12,102.41,1277.81,Premium Plus,Two year,Bank transfer,0,0,627.3,Yes
+C-11424,88,98.15,8324.29,Premium,Two year,Electronic check,0,6,757.5,No
+C-11425,1,44.51,43.87,Premium Plus,Month-to-month,Credit card,1,4,854.5,No
+C-11426,9,77.37,676.06,Premium,One year,Mailed check,0,7,688.8,No
+C-11427,46,98.96,4340.2,Premium,Two year,Bank transfer,1,5,71.9,No
+C-11428,46,90.22,4123.77,Standard,Month-to-month,Mailed check,1,2,170.7,No
+C-11429,34,45.73,1562.29,Premium Plus,Month-to-month,Electronic check,0,1,336.8,Yes
+C-11430,45,113.28,4935.73,Standard,One year,Credit card,0,6,682.7,No
+C-11431,15,110.96,1735.83,Premium,One year,Mailed check,0,5,394.1,No
+C-11432,120,70.4,8470.27,Premium Plus,Month-to-month,Mailed check,1,3,438.2,No
+C-11433,98,52.98,5294.6,Premium,Month-to-month,Mailed check,0,4,543.4,Yes
+C-11434,61,50.59,3090.72,Premium,One year,Credit card,0,4,536.6,No
+C-11435,79,108.36,8513.16,Standard,Month-to-month,Mailed check,1,6,735.3,No
+C-11436,5,25.94,123.31,Standard,One year,Credit card,0,5,359.3,Yes
+C-11437,72,64.96,4687.76,Premium Plus,One year,Credit card,0,5,335.3,No
+C-11438,64,55.21,3359.19,Standard,One year,Credit card,0,8,435.0,No
+C-11439,89,105.58,9286.32,Premium,Two year,Bank transfer,0,5,149.5,Yes
+C-11440,17,106.16,1799.72,Premium,Month-to-month,Bank transfer,0,0,180.7,No
+C-11441,28,72.93,2004.93,Premium Plus,Month-to-month,Credit card,0,0,673.4,Yes
+C-11442,97,115.83,11583.69,Premium Plus,Month-to-month,Bank transfer,0,2,829.7,No
+C-11443,74,37.34,2772.74,Premium,Two year,Electronic check,0,4,687.2,No
+C-11444,29,86.8,2598.67,Basic,Two year,Credit card,0,7,789.1,No
+C-11445,101,104.07,10366.63,Premium,Month-to-month,Bank transfer,0,8,71.1,Yes
+C-11446,50,66.4,3481.97,Premium,One year,Electronic check,0,5,478.5,No
+C-11447,34,45.12,1541.52,Basic,One year,Mailed check,0,6,60.9,No
+C-11448,41,34.71,1427.44,Basic,Month-to-month,Mailed check,1,5,497.3,Yes
+C-11449,4,39.12,160.3,Premium,Month-to-month,Credit card,0,7,300.0,Yes
+C-11450,87,56.26,5090.09,Premium,Month-to-month,Bank transfer,0,8,666.2,Yes
+C-11451,25,70.09,1817.75,Standard,Two year,Bank transfer,0,1,539.3,No
+C-11452,16,84.67,1386.8,Standard,Month-to-month,Bank transfer,1,8,376.5,Yes
+C-11453,39,65.92,2660.68,Premium Plus,One year,Credit card,1,3,647.8,Yes
+C-11454,85,38.18,3111.09,Standard,Two year,Electronic check,1,8,835.6,No
+C-11455,10,74.09,764.86,Standard,One year,Bank transfer,0,4,408.0,No
+C-11456,4,112.79,458.1,Standard,Month-to-month,Electronic check,0,7,584.7,Yes
+C-11457,2,108.39,206.72,Standard,One year,Credit card,0,5,752.1,No
+C-11458,98,87.11,8710.3,Premium,One year,Electronic check,1,7,413.4,No
+C-11459,59,40.25,2456.2,Basic,Two year,Mailed check,0,7,491.9,No
+C-11460,67,26.48,1751.02,Premium Plus,Two year,Credit card,0,2,400.2,No
+C-11461,33,46.36,1477.18,Premium Plus,One year,Electronic check,0,7,394.8,Yes
+C-11462,16,79.37,1291.24,Basic,Month-to-month,Electronic check,0,5,680.1,No
+C-11463,8,112.84,926.82,Premium Plus,Two year,Electronic check,0,7,65.9,Yes
+C-11464,85,91.53,7561.78,Basic,Month-to-month,Mailed check,0,8,180.9,No
+C-11465,28,47.49,1385.74,Premium Plus,Two year,Mailed check,0,5,97.2,No
+C-11466,107,66.02,7414.91,Premium Plus,Two year,Mailed check,0,5,357.6,No
+C-11467,97,100.04,10033.68,Premium Plus,Month-to-month,Mailed check,0,1,331.2,No
+C-11468,69,24.27,1612.16,Premium,One year,Electronic check,0,8,461.9,Yes
+C-11469,33,47.38,1564.96,Premium,One year,Mailed check,0,1,876.4,No
+C-11470,38,50.86,1981.49,Premium Plus,Month-to-month,Mailed check,0,5,774.7,No
+C-11471,31,73.58,2353.77,Premium Plus,Month-to-month,Electronic check,0,0,549.5,No
+C-11472,111,81.79,9354.95,Basic,Month-to-month,Bank transfer,0,5,418.1,No
+C-11473,41,61.2,2574.76,Premium Plus,Two year,Mailed check,1,6,669.5,Yes
+C-11474,82,101.44,8167.77,Basic,One year,Mailed check,0,7,485.1,Yes
+C-11475,26,55.51,1457.9,Premium Plus,One year,Mailed check,0,7,256.2,No
+C-11476,90,97.4,8405.48,Standard,Two year,Bank transfer,0,4,599.7,No
+C-11477,28,37.51,1005.01,Basic,One year,Bank transfer,1,4,511.5,No
+C-11478,85,22.4,1969.98,Premium Plus,Month-to-month,Bank transfer,0,6,208.4,No
+C-11479,9,94.3,859.49,Premium,Two year,Bank transfer,0,1,416.7,Yes
+C-11480,97,53.67,5156.27,Standard,Month-to-month,Electronic check,0,4,808.6,No
+C-11481,8,98.77,820.93,Premium,One year,Bank transfer,0,8,230.9,Yes
+C-11482,111,48.78,5434.08,Standard,Two year,Bank transfer,1,3,875.7,No
+C-11483,2,62.48,126.02,Premium,Two year,Mailed check,0,1,528.6,No
+C-11484,31,57.71,1773.89,Premium Plus,Month-to-month,Credit card,0,1,61.3,Yes
+C-11485,72,59.42,4078.05,Standard,One year,Mailed check,0,2,631.2,No
+C-11486,29,81.37,2345.03,Basic,Month-to-month,Credit card,1,8,245.4,Yes
+C-11487,88,55.81,4701.16,Basic,Month-to-month,Mailed check,0,4,291.9,No
+C-11488,76,47.43,3733.85,Basic,Two year,Electronic check,0,7,315.4,No
+C-11489,84,63.43,5089.71,Premium,Month-to-month,Credit card,1,3,471.3,Yes
+C-11490,19,41.82,803.51,Premium,Two year,Bank transfer,1,5,549.4,No
+C-11491,23,38.27,844.36,Premium Plus,One year,Electronic check,1,0,241.7,No
+C-11492,49,117.28,5579.08,Premium,One year,Bank transfer,0,4,837.3,No
+C-11493,45,59.93,2716.45,Standard,Month-to-month,Bank transfer,0,7,694.2,No
+C-11494,26,45.27,1128.02,Premium,One year,Credit card,0,4,547.4,No
+C-11495,27,55.76,1509.43,Basic,One year,Credit card,0,5,239.5,No
+C-11496,24,20.81,499.22,Basic,Two year,Credit card,0,6,139.6,No
+C-11497,25,89.84,2290.18,Premium,Two year,Credit card,0,3,132.1,Yes
+C-11498,34,28.43,969.99,Basic,Month-to-month,Mailed check,0,1,854.0,No
+C-11499,4,99.84,406.2,Basic,Two year,Bank transfer,0,6,313.0,Yes
+C-10000,24,57.77,1431.24,Standard,Month-to-month,Bank transfer,0,7,142.3,No

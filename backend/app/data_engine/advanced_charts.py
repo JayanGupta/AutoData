@@ -313,11 +313,173 @@ def correlation_spec(engine) -> dict | None:
     }
 
 
+def violin_specs(engine) -> list[dict]:
+    """Violin plots: mirrored KDE for up to 3 numeric columns."""
+    specs = []
+    for col in _numeric_profiles(engine)[:3]:
+        vals = pd.to_numeric(engine.df[col["name"]], errors="coerce").dropna()
+        if len(vals) < 5:
+            continue
+        density = _kde_points(vals, n=60)
+        if not density:
+            continue
+        stats = col.get("stats") or {}
+        specs.append({
+            "chart_type": "violin",
+            "title": f"Distribution of {col['name']}",
+            "description": (
+                f"median {_round(stats.get('median'))}, IQR "
+                f"{_round(stats.get('q1'))}–{_round(stats.get('q3'))}"
+            ),
+            "column": col["name"],
+            "data": {
+                "median": _round(stats.get("median")),
+                "q1": _round(stats.get("q1")),
+                "q3": _round(stats.get("q3")),
+                "min": _round(float(vals.min())),
+                "max": _round(float(vals.max())),
+                "density": density,
+            },
+        })
+    return specs
+
+
+def _normal_ppf(q: np.ndarray) -> np.ndarray:
+    """Acklam's approximation of the standard normal inverse CDF (vectorised)."""
+    q = np.clip(np.asarray(q, dtype=float), 1e-12, 1 - 1e-12)
+    a = [-39.69683028665376, 220.9460984245205, -275.9285104469687,
+         138.3577518672690, -30.66479806614716, 2.506628277459239]
+    b = [-54.47609879822406, 161.5858368580409, -155.6989798598866,
+         66.80131188771972, -13.28068155288572]
+    c = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838,
+         -2.549732539343734, 4.374664141464968, 2.938163982698783]
+    d = [0.007784695709041462, 0.3224671290700398, 2.445134137142996,
+         3.754408661907416]
+    p_low = 0.02425
+    x = np.zeros_like(q)
+    low = q < p_low
+    high = q > 1 - p_low
+    mid = ~(low | high)
+    qq = q[low]
+    r = np.sqrt(-2 * np.log(qq))
+    x[low] = (((((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]) * r + c[5]) / \
+             ((((d[0] * r + d[1]) * r + d[2]) * r + d[3]) * r + 1)
+    qq = q[high]
+    r = np.sqrt(-2 * np.log(1 - qq))
+    x[high] = -(((((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]) * r + c[5]) / \
+              ((((d[0] * r + d[1]) * r + d[2]) * r + d[3]) * r + 1)
+    qq = q[mid]
+    r = qq - 0.5
+    r2 = r * r
+    x[mid] = (((((a[0] * r2 + a[1]) * r2 + a[2]) * r2 + a[3]) * r2 + a[4]) * r2 + a[5]) * r / \
+             (((((b[0] * r2 + b[1]) * r2 + b[2]) * r2 + b[3]) * r2 + b[4]) * r2 + 1)
+    return x
+
+
+def qq_specs(engine) -> list[dict]:
+    """QQ plots vs the normal distribution for numeric columns."""
+    specs = []
+    for col in _numeric_profiles(engine)[:3]:
+        vals = pd.to_numeric(engine.df[col["name"]], errors="coerce").dropna()
+        if len(vals) < 10:
+            continue
+        sorted_vals = np.sort(vals.to_numpy())
+        n = len(sorted_vals)
+        probs = (np.arange(1, n + 1) - 0.5) / n
+        theoretical = _normal_ppf(probs)
+        data = [
+            {"x": _round(float(t), 4), "y": _round(float(v), 4)}
+            for t, v in zip(theoretical, sorted_vals)
+        ]
+        stats = col.get("stats") or {}
+        specs.append({
+            "chart_type": "qq",
+            "title": f"Q-Q plot of {col['name']}",
+            "description": (
+                f"Points near the diagonal suggest normality (skew {_round(stats.get('skewness'))})."
+            ),
+            "column": col["name"],
+            "data": data,
+        })
+    return specs
+
+
+def parallel_specs(engine) -> list[dict]:
+    """Parallel coordinates for up to 6 numeric columns."""
+    numerics = _numeric_profiles(engine)
+    if len(numerics) < 3:
+        return []
+    cols = [c["name"] for c in numerics[:6]]
+    df = _sample(engine.df)
+    frame = df[cols].apply(pd.to_numeric, errors="coerce")
+    frame = frame.dropna().head(MAX_POINTS)
+    if len(frame) < 5:
+        return []
+    mins, maxs = frame.min(), frame.max()
+    spans = (maxs - mins).replace(0, 1)
+    rows = []
+    for _, r in frame.iterrows():
+        row = {}
+        for c in cols:
+            row[c] = _round(float((r[c] - mins[c]) / spans[c]), 4)
+        rows.append(row)
+    return [{
+        "chart_type": "parallel",
+        "title": "Parallel coordinates of numeric columns",
+        "description": "Each line is a row; crossing lines reveal anti-correlated columns.",
+        "columns": cols,
+        "data": rows[:250],
+    }]
+
+
+def seasonal_specs(engine) -> list[dict]:
+    """Simple trend / seasonal / residual decomposition for a datetime + numeric pair."""
+    dts = _datetime_profiles(engine)
+    numerics = _numeric_profiles(engine)
+    if not dts or not numerics:
+        return []
+    date_col = dts[0]["name"]
+    value_col = numerics[0]["name"]
+    dates = pd.to_datetime(engine.df[date_col], errors="coerce")
+    values = pd.to_numeric(engine.df[value_col], errors="coerce")
+    frame = pd.DataFrame({"date": dates, "value": values}).dropna().sort_values("date")
+    if len(frame) < 14:
+        return []
+    frame = frame.set_index("date")["value"].resample("D").mean()
+    frame = frame.dropna()
+    if len(frame) < 14:
+        return []
+    trend = frame.rolling(7, min_periods=3).mean()
+    detrended = frame - trend
+    weekday = pd.Series(detrended.index.dayofweek, index=detrended.index)
+    seasonal = detrended.groupby(weekday).transform("mean")
+    residual = detrended - seasonal
+    data = [
+        {
+            "date": str(idx.date()),
+            "actual": _round(float(a), 4),
+            "trend": _round(float(t), 4) if not pd.isna(t) else None,
+            "seasonal": _round(float(s), 4),
+            "residual": _round(float(r), 4),
+        }
+        for idx, a, t, s, r in zip(frame.index, frame, trend, seasonal, residual)
+    ][:: max(1, len(frame) // 180)]
+    return [{
+        "chart_type": "seasonal",
+        "title": f"Trend & seasonality of {value_col}",
+        "description": "Additive decomposition: trend (7-day rolling mean), weekly seasonal pattern and residuals.",
+        "x": "date",
+        "y": value_col,
+        "data": data,
+    }]
+
+
 def build_advanced_charts(engine) -> list[dict]:
     specs = []
     for builder in (
         correlation_spec, box_spec, pair_plot_spec, bubble_spec,
-        distribution_specs, area_specs, stacked_bar_specs, multi_line_specs,
+        distribution_specs, violin_specs, qq_specs, area_specs, seasonal_specs,
+        stacked_bar_specs, multi_line_specs, parallel_specs,
         radar_specs, treemap_spec, sunburst_spec,
     ):
         result = builder(engine)

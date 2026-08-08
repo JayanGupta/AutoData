@@ -30,7 +30,7 @@ interface DatasetContextValue {
   cleaningSteps: CleaningStepLike[];
   upload: (file: File) => Promise<AnalysisSnapshot>;
   uploadViaJob: (file: File, onProgress?: (p: UploadProgress) => void) => Promise<AnalysisSnapshot>;
-  uploadSample: () => Promise<AnalysisSnapshot>;
+  uploadSample: (name?: string) => Promise<AnalysisSnapshot>;
   load: (id: string) => Promise<void>;
   listSessions: () => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
@@ -146,11 +146,11 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     [adoptSnapshot, setErrorSafe],
   );
 
-  const uploadSample = useCallback(async () => {
+  const uploadSample = useCallback(async (name?: string) => {
     setLoading(true);
     setErrorSafe(null);
     try {
-      const snap = await api.uploadSampleDataset();
+      const snap = await api.uploadSampleDataset(name);
       await adoptSnapshot(snap);
       return snap;
     } catch (e) {

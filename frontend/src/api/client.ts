@@ -11,6 +11,7 @@ import type {
   Insight,
   ReportResult,
   RowPage,
+  SampleInfo,
 } from "../types";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
@@ -103,8 +104,13 @@ export function getExportUrl(id: string, fmt: "csv" | "xlsx"): string {
   return `${BASE}/datasets/${id}/export?fmt=${fmt}`;
 }
 
-export function uploadSampleDataset(): Promise<AnalysisSnapshot> {
-  return request<AnalysisSnapshot>("/datasets/sample", { method: "POST" });
+export function uploadSampleDataset(name?: string): Promise<AnalysisSnapshot> {
+  const query = name ? `?name=${encodeURIComponent(name)}` : "";
+  return request<AnalysisSnapshot>(`/datasets/sample${query}`, { method: "POST" });
+}
+
+export function listSamples(): Promise<{ samples: SampleInfo[] }> {
+  return request<{ samples: SampleInfo[] }>("/samples");
 }
 
 export function listDatasets(): Promise<{ datasets: DatasetInfo[] }> {

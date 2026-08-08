@@ -37,8 +37,8 @@ export function UploadButton({ className = "", children }: UploadButtonProps) {
     setBusy(true);
     try {
       await uploadViaJob(file);
-      toastSuccess(`Analyzed "${file.name}" — ready to explore.`);
-      router.push("/dashboard");
+      toastSuccess(`Analyzed "${file.name}" — added to your library.`);
+      router.push("/datasets");
     } catch (e) {
       toastError(e instanceof Error ? e.message : "Analysis failed");
     } finally {

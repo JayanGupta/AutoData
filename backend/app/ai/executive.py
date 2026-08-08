@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 
+from ..data_engine import analysis
 from .insights import dataset_overview_text
 from .nlu import suggested_questions
 
@@ -248,3 +249,35 @@ def build_executive_summary(engine) -> dict:
         "suggested_next": _suggested_next(engine),
         "question_suggestions": suggested_questions(engine, limit=6),
     }
+
+
+def build_snippet(engine) -> str:
+    """A short, human-friendly one-liner summarising a dataset for list cards.
+
+    Cheap to compute (no insight regeneration) so it is safe to call for every
+    dataset in the library.
+    """
+    summary = engine.summary
+    quality = engine.quality["summary"]
+    parts = [
+        f"{summary['row_count']:,} rows",
+        f"{summary['column_count']} columns",
+        f"quality {quality['quality_score']}/100",
+    ]
+
+    cats = _categorical_profiles(engine)
+    if cats:
+        counts = analysis.count_by_category(engine.df, cats[0]["name"], limit=1)
+        if counts:
+            parts.append(f"top {cats[0]['name']}: {counts[0]['group']}")
+
+    dts = _datetime_profiles(engine)
+    numerics = _numeric_profiles(engine)
+    if dts and numerics:
+        trend = analysis.temporal_trend(engine.df, dts[0]["name"], numerics[0]["name"])
+        if trend:
+            parts.append(
+                f"{numerics[0]['name']} {trend['direction']} "
+                f"{abs(trend['change_pct']):.0f}% in H2"
+            )
+    return " · ".join(parts)

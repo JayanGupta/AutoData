@@ -28,6 +28,10 @@ const ADVANCED_TYPE_LABEL: Record<string, string> = {
   sunburst: "Sunburst",
   pair_plot: "Pair plot",
   correlation: "Correlation",
+  violin: "Violin",
+  qq: "Q-Q",
+  parallel: "Parallel",
+  seasonal: "Seasonal",
 };
 
 const ADVANCED_TYPES = Object.keys(ADVANCED_TYPE_LABEL);
@@ -84,8 +88,8 @@ export function VisualizationsPage() {
 
   const advancedCharts = advanced?.charts ?? [];
   const advancedRecs = useMemo(
-    () => (advanced?.recommendations ?? []).filter((r) => advancedCharts.some((c) => c.chart_type === r.chart_type)),
-    [advanced, advancedCharts],
+    () => (advanced?.recommendations ?? []).filter((r) => (advanced?.charts ?? []).some((c) => c.chart_type === r.chart_type)),
+    [advanced],
   );
   const advancedVisible =
     advFilter === "all"

@@ -28,7 +28,7 @@ import { Button, Spinner } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatBytes, formatTimestamp } from "@/lib/format";
 import { cn } from "./landing/primitives";
-import type { DatasetInfo } from "@/types";
+import type { DatasetInfo, SampleInfo } from "@/types";
 
 const ACCEPTED = [".csv", ".tsv", ".xlsx", ".xls"];
 const MAX_MB = 50;
@@ -36,6 +36,7 @@ const MAX_BYTES = MAX_MB * 1024 * 1024;
 
 type SortKey = "recent" | "name" | "size" | "quality";
 type FilterKey = "all" | "favorites";
+type TypeFilterKey = "all" | ".csv" | ".tsv" | ".xlsx" | ".xls";
 
 const FILE_META: Record<string, { icon: typeof FileType2; color: string; label: string }> = {
   ".csv": { icon: FileType2, color: "from-emerald-500/30 to-teal-500/10 text-emerald-300", label: "CSV" },
@@ -51,21 +52,33 @@ const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "quality", label: "Quality score" },
 ];
 
+const TYPE_OPTIONS: Array<{ key: TypeFilterKey; label: string }> = [
+  { key: "all", label: "All types" },
+  { key: ".csv", label: "CSV" },
+  { key: ".tsv", label: "TSV" },
+  { key: ".xlsx", label: "XLSX" },
+  { key: ".xls", label: "XLS" },
+];
+
 export function DatasetsPage() {
   const { load, uploadViaJob, uploadSample } = useDataset();
   const { error: toastError, success: toastSuccess } = useToast();
   const router = useRouter();
 
   const [datasets, setDatasets] = useState<DatasetInfo[]>([]);
+  const [samples, setSamples] = useState<SampleInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilterKey>("all");
 
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [sampleOpen, setSampleOpen] = useState(false);
   const [renaming, setRenaming] = useState<DatasetInfo | null>(null);
   const [deleting, setDeleting] = useState<DatasetInfo | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -80,7 +93,20 @@ export function DatasetsPage() {
 
   useEffect(() => {
     void refresh();
+    void api.listSamples().then((res) => setSamples(res.samples)).catch(() => {});
   }, [refresh]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      if (["input", "textarea", "select"].includes(tag)) return;
+      e.preventDefault();
+      searchRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const handleOpen = async (id: string) => {
     try {
@@ -88,6 +114,17 @@ export function DatasetsPage() {
       router.push("/dashboard");
     } catch (e) {
       toastError(e instanceof Error ? e.message : "Could not open this dataset");
+    }
+  };
+
+  const handleLoadSample = async (name?: string) => {
+    try {
+      await uploadSample(name);
+      await refresh();
+      toastSuccess("Sample dataset added to your library.");
+      setSampleOpen(false);
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Sample dataset failed to load");
     }
   };
 
@@ -133,6 +170,7 @@ export function DatasetsPage() {
 
   const visible = datasets
     .filter((d) => (filter === "favorites" ? d.favorite : true))
+    .filter((d) => (typeFilter === "all" ? true : (d.file_type ?? ".csv").toLowerCase() === typeFilter))
     .filter((d) => {
       const q = query.trim().toLowerCase();
       if (!q) return true;
@@ -150,6 +188,10 @@ export function DatasetsPage() {
           return (b.last_access ?? b.created_at) - (a.last_access ?? a.created_at);
       }
     });
+
+  const recentlyOpened = [...datasets]
+    .sort((a, b) => (b.last_access ?? b.created_at) - (a.last_access ?? a.created_at))
+    .slice(0, 6);
 
   return (
     <div className="min-h-screen bg-night-950 text-slate-100 antialiased">
@@ -170,7 +212,7 @@ export function DatasetsPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="md" onClick={() => void openSample(uploadSample, toastError, toastSuccess, router)}>
+            <Button variant="outline" size="md" onClick={() => setSampleOpen(true)}>
               <Sparkles className="h-4 w-4 text-violet-300" /> Sample dataset
             </Button>
             <Button onClick={() => setUploadOpen(true)}>
@@ -179,16 +221,55 @@ export function DatasetsPage() {
           </div>
         </header>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
+        {recentlyOpened.length > 0 && (
+          <section className="mt-8" aria-label="Recently opened datasets">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+              <Clock className="h-3.5 w-3.5 text-violet-300" /> Recently opened
+            </div>
+            <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1.5 [scrollbar-width:thin]">
+              {recentlyOpened.map((d) => {
+                const meta = fileMeta(d.file_type);
+                const Icon = meta.icon;
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => void handleOpen(d.id)}
+                    className="group flex shrink-0 items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] py-2.5 pl-3 pr-4 text-left transition-all hover:border-violet-400/30 hover:bg-white/[0.06]"
+                    title={`Open ${d.name}`}
+                  >
+                    <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ring-1 ring-white/10", meta.color)}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block max-w-[11rem] truncate text-xs font-medium text-slate-200 group-hover:text-white">
+                        {d.name}
+                      </span>
+                      <span className="block text-[10px] text-slate-500">
+                        {d.rows.toLocaleString()} rows · {(d.quality_score ?? 0)}/100
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <div className="relative min-w-[220px] flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <input
+              ref={searchRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search datasets…"
-              aria-label="Search datasets"
+              aria-label="Search datasets (press / to focus)"
               className="field !pl-10"
             />
+            <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-slate-500 sm:block">
+              /
+            </kbd>
           </div>
           <div className="flex gap-1 rounded-xl border border-white/[0.08] bg-white/[0.04] p-1">
             {(
@@ -211,6 +292,21 @@ export function DatasetsPage() {
               </button>
             ))}
           </div>
+          <label className="flex items-center gap-2 text-xs text-slate-500">
+            Type
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as TypeFilterKey)}
+              aria-label="Filter datasets by file type"
+              className="field !w-auto !py-1.5 text-xs"
+            >
+              {TYPE_OPTIONS.map((o) => (
+                <option key={o.key} value={o.key}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="flex items-center gap-2 text-xs text-slate-500">
             Sort by
             <select
@@ -239,10 +335,22 @@ export function DatasetsPage() {
             <EmptyState
               icon={<FolderUp className="h-7 w-7" />}
               title="No datasets yet"
-              description="Upload a CSV, TSV or Excel file to create your first analysis — or load the bundled sample dataset."
+              description="Upload a CSV, TSV or Excel file to create your first analysis — or load one of the ready-made samples below."
               actionLabel="Upload your first dataset"
               onAction={() => setUploadOpen(true)}
             />
+            {samples.length > 0 && (
+              <div className="mt-8">
+                <h2 className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-300">
+                  <Sparkles className="h-3.5 w-3.5" /> Ready-made sample datasets
+                </h2>
+                <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {samples.map((s) => (
+                    <SampleCard key={s.name} sample={s} onLoad={() => void handleLoadSample(s.name)} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : visible.length === 0 ? (
           <div className="mt-10">
@@ -279,8 +387,19 @@ export function DatasetsPage() {
       {uploadOpen && (
         <UploadModal
           onClose={() => setUploadOpen(false)}
-          onUploaded={(id) => void handleOpen(id)}
+          onUploaded={async () => {
+            setUploadOpen(false);
+            await refresh();
+            toastSuccess("Dataset added to your library.");
+          }}
           uploadViaJob={uploadViaJob}
+        />
+      )}
+      {sampleOpen && (
+        <SampleModal
+          samples={samples}
+          onClose={() => setSampleOpen(false)}
+          onLoad={(name) => void handleLoadSample(name)}
         />
       )}
       {renaming && (
@@ -298,21 +417,6 @@ export function DatasetsPage() {
       )}
     </div>
   );
-}
-
-async function openSample(
-  uploadSample: () => Promise<unknown>,
-  toastError: (m: string) => void,
-  toastSuccess: (m: string) => void,
-  router: ReturnType<typeof useRouter>,
-) {
-  try {
-    await uploadSample();
-    toastSuccess("Sample dataset loaded — ready to explore.");
-    router.push("/dashboard");
-  } catch (e) {
-    toastError(e instanceof Error ? e.message : "Sample dataset failed to load");
-  }
 }
 
 function Ambient() {
@@ -439,6 +543,13 @@ function DatasetCard({
         </span>
       </div>
 
+      {dataset.snippet && (
+        <p className="relative mt-3 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400">
+          <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-violet-300/70" />
+          <span className="line-clamp-2">{dataset.snippet}</span>
+        </p>
+      )}
+
       <div className="relative mt-4 flex items-center gap-1.5 border-t border-white/[0.06] pt-3.5">
         <button
           onClick={onOpen}
@@ -518,13 +629,111 @@ function SkeletonCard({ delay }: { delay: number }) {
   );
 }
 
+function SampleCard({ sample, onLoad }: { sample: SampleInfo; onLoad: () => void }) {
+  const meta = fileMeta(sample.file_type);
+  const Icon = meta.icon;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/[0.07] bg-night-900/70 p-5 shadow-inner-light backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/30 hover:shadow-glow-violet"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-violet-500/[0.1] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
+      <div className="relative flex items-start gap-4">
+        <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ring-1 ring-white/10", meta.color)}>
+          <Icon className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-display text-[15px] font-semibold text-white">{sample.title}</h3>
+          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-500">
+            {formatBytes(sample.size)} · {sample.file_type.toUpperCase()}
+          </p>
+        </div>
+        <Sparkles className="h-4 w-4 shrink-0 text-violet-300/70" />
+      </div>
+      <p className="relative mt-3 flex-1 text-xs leading-relaxed text-slate-400">{sample.description}</p>
+      <div className="relative mt-3 flex flex-wrap gap-1.5">
+        {sample.tags.map((t) => (
+          <Badge key={t} className="border-white/10 bg-white/[0.04] font-mono text-[10px] text-violet-200/80">
+            {t}
+          </Badge>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={onLoad}
+        className="btn-gradient relative mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold"
+      >
+        Load sample <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </motion.div>
+  );
+}
+
+function SampleModal({
+  samples,
+  onClose,
+  onLoad,
+}: {
+  samples: SampleInfo[];
+  onClose: () => void;
+  onLoad: (name: string) => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Load a sample dataset"
+    >
+      <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-night-800 shadow-2xl backdrop-blur-xl animate-modal-in">
+        <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
+          <div>
+            <h3 className="flex items-center gap-2 font-display text-base font-bold text-white">
+              <Sparkles className="h-4 w-4 text-violet-300" /> Sample datasets
+            </h3>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Curated datasets to explore the analytics workspace without uploading your own.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="grid max-h-[70vh] gap-4 overflow-y-auto p-5 sm:grid-cols-2">
+          {samples.length === 0 ? (
+            <div className="col-span-full flex items-center justify-center gap-2 py-10 text-sm text-slate-500">
+              <Spinner className="h-4 w-4 text-violet-300" /> Loading samples…
+            </div>
+          ) : (
+            samples.map((s) => (
+              <SampleCard key={s.name} sample={s} onLoad={() => onLoad(s.name)} />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function UploadModal({
   onClose,
   onUploaded,
   uploadViaJob,
 }: {
   onClose: () => void;
-  onUploaded: (id: string) => void;
+  onUploaded: () => void;
   uploadViaJob: (file: File, onProgress?: (p: { progress: number; stage: string; message: string }) => void) => Promise<{ dataset: { id: string } }>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -559,11 +768,11 @@ function UploadModal({
     setProgress(0);
     setStage("validating");
     try {
-      const snap = await uploadViaJob(file, (p) => {
+      await uploadViaJob(file, (p) => {
         setProgress(p.progress);
         setStage(p.stage);
       });
-      onUploaded(snap.dataset.id);
+      onUploaded();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed");
       setFileName(null);

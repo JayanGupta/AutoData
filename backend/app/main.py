@@ -40,7 +40,34 @@ from .sessions.store import store
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("autodata")
 
-SAMPLE_DATA_PATH = Path(__file__).resolve().parents[2] / "sample_data" / "sales_data.csv"
+SAMPLE_DATA_DIR = Path(__file__).resolve().parents[2] / "sample_data"
+
+SAMPLE_CATALOG = [
+    {
+        "name": "sales_data",
+        "title": "Retail sales",
+        "description": "1,201 orders with revenue, regions, channels and product categories. Includes deliberately injected quality issues to explore.",
+        "file": "sales_data.csv",
+        "file_type": ".csv",
+        "tags": ["retail", "time series", "categories"],
+    },
+    {
+        "name": "customer_churn",
+        "title": "Customer churn",
+        "description": "1,501 telecom customers with plans, contracts, usage and churn outcomes — ideal for classification-style exploration.",
+        "file": "customer_churn.csv",
+        "file_type": ".csv",
+        "tags": ["telecom", "categories", "target"],
+    },
+    {
+        "name": "web_traffic",
+        "title": "Web traffic",
+        "description": "365 days of marketing metrics with a clear trend and weekly seasonality — perfect for time-series analysis.",
+        "file": "web_traffic.csv",
+        "file_type": ".csv",
+        "tags": ["marketing", "time series", "seasonality"],
+    },
+]
 
 app = FastAPI(title="AI Data Analyst", version="2.0.0")
 
@@ -223,10 +250,14 @@ async def upload_dataset(
 
 
 @app.post("/api/datasets/sample")
-def upload_sample_dataset():
+def upload_sample_dataset(name: str = "sales_data"):
+    entry = next((s for s in SAMPLE_CATALOG if s["name"] == name), None)
+    if entry is None:
+        raise HTTPException(status_code=400, detail=f"Unknown sample dataset '{name}'.")
+    path = SAMPLE_DATA_DIR / entry["file"]
     try:
-        data = SAMPLE_DATA_PATH.read_bytes()
-        df = load_dataframe(data, SAMPLE_DATA_PATH.name)
+        data = path.read_bytes()
+        df = load_dataframe(data, path.name)
     except DataLoadError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except OSError as exc:
@@ -235,8 +266,18 @@ def upload_sample_dataset():
     from .data_engine import analyze
 
     engine = analyze(df)
-    session = store.create(SAMPLE_DATA_PATH.name, engine, file_size=len(data), file_type=".csv")
+    session = store.create(path.name, engine, file_size=len(data), file_type=".csv")
     return _snapshot(session.id)
+
+
+@app.get("/api/samples")
+def list_samples():
+    catalog = []
+    for entry in SAMPLE_CATALOG:
+        path = SAMPLE_DATA_DIR / entry["file"]
+        size = path.stat().st_size if path.exists() else 0
+        catalog.append({**entry, "size": size})
+    return {"samples": catalog}
 
 
 @app.get("/api/datasets/{session_id}")
