@@ -28,6 +28,26 @@
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/landing.png" width="100%" alt="AutoData landing page">
+  <br/>
+  <em>Landing page with live dashboard preview</em>
+</p>
+
+<p align="center">
+  <img src="docs/landing-features.png" width="100%" alt="AutoData feature highlights">
+  <br/>
+  <em>Feature highlights and workflow</em>
+</p>
+
+<p align="center">
+  <img src="docs/datasets.png" width="100%" alt="AutoData dataset library">
+  <br/>
+  <em>Dataset library with search, filters, and sample data</em>
+</p>
+
 ## Why AutoData
 
 Most data-analysis tools are either black-box SaaS (your data leaves your machine) or require you to string together a dozen notebooks and scripts. AutoData sits in the middle: a self-contained, run-anywhere pipeline that takes a raw file and walks it through a complete analysis workflow — automatically, with no code, and with every number grounded in your actual data.
