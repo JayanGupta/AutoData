@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import threading
 from pathlib import Path
@@ -8,7 +9,10 @@ from typing import Any
 
 import pandas as pd
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+# Overridable so deployments can point the session database at a persistent
+# disk (e.g. AUTODATA_DATA_DIR=/opt/data on Render) instead of the ephemeral
+# package directory.
+DATA_DIR = Path(os.getenv("AUTODATA_DATA_DIR", str(Path(__file__).resolve().parents[1] / "data")))
 DB_PATH = DATA_DIR / "sessions.db"
 _LOCK = threading.Lock()
 

@@ -1,0 +1,42 @@
+services:
+  # Backend: FastAPI + pandas analysis engine
+  # The frontend reverse-proxies every /api request to this service.
+  - type: web
+    name: autodata-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: CORS_ORIGINS
+        value: "*"
+      # Data lives here. Free tier is ephemeral: data is lost on spin-down or
+      # redeploy. To persist, upgrade to a paid instance type and attach a
+      # disk mounted at /opt/data (see https://render.com/docs/disks).
+      - key: AUTODATA_DATA_DIR
+        value: /opt/data
+
+  # Frontend: Next.js app. Every /api request is proxied server-side to the
+  # backend service through the rewrite in frontend/next.config.mjs, which
+  # reads BACKEND_URL (set below to the backend's public URL).
+  - type: web
+    name: autodata-frontend
+    runtime: node
+    rootDir: frontend
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.1
+      - key: BACKEND_URL
+        fromService:
+          name: autodata-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
