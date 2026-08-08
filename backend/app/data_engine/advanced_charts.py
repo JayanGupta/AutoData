@@ -52,9 +52,12 @@ def _sample(df: pd.DataFrame, n: int = MAX_POINTS) -> pd.DataFrame:
 
 def _round(v, digits: int = 4):
     try:
-        return round(float(v), digits)
+        f = float(v)
     except (TypeError, ValueError):
         return None
+    if not math.isfinite(f):
+        return None
+    return round(f, digits)
 
 
 def box_spec(engine) -> dict | None:

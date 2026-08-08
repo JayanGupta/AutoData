@@ -131,5 +131,35 @@ class TestAnalystIntents(unittest.TestCase):
         self.assertEqual(res["intent"], "median")
 
 
+class TestAdvancedChartsJsonSafe(unittest.TestCase):
+    """Advanced chart specs must be fully JSON-serializable (no NaN/Inf)."""
+
+    def test_specs_contain_no_non_finite_floats(self):
+        import json
+        import math
+
+        from app.data_engine.advanced_charts import build_advanced_charts
+
+        engine = load_sample()
+        specs = build_advanced_charts(engine)
+        self.assertTrue(specs, "expected at least one advanced chart spec")
+        dumped = json.dumps(specs)  # would raise if a non-finite float leaked
+        parsed = json.loads(dumped)
+        self.assertEqual(parsed, specs)
+
+        def _walk(node):
+            if isinstance(node, float):
+                self.assertTrue(math.isfinite(node), f"non-finite float in spec: {node!r}")
+            elif isinstance(node, dict):
+                for v in node.values():
+                    _walk(v)
+            elif isinstance(node, list):
+                for v in node:
+                    _walk(v)
+
+        for spec in specs:
+            _walk(spec)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
