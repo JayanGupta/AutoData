@@ -35,6 +35,7 @@ interface DatasetContextValue {
   listSessions: () => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
   refreshInsights: () => Promise<void>;
+  generateInsights: () => Promise<void>;
   applyClean: (action: string, params?: { column?: string; value?: string | number | null }) => Promise<CleaningResponse | undefined>;
   undoClean: () => Promise<CleaningResponse | undefined>;
   resumeRecent: () => Promise<boolean>;
@@ -205,6 +206,19 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     }
   }, [snapshot]);
 
+  const generateInsights = useCallback(async () => {
+    if (!snapshot) return;
+    setInsightsLoading(true);
+    try {
+      // POST invalidates the engine's insight cache server-side so patterns
+      // are recomputed from the latest (possibly cleaned) dataset.
+      const result = await api.generateInsights(snapshot.dataset.id);
+      setInsights(result.insights);
+    } finally {
+      setInsightsLoading(false);
+    }
+  }, [snapshot]);
+
   const applyClean = useCallback(
     async (action: string, params: { column?: string; value?: string | number | null } = {}) => {
       if (!snapshot) return undefined;
@@ -271,6 +285,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       listSessions,
       deleteSession,
       refreshInsights,
+      generateInsights,
       applyClean,
       undoClean,
       resumeRecent,
@@ -280,7 +295,8 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     [
       snapshot, loading, error, insights, insightsLoading, sessions, cleaningSteps,
       upload, uploadViaJob, uploadSample, load, listSessions, deleteSession,
-      refreshInsights, applyClean, undoClean, resumeRecent, clear, clearError,
+      refreshInsights, generateInsights, applyClean, undoClean, resumeRecent,
+      clear, clearError,
     ],
   );
 

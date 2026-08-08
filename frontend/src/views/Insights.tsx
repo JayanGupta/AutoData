@@ -9,11 +9,11 @@ import { categoryLabel } from "../lib/format";
 import type { Insight } from "../types";
 
 export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
-  const { snapshot, insights, insightsLoading, refreshInsights } = useDataset();
+  const { snapshot, insights, insightsLoading, generateInsights } = useDataset();
 
   useEffect(() => {
     if (snapshot && insights.length === 0 && !insightsLoading) {
-      void refreshInsights();
+      void generateInsights();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot?.dataset.id]);
@@ -31,7 +31,7 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
             Patterns detected automatically from the actual data — every insight links to its evidence.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void refreshInsights()} loading={insightsLoading}>
+        <Button variant="outline" size="sm" onClick={() => void generateInsights()} loading={insightsLoading}>
           {!insightsLoading && <RefreshCw className="h-4 w-4" />}
           Regenerate
         </Button>
@@ -48,7 +48,7 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
           title="No insights generated yet"
           description="Click regenerate to have the AI analyst scan your dataset for patterns, trends and anomalies."
           actionLabel="Generate insights"
-          onAction={() => void refreshInsights()}
+          onAction={() => void generateInsights()}
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

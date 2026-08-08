@@ -43,7 +43,12 @@ export function Dashboard() {
   }, [section]);
 
   useEffect(() => {
-    if (snapshot) return;
+    if (snapshot) {
+      // Snapshot is already loaded (e.g. opened from the dataset library), so
+      // the workspace is ready immediately.
+      setRestoring(false);
+      return;
+    }
     let mounted = true;
     void (async () => {
       const ok = await resumeRecent();
