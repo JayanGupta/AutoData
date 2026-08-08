@@ -122,11 +122,7 @@ function HistogramView({ chart, height }: { chart: ChartSpec; height: number }) 
         <XAxis dataKey="label" tick={XTickLabel} interval="preserveStartEnd" angle={-35} textAnchor="end" height={50} stroke="rgba(255,255,255,0.06)" />
         <YAxis tick={YTickLabel} width={44} stroke="rgba(255,255,255,0.06)" />
         <Tooltip content={<DataTooltip valueName="count" />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-        <Bar dataKey="count" radius={[5, 5, 0, 0]} maxBarSize={48}>
-          {data.map((_, i) => (
-            <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.9} />
-          ))}
-        </Bar>
+        <Bar dataKey="count" fill={PALETTE[0]} fillOpacity={0.85} radius={[5, 5, 0, 0]} maxBarSize={48} />
       </BarChart>
     </ResponsiveContainer>
   );
