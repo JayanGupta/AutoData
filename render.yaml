@@ -18,9 +18,7 @@ services:
       # Data lives here. Free tier is ephemeral: data is lost on spin-down or
       # redeploy. To persist, upgrade to a paid instance type and attach a
       # disk mounted at /opt/data (see https://render.com/docs/disks).
-      - key: AUTODATA_DATA_DIR
-        value: /opt/data
-
+      
   # Frontend: Next.js app. Every /api request is proxied server-side to the
   # backend service through the rewrite in frontend/next.config.mjs, which
   # reads BACKEND_URL (set below to the backend's public URL).
