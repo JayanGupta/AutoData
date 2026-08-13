@@ -1,0 +1,1 @@
+- [2026-08-13] Add notes on docker configuration
