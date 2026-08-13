@@ -1,1 +1,2 @@
 - [2026-08-13] Add notes on docker configuration
+- [2026-08-13] Update project dependencies
