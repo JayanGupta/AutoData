@@ -128,6 +128,33 @@ class _JobStore:
 jobs = _JobStore()
 
 
+def _validate_upload(filename: str, data: bytes) -> None:
+    """Shared validation for file uploads.
+
+    Checks both file extension (against ``config.ALLOWED_EXTENSIONS``) and
+    file size (against ``config.MAX_UPLOAD_BYTES``).  Raises
+    :class:`~fastapi.HTTPException` with a descriptive 400 message on failure.
+    """
+    ext = Path(filename).suffix.lower()
+    if ext not in config.ALLOWED_EXTENSIONS:
+        allowed = ", ".join(sorted(config.ALLOWED_EXTENSIONS))
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported file type '{ext}'. "
+                f"Allowed types: {allowed}"
+            ),
+        )
+    if len(data) > config.MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"File is too large ({len(data) / (1024 * 1024):.1f} MB). "
+                f"Maximum allowed size is {config.MAX_UPLOAD_MB} MB."
+            ),
+        )
+
+
 def _get_session_or_404(session_id: str):
     session = store.get(session_id)
     if session is None:
@@ -203,15 +230,7 @@ async def create_upload_job(
     if file.filename is None:
         raise HTTPException(status_code=400, detail="No file name provided.")
     data = await file.read()
-    # Fail fast on size before queueing the job.
-    if len(data) > config.MAX_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"File is too large ({len(data) / (1024 * 1024):.1f} MB). "
-                f"Maximum allowed size is {config.MAX_UPLOAD_MB} MB."
-            ),
-        )
+    _validate_upload(file.filename, data)
     job_id = jobs.create(file.filename)
     thread = threading.Thread(
         target=_run_analysis_job, args=(job_id, data, file.filename, sheet_name), daemon=True
@@ -236,6 +255,7 @@ async def upload_dataset(
     if file.filename is None:
         raise HTTPException(status_code=400, detail="No file name provided.")
     data = await file.read()
+    _validate_upload(file.filename, data)
     try:
         df = load_dataframe(data, file.filename, sheet_name)
     except DataLoadError as exc:
