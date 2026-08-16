@@ -13,7 +13,7 @@
   <a href="#tests"><img src="https://img.shields.io/badge/tests-55_passing-22c55e?style=flat-square" alt="55 tests passing"></a>
   <a href="#privacy-note"><img src="https://img.shields.io/badge/privacy-100%25_local-fbbf24?style=flat-square" alt="100% local"></a>
   <br/>
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11">
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/pandas-2.x-150458?style=flat-square&logo=pandas&logoColor=white" alt="pandas">
   <img src="https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 14">
