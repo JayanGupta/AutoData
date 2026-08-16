@@ -199,5 +199,5 @@ Datasets are stored locally in a SQLite database under `backend/app/data/` and n
 ---
 
 <p align="center">
-  Built with FastAPI & Next.js. Questions, ideas, and pull requests are welcome.
+  Built with FastAPI & Next.js. Questions, ideas, and pull requests are welcome !
 </p>
