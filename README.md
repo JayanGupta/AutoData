@@ -27,6 +27,10 @@
   <a href="https://github.com/JayanGupta/AutoData/stargazers"><img src="https://img.shields.io/github/stars/JayanGupta/AutoData?style=social" alt="Stars"></a>
 </p>
 
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api/pin/?username=JayanGupta&repo=AutoData&theme=radical" alt="GitHub Stats">
+</p>
+
 ---
 
 ## 📸 Screenshots
