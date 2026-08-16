@@ -7,23 +7,23 @@
 </p>
 
 <p align="center">
-  <a href="#features"><img src="https://img.shields.io/badge/features-9-8b5cf6?style=flat-square" alt="Features"></a>
-  <a href="#quick-start"><img src="https://img.shields.io/badge/quickstart-2_min-22d3ee?style=flat-square" alt="Quick start"></a>
-  <a href="#deploy-to-render-free"><img src="https://img.shields.io/badge/deploy-render_free-34d399?style=flat-square" alt="Deploy to Render (free)"></a>
-  <a href="#tests"><img src="https://img.shields.io/badge/tests-55_passing-22c55e?style=flat-square" alt="55 tests passing"></a>
-  <a href="#privacy-note"><img src="https://img.shields.io/badge/privacy-100%25_local-fbbf24?style=flat-square" alt="100% local"></a>
-  <br/>
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/pandas-2.x-150458?style=flat-square&logo=pandas&logoColor=white" alt="pandas">
-  <img src="https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 14">
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18">
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Tailwind%2520CSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/Recharts-2.x-FF6B6B?style=flat-square" alt="Recharts">
-  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
-  <br/>
-  <a href="#contributing-and-vibe-coding-✨"><img src="https://img.shields.io/badge/PRs-welcome-8b5cf6?style=flat-square&logo=github" alt="PRs welcome"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/features-9-8b5cf6?style=for-the-badge" alt="Features"></a>
+  <a href="#quick-start"><img src="https://img.shields.io/badge/quickstart-2_min-22d3ee?style=for-the-badge" alt="Quick start"></a>
+  <a href="#deploy-to-render-free"><img src="https://img.shields.io/badge/deploy-render_free-34d399?style=for-the-badge" alt="Deploy to Render (free)"></a>
+  <a href="#tests"><img src="https://img.shields.io/badge/tests-55_passing-22c55e?style=for-the-badge" alt="55 tests passing"></a>
+  <a href="#privacy-note"><img src="https://img.shields.io/badge/privacy-100%25_local-fbbf24?style=for-the-badge" alt="100% local"></a>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/pandas-2.x-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="pandas">
+  <img src="https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 14">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 18">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind%2520CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Recharts-2.x-FF6B6B?style=for-the-badge" alt="Recharts">
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+  <br/><br/>
+  <a href="#contributing-and-vibe-coding-✨"><img src="https://img.shields.io/badge/PRs-welcome-8b5cf6?style=for-the-badge&logo=github" alt="PRs welcome"></a>
   <a href="https://github.com/JayanGupta/AutoData/stargazers"><img src="https://img.shields.io/github/stars/JayanGupta/AutoData?style=social" alt="Stars"></a>
 </p>
 
