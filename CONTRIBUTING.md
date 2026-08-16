@@ -1,23 +1,51 @@
 # Contributing to AutoData
 
-First off, thank you for considering contributing to AutoData! 
+Thank you for considering contributing! This guide covers the essentials.
 
-## Development Setup
-1. Clone the repository
-2. Set up the backend:
+## Getting started
+
+1. Fork the repo and clone your fork.
+2. Create a branch: `git checkout -b feat/your-feature`
+3. Install deps — see [Quick start](README.md#quick-start).
+4. Make your changes and run the test suite:
    ```bash
    cd backend
-   pip install -r requirements.txt
+   python -m unittest tests.test_engine tests.test_features tests.test_api -v
    ```
-3. Set up the frontend:
-   ```bash
-   cd frontend
-   npm install
-   ```
-4. Run locally using `./start.sh` or starting the respective dev servers.
+5. Open a pull request against `main`.
 
-## Pull Request Process
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a build.
-2. Update the README.md with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations and container parameters.
-3. Your code should pass the tests in the backend. 
-4. You may merge the Pull Request in once you have the sign-off of other developers, or if you do not have permission to do that, you may request the reviewer to merge it for you.
+## Branch naming
+
+| Type | Pattern |
+| --- | --- |
+| Feature | `feat/<short-description>` |
+| Bug fix | `fix/<short-description>` |
+| Docs | `docs/<short-description>` |
+| Chore | `chore/<short-description>` |
+
+## Commit style
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: add CSV export endpoint
+fix: handle empty column edge case in profiler
+docs: update deploy instructions
+```
+
+## Code style
+
+- **Python**: follow PEP 8; format with `black .` before committing.
+- **TypeScript/React**: run `npm run lint` from `frontend/`.
+- Keep functions small and focused; prefer explicit over implicit.
+
+## Reporting bugs
+
+Open an issue with:
+- Steps to reproduce
+- Expected vs. actual behaviour
+- AutoData version / OS / Python version
+
+## Suggesting features
+
+Open a discussion or issue labelled `enhancement` before coding, so we can align on scope first.
