@@ -19,16 +19,17 @@
   <img src="https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 14">
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18">
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Tailwind%20CSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Tailwind%2520CSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/Recharts-2.x-FF6B6B?style=flat-square" alt="Recharts">
   <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
   <br/>
-  <img src="https://img.shields.io/badge/PRs-welcome-8b5cf6?style=flat-square" alt="PRs welcome">
+  <a href="#contributing-and-vibe-coding-✨"><img src="https://img.shields.io/badge/PRs-welcome-8b5cf6?style=flat-square&logo=github" alt="PRs welcome"></a>
+  <a href="https://github.com/JayanGupta/AutoData/stargazers"><img src="https://img.shields.io/github/stars/JayanGupta/AutoData?style=social" alt="Stars"></a>
 </p>
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
 <p align="center">
   <img src="docs/landing.png" width="100%" alt="AutoData landing page">
@@ -48,11 +49,11 @@
   <em>Dataset library with search, filters, and sample data</em>
 </p>
 
-## Why AutoData
+## 🚀 Why AutoData
 
 Most data-analysis tools are either black-box SaaS (your data leaves your machine) or require you to string together a dozen notebooks and scripts. AutoData sits in the middle: a self-contained, run-anywhere pipeline that takes a raw file and walks it through a complete analysis workflow — automatically, with no code, and with every number grounded in your actual data.
 
-## Features
+## ✨ Features
 
 - 📥 **Upload anything** — CSV / TSV / Excel (`.xlsx` & `.xls`), up to 50 MB, with automatic encoding & delimiter sniffing and async background jobs for large files
 - 🔍 **Auto-profiling** — column type inference, distributions, summary statistics, semantic hints, and PII / sensitive-column detection
@@ -64,34 +65,22 @@ Most data-analysis tools are either black-box SaaS (your data leaves your machin
 - 🧠 **AI insights** — deterministic pattern detection (correlations, trends, top performers, outliers), each linked to its chart evidence
 - 📤 **Export & report** — download the cleaned dataset as CSV or XLSX, or generate a shareable report in Markdown, HTML, or PDF
 
-## Quick start
+## 🛠️ Quick start
 
-Requirements: Python 3.11+, Node 18+.
+Requirements: Python 3.11+, Node 18+, or Docker.
 
+**Using Docker Compose (Recommended)**
 ```bash
-# one command — installs deps and starts both servers
-./start.sh
+docker-compose up --build
 ```
+Open **http://localhost:3000** in your browser.
 
-Or start them yourself:
-
-**1. Backend** (http://localhost:8000)
-
+**Using Make (Local Development)**
 ```bash
-cd backend
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
+make setup
+make dev
 ```
-
-**2. Frontend** (http://localhost:5173, in a second terminal)
-
-```bash
-cd frontend
-npm install
-npm run dev -- -p 5173
-```
-
-Open **http://localhost:5173** — the Next.js dev server reverse-proxies every `/api/*` request to the backend on port 8000, so there is no CORS setup to do.
+Open **http://localhost:3000** in your browser.
 
 ### Environment Variables
 
@@ -107,16 +96,7 @@ Copy `backend/.env.example` to `backend/.env` and configure your credentials if 
 > [!NOTE]
 > **No API Key? No problem.** AutoData will gracefully fall back to **local rule-based mode**. The AI Analyst will still answer questions and generate insights completely locally using deterministic statistical rules.
 
-## Tech stack
-
-| Layer | Tech |
-| --- | --- |
-| Frontend | React 18, TypeScript, Next.js 14, Tailwind CSS, Recharts |
-| Backend | Python 3.11, FastAPI, pandas, numpy, reportlab |
-| Storage | SQLite (sessions + conversation history) with CSV/JSON persistence — portable, no pickling |
-| AI | Optional OpenAI-compatible LLM (SQL generation + interpretation); fully functional **local rule-based mode** without a key |
-
-## Architecture
+## 🏗️ Architecture
 
 ```mermaid
 graph TD
@@ -158,7 +138,7 @@ graph TD
     end
 ```
 
-## Deploy to Render (free)
+## ☁️ Deploy to Render (free)
 
 Push this repo to GitHub, then on Render: **New → Blueprint**, pick the repo.
 The `render.yaml` at the repo root defines two **free** web services — no credit
@@ -173,63 +153,30 @@ Open the frontend's `*.onrender.com` URL — the browser only ever talks to the
 frontend, which reverse-proxies `/api` to the backend, so no CORS setup is
 needed.
 
-Free-tier caveats to know:
-
-- **Cold start** — the first request after ~15 min idle takes ~1 minute while Render boots the service.
-- **Ephemeral storage** — uploaded datasets / sessions are lost when a free service spins down or redeploys. For durable storage, upgrade to a paid instance and attach a disk at `/opt/data` (set `AUTODATA_DATA_DIR` in the backend env — it's already wired up in code).
-- **Always-on** — switch both services to a paid instance type if you need zero idle spin-down.
-- **LLM** — add your own `USER_LLM_API_KEY` to the backend service env vars to enable AI answers; otherwise the app runs in local rule-based mode.
-
-## API overview
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `POST` | `/api/jobs/upload` | Upload file → returns a job id (async background analysis) |
-| `GET` | `/api/jobs/{id}` | Poll job status / progress |
-| `POST` | `/api/datasets` | Upload file → full analysis snapshot (sync) |
-| `GET` | `/api/datasets` | List saved sessions |
-| `GET` | `/api/datasets/{id}` | Fetch snapshot (overview, quality, charts) |
-| `POST` | `/api/datasets/sample?name=` | Load a bundled sample dataset |
-| `GET` | `/api/samples` | List the sample dataset catalog |
-| `GET` | `/api/datasets/{id}/rows` | Paginated raw rows |
-| `GET` | `/api/datasets/{id}/export?fmt=csv\|xlsx` | Download the cleaned dataset |
-| `POST` | `/api/datasets/{id}/clean` | Apply a cleaning step |
-| `POST` | `/api/datasets/{id}/clean/undo` | Undo the last cleaning step |
-| `GET` | `/api/datasets/{id}/cleaning` | Cleaning history |
-| `GET` | `/api/datasets/{id}/insights` | Auto-generated insights |
-| `POST` | `/api/datasets/{id}/insights/generate` | Re-run insight generation |
-| `GET` | `/api/datasets/{id}/suggested-questions` | Suggested analyst questions |
-| `POST` | `/api/datasets/{id}/ask` | Natural-language question |
-| `GET` | `/api/datasets/{id}/report?fmt=markdown\|html\|pdf` | Report (markdown, html or pdf) |
-| `GET` | `/api/llm/status` | LLM availability |
-
-## Tests
+## 🧪 Tests
 
 ```bash
-cd backend
-python -m unittest tests.test_engine tests.test_features tests.test_api -v
+make test
 ```
 
-## Try it with sample data
+## 🤝 Contributing and Vibe Coding ✨
 
-Three curated sample datasets ship in `sample_data/`, generated by `generate_samples.py`:
+**We love contributions!** Whether you're a seasoned developer, a data scientist, or someone who loves "vibe coding" with AI tools like GitHub Copilot or Cursor, you are incredibly welcome here.
 
-- `sales_data.csv` — 1,201 retail orders with revenue, regions, channels and product categories, including deliberately injected quality issues to explore
-- `customer_churn.csv` — 1,501 telecom customers with plans, contracts, usage and churn outcomes
-- `web_traffic.csv` — 365 days of marketing metrics with a clear trend and weekly seasonality
+How you can contribute:
+*   **Vibe Coding 🤖**: Drop this repository into Cursor, Claude, or your favorite AI IDE, and start chatting to build features! We encourage AI-assisted contributions.
+*   **Code 💻**: Found a bug? Have a feature idea? Open a PR! The `Makefile` and `docker-compose.yml` make it super easy to spin up the dev environment.
+*   **Ideas & Feedback 💡**: Open an Issue or start a Discussion. We want to hear how you use AutoData.
+*   **Spread the word 🌟**: If you like what we're building, give us a **Star**! It helps the project grow.
 
-Load any of them from the landing page or the Dataset library, then open a card to enter the analytics workspace.
+Don't worry if your code isn't perfect. We are happy to help you get your PR across the finish line! 
 
-## Privacy note
+## 🔒 Privacy note
 
 Datasets are stored locally in a SQLite database under `backend/app/data/` and never leave your machine. Nothing is uploaded to a cloud. When no LLM key is configured, all analysis is computed locally with deterministic rules.
 
 ---
 
 <p align="center">
-  Built with ❤️ using FastAPI & Next.js by Jayan Gupta. Pull requests are welcome !
+  Built with ❤️ using FastAPI & Next.js by Jayan Gupta.
 </p>
- 
-    
-  
- 
