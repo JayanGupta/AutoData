@@ -93,18 +93,19 @@ npm run dev -- -p 5173
 
 Open **http://localhost:5173** — the Next.js dev server reverse-proxies every `/api/*` request to the backend on port 8000, so there is no CORS setup to do.
 
-### Optional: enable the LLM
+### Environment Variables
 
-Copy `backend/.env.example` to `backend/.env` and fill in your own credentials:
+Copy `backend/.env.example` to `backend/.env` and configure your credentials if you want to unlock AI capabilities. 
 
-```bash
-cp backend/.env.example backend/.env
-# USER_LLM_API_KEY=...
-# USER_LLM_BASE_URL=https://api.deepseek.com/v1
-# USER_LLM_MODEL=deepseek-chat
-```
+| Variable | Description | Default / Example |
+| :--- | :--- | :--- |
+| `USER_LLM_API_KEY` | Your API key for the LLM provider. | `sk-...` |
+| `USER_LLM_BASE_URL` | The base URL for the OpenAI-compatible API. | `https://api.deepseek.com/v1` |
+| `USER_LLM_MODEL` | The specific model to use for AI Q&A. | `deepseek-chat` |
+| `AUTODATA_DATA_DIR` | (Optional) Path for durable storage. | `/opt/data` (on Render) |
 
-No key? No problem. AutoData runs in **local rule-based mode** — the AI analyst still answers questions and generates insights purely from computed statistics.
+> [!NOTE]
+> **No API Key? No problem.** AutoData will gracefully fall back to **local rule-based mode**. The AI Analyst will still answer questions and generate insights completely locally using deterministic statistical rules.
 
 ## Tech stack
 
@@ -117,17 +118,44 @@ No key? No problem. AutoData runs in **local rule-based mode** — the AI analys
 
 ## Architecture
 
-```
-frontend/            Next.js app (port 5173) — reverse-proxies /api → backend
-backend/             FastAPI app (port 8000)
-  app/
-    data_engine/     loader → profiler → quality → analysis → charts → cleaning
-    ai/              insights, nlu (LLM or local), sql_runner, llm_client, local_analyst
-    sessions/        SQLite-backed session store
-    data_store/      persistence (SQLite: sessions, history, conversation)
-    main.py          REST API (job runner, export, report, cleaning history, rate limiting)
-  tests/             stdlib unittest suite (unit + API integration)
-sample_data/         curated sample datasets (sales, customer churn, web traffic)
+```mermaid
+graph TD
+    %% Define Styles
+    classDef frontend fill:#000000,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef backend fill:#009688,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef storage fill:#003B57,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef ai fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff;
+
+    %% Nodes
+    User(("👤 User"))
+    NextJS["⚛️ Next.js Frontend (React)"]:::frontend
+    FastAPI["⚡ FastAPI Backend (Python)"]:::backend
+    SQLite[("🗄️ SQLite Database")]:::storage
+    DataEngine["⚙️ Data Engine (pandas/numpy)"]:::backend
+    AIEngine["🤖 AI Analyst Engine"]:::ai
+    LLM["☁️ LLM Provider (Optional)"]:::ai
+
+    %% Connections
+    User -- "Upload CSV/Excel\nInteract with UI" --> NextJS
+    NextJS -- "REST API Proxy (/api/*)" --> FastAPI
+    
+    FastAPI -- "Manage Sessions\nStore History" --> SQLite
+    FastAPI -- "Process Data" --> DataEngine
+    FastAPI -- "Natural Language Q&A" --> AIEngine
+    
+    DataEngine -- "Load, Profile, Clean" --> DataEngine
+    
+    AIEngine -. "API Call" .-> LLM
+    AIEngine -- "Fallback" --> DataEngine
+
+    %% Subgraphs for organization
+    subgraph "Local Environment"
+        NextJS
+        FastAPI
+        SQLite
+        DataEngine
+        AIEngine
+    end
 ```
 
 ## Deploy to Render (free)
