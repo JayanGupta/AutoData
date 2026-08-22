@@ -33,6 +33,19 @@
 
 ---
 
+## 📑 Table of Contents
+- [Screenshots](#-screenshots)
+- [Why AutoData](#-why-autodata)
+- [Features](#-features)
+- [Quick Start](#️-quick-start)
+- [Architecture](#️-architecture)
+- [Deploy to Render](#️-deploy-to-render-free)
+- [Tests](#-tests)
+- [Contributing](#-contributing-and-vibe-coding-)
+- [Privacy Note](#-privacy-note)
+
+---
+
 ## 📸 Screenshots
 
 <p align="center">
@@ -167,13 +180,15 @@ make test
 
 **We love contributions!** Whether you're a seasoned developer, a data scientist, or someone who loves "vibe coding" with AI tools like GitHub Copilot or Cursor, you are incredibly welcome here.
 
+Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started, and please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions.
+
 How you can contribute:
 *   **Vibe Coding 🤖**: Drop this repository into Cursor, Claude, or your favorite AI IDE, and start chatting to build features! We encourage AI-assisted contributions.
 *   **Code 💻**: Found a bug? Have a feature idea? Open a PR! The `Makefile` and `docker-compose.yml` make it super easy to spin up the dev environment.
 *   **Ideas & Feedback 💡**: Open an Issue or start a Discussion. We want to hear how you use AutoData.
 *   **Spread the word 🌟**: If you like what we're building, give us a **Star**! It helps the project grow.
 
-Don't worry if your code isn't perfect. We are happy to help you get your PR across the finish line! 
+Don't worry if your code isn't perfect. We are happy to help you get your PR across the finish line!
 
 ## 🔒 Privacy note
 
