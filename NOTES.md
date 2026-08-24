@@ -6,3 +6,4 @@
 - [2026-08-19] Update api setup notes
 - [2026-08-19] Update project dependencies
 - [2026-08-20] Clean backend route handling
+- [2026-08-24] Add notes on docker configuration
