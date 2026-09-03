@@ -11,3 +11,4 @@
 - [2026-08-25] Clean backend route handling
 - [2026-08-25] Update api setup notes
 - [2026-08-25] Clean backend route handling
+- [2026-09-03] Format frontend component structure
