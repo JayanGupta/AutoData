@@ -13,3 +13,4 @@
 - [2026-08-25] Clean backend route handling
 - [2026-09-03] Format frontend component structure
 - [2026-09-03] Add notes on docker configuration
+- [2026-09-03] Update project dependencies
