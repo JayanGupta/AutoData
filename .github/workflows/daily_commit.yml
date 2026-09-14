@@ -1,0 +1,36 @@
+name: Daily Automated Commit
+
+on:
+  schedule:
+    # Runs once daily at 12:00 UTC
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update Daily Activity Log
+        run: |
+          mkdir -p docs
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "## Activity Entry - $TIMESTAMP" >> docs/daily_activity.md
+          echo "- System metric log updated automatically." >> docs/daily_activity.md
+          echo "- Status: Operational" >> docs/daily_activity.md
+          echo "" >> docs/daily_activity.md
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "JayanGupta"
+          git config user.email "jayangupta455@gmail.com"
+          git add docs/daily_activity.md
+          git commit -m "docs: update daily system activity log" || exit 0
+          git push origin main
