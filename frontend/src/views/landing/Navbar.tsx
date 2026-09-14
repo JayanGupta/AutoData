@@ -23,10 +23,14 @@ export function Navbar({
   onSample,
   onResume,
   loadingSample,
+  hasSessions,
+  sessionCount = 0,
 }: {
   onSample: () => void;
   onResume: () => void;
   loadingSample: boolean;
+  hasSessions?: boolean;
+  sessionCount?: number;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -87,10 +91,20 @@ export function Navbar({
           </nav>
 
           <div className="flex items-center gap-2">
-            <UploadButton className="btn-ghost hidden px-3.5 py-2 text-sm sm:inline-flex">
-              <UploadCloud className="h-4 w-4" />
-              Upload data
-            </UploadButton>
+            {hasSessions ? (
+              <Link
+                href="/datasets"
+                className="inline-flex items-center gap-2 rounded-full border border-violet-500/40 bg-violet-500/10 px-3.5 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-500/20 hover:text-white"
+              >
+                <Sparkles className="h-4 w-4 text-violet-400" />
+                <span>My Workspace ({sessionCount})</span>
+              </Link>
+            ) : (
+              <UploadButton className="btn-ghost hidden px-3.5 py-2 text-sm sm:inline-flex">
+                <UploadCloud className="h-4 w-4" />
+                Upload data
+              </UploadButton>
+            )}
             <button
               type="button"
               onClick={onResume}

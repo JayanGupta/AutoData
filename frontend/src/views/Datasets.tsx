@@ -3,11 +3,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
+  BarChart3,
+  ChevronRight,
   Clock,
   Copy,
   FileSpreadsheet,
   FileType2,
   FolderUp,
+  Home,
   Pencil,
   Search,
   Sparkles,
@@ -55,10 +58,37 @@ const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
 const TYPE_OPTIONS: Array<{ key: TypeFilterKey; label: string }> = [
   { key: "all", label: "All types" },
   { key: ".csv", label: "CSV" },
-  { key: ".tsv", label: "TSV" },
   { key: ".xlsx", label: "XLSX" },
   { key: ".xls", label: "XLS" },
 ];
+
+function StatPill({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  color: "violet" | "cyan" | "amber" | "emerald";
+}) {
+  const colorMap = {
+    violet: "border-violet-500/20 bg-violet-500/5 text-violet-300",
+    cyan: "border-cyan-500/20 bg-cyan-500/5 text-cyan-300",
+    amber: "border-amber-500/20 bg-amber-500/5 text-amber-300",
+    emerald: "border-emerald-500/20 bg-emerald-500/5 text-emerald-300",
+  };
+  return (
+    <div className={cn("flex items-center gap-3 rounded-2xl border px-4 py-3 backdrop-blur-md", colorMap[color])}>
+      <div className="shrink-0">{icon}</div>
+      <div className="flex flex-col">
+        <span className="text-[11px] font-medium text-slate-400">{label}</span>
+        <span className="text-base font-bold text-white">{value}</span>
+      </div>
+    </div>
+  );
+}
 
 export function DatasetsPage() {
   const { load, uploadViaJob, uploadSample } = useDataset();
@@ -120,9 +150,9 @@ export function DatasetsPage() {
   const handleLoadSample = async (name?: string) => {
     try {
       await uploadSample(name);
-      await refresh();
-      toastSuccess("Sample dataset added to your library.");
+      toastSuccess("Sample dataset loaded — opening workspace.");
       setSampleOpen(false);
+      router.push("/dashboard");
     } catch (e) {
       toastError(e instanceof Error ? e.message : "Sample dataset failed to load");
     }
@@ -193,22 +223,35 @@ export function DatasetsPage() {
     .sort((a, b) => (b.last_access ?? b.created_at) - (a.last_access ?? a.created_at))
     .slice(0, 6);
 
+  const totalRows = datasets.reduce((sum, d) => sum + (d.rows ?? 0), 0);
+  const favCount = datasets.filter((d) => d.favorite).length;
+
   return (
     <div className="min-h-screen bg-night-950 text-slate-100 antialiased">
       <Ambient />
       <div className="relative mx-auto max-w-[76rem] px-4 py-8 sm:px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <nav className="mb-6 flex items-center gap-1.5 text-xs text-slate-500">
+          <a href="/" className="flex items-center gap-1 transition-colors hover:text-slate-300">
+            <Home className="h-3.5 w-3.5" /> Home
+          </a>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-slate-300">My Workspace</span>
+        </nav>
+
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-300">
               <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-violet-400 to-cyan-400" />
-              Dataset library
+              My Workspace
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Your analyses, in one place
+              {datasets.length === 0 ? "Welcome to AutoData" : `${datasets.length} Dataset${datasets.length !== 1 ? "s" : ""} ready`}
             </h1>
             <p className="mt-2 max-w-xl text-sm text-slate-400">
-              Every dataset you upload is saved on this machine. Open one to jump straight back into the
-              analytics workspace.
+              {datasets.length === 0
+                ? "Upload a CSV, Excel or TSV file to get instant AI-powered analytics — no account needed."
+                : "Open a dataset to jump back into the analytics workspace, or upload a new one below."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -220,6 +263,16 @@ export function DatasetsPage() {
             </Button>
           </div>
         </header>
+
+        {/* Workspace Stats Strip */}
+        {datasets.length > 0 && (
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatPill icon={<FolderUp className="h-4 w-4" />} label="Datasets" value={datasets.length} color="violet" />
+            <StatPill icon={<BarChart3 className="h-4 w-4" />} label="Rows analyzed" value={totalRows > 1000 ? `${(totalRows / 1000).toFixed(1)}k` : totalRows} color="cyan" />
+            <StatPill icon={<Star className="h-4 w-4" />} label="Favorites" value={favCount} color="amber" />
+            <StatPill icon={<Clock className="h-4 w-4" />} label="Last active" value={datasets.length > 0 ? formatTimestamp(Math.max(...datasets.map(d => d.last_access ?? d.created_at))) : "—"} color="emerald" />
+          </div>
+        )}
 
         {recentlyOpened.length > 0 && (
           <section className="mt-8" aria-label="Recently opened datasets">
@@ -387,10 +440,10 @@ export function DatasetsPage() {
       {uploadOpen && (
         <UploadModal
           onClose={() => setUploadOpen(false)}
-          onUploaded={async () => {
+        onUploaded={async () => {
             setUploadOpen(false);
-            await refresh();
-            toastSuccess("Dataset added to your library.");
+            toastSuccess("Dataset analyzed — opening your workspace!");
+            router.push("/dashboard");
           }}
           uploadViaJob={uploadViaJob}
         />

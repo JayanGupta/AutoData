@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, BarChart3, Check, ChevronDown, Download, FileSpreadsheet, FileText, FolderUp, GitMerge, LayoutDashboard, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
+import { Activity, BarChart3, Check, ChevronDown, Download, FileSpreadsheet, FileText, FolderUp, GitMerge, Home, LayoutDashboard, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,7 +32,7 @@ const NAV: Array<{ key: Section; label: string; icon: typeof Activity }> = [
 ];
 
 export function Dashboard() {
-  const { snapshot, clear, resumeRecent, sessions, load, loading } = useDataset();
+  const { snapshot, resumeRecent, sessions, load, loading } = useDataset();
   const router = useRouter();
   const [section, setSection] = useState<Section>("overview");
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
@@ -96,8 +96,7 @@ export function Dashboard() {
   const qTone = qualityScore >= 80 ? "text-emerald-300" : qualityScore >= 60 ? "text-amber-300" : "text-rose-300";
 
   const handleNew = () => {
-    clear();
-    router.push("/");
+    router.push("/datasets");
   };
 
   const handleAsk = (question: string) => {
@@ -224,11 +223,13 @@ function Sidebar({
   return (
     <aside className="sticky top-0 z-30 hidden h-screen w-[15.5rem] shrink-0 flex-col border-r border-white/[0.06] bg-night-950/60 backdrop-blur-xl lg:flex">
       <div className="flex items-center gap-3 px-6 pb-6 pt-7">
-        <BrandMark />
-        <div className="flex flex-col leading-none">
-          <span className="font-display text-[15px] font-semibold tracking-tight text-white">AutoData</span>
-          <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-500">Analytics</span>
-        </div>
+        <Link href="/" className="group flex items-center gap-3">
+          <BrandMark className="transition-transform duration-300 group-hover:scale-105" />
+          <div className="flex flex-col leading-none">
+            <span className="font-display text-[15px] font-semibold tracking-tight text-white">AutoData</span>
+            <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-500">Analytics</span>
+          </div>
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
@@ -280,7 +281,14 @@ function Sidebar({
           className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-all duration-300 hover:bg-white/[0.04] hover:text-slate-100"
         >
           <Library className="h-[18px] w-[18px] text-slate-500 transition-colors group-hover:text-violet-300" />
-          <span>Dataset library</span>
+          <span>My Workspace</span>
+        </Link>
+        <Link
+          href="/"
+          className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-all duration-300 hover:bg-white/[0.04] hover:text-slate-100"
+        >
+          <Home className="h-[18px] w-[18px] text-slate-500 transition-colors group-hover:text-violet-300" />
+          <span>Home Page</span>
         </Link>
       </nav>
 
@@ -303,7 +311,7 @@ function Sidebar({
           className="btn-gradient w-full px-4 py-2.5 text-sm font-semibold"
         >
           <FolderUp className="h-4 w-4" />
-          New dataset
+          Upload Dataset
         </button>
       </div>
     </aside>
@@ -486,7 +494,7 @@ function Topbar({
             </AnimatePresence>
           </div>
           <button onClick={onNew} className="btn-gradient px-3.5 py-2 text-sm font-semibold">
-            <FolderUp className="h-4 w-4" /> New dataset
+            <FolderUp className="h-4 w-4" /> Library
           </button>
         </div>
       </div>

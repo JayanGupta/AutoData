@@ -84,8 +84,8 @@ export function UploadSection() {
           setProgress(p.progress);
           setStage(p.stage);
         });
-        toastSuccess(`Analyzed "${file.name}" — added to your library.`);
-        router.push("/datasets");
+        toastSuccess(`Analyzed "${file.name}" — opening your workspace now.`);
+        router.push("/dashboard");
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Analysis failed";
         setError(msg);
@@ -119,8 +119,8 @@ export function UploadSection() {
     setLoadingSample(true);
     try {
       await uploadSample();
-      toastSuccess("Sample dataset added to your library.");
-      router.push("/datasets");
+      toastSuccess("Sample dataset loaded — opening your workspace.");
+      router.push("/dashboard");
     } catch (e) {
       toastError(e instanceof Error ? e.message : "Sample dataset failed to load");
     } finally {
