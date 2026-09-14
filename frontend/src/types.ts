@@ -266,3 +266,65 @@ export interface ExecutiveSummary {
   suggested_next: Array<{ title: string; description: string; chart: string; columns: string[] }>;
   question_suggestions: string[];
 }
+
+export type WidgetType = "kpi" | "chart" | "table" | "note";
+
+export interface DashboardWidget {
+  id: string;
+  type: WidgetType;
+  title: string;
+  span?: 1 | 2 | 3 | 4; // grid column span
+  // KPI widget properties
+  column?: string;
+  aggregation?: "sum" | "avg" | "min" | "max" | "count" | "unique";
+  color?: string;
+  prefix?: string;
+  suffix?: string;
+  // Chart widget properties
+  chart_type?: "bar" | "line" | "area" | "pie" | "scatter";
+  x?: string;
+  y?: string;
+  // Note widget properties
+  content?: string;
+}
+
+export interface DashboardLayout {
+  title?: string;
+  widgets: DashboardWidget[];
+  updated_at?: number;
+}
+
+export interface GoogleSheetsImportPayload {
+  urls: string[];
+  combine?: boolean;
+  sheet_name?: string;
+}
+
+export interface GoogleSheetsImportResponse {
+  snapshot: AnalysisSnapshot;
+  created_ids: string[];
+  created_count: number;
+  sessions: DatasetInfo[];
+}
+
+export interface MergeDatasetsPayload {
+  left_session_id: string;
+  right_session_id: string;
+  how: "inner" | "left" | "right" | "outer" | "concat";
+  left_on?: string;
+  right_on?: string;
+  name?: string;
+}
+
+export interface MergeDatasetsResponse {
+  snapshot: AnalysisSnapshot;
+  sessions: DatasetInfo[];
+}
+
+export interface SqlQueryResult {
+  columns: string[];
+  rows: Array<Array<string | number | boolean | null>>;
+  row_count: number;
+  elapsed_ms: number;
+}
+

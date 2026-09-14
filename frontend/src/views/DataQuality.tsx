@@ -47,12 +47,17 @@ const GENERIC_OPS: ColumnOp[] = [
   { value: "trim_whitespace", label: "Trim whitespace", needsValue: false },
   { value: "lowercase_column", label: "Lowercase values", needsValue: false },
   { value: "standardize_dates", label: "Parse as dates", needsValue: false },
+  { value: "filter_rows", label: "Filter rows (e.g. >10, ==US, contains:xyz)", needsValue: true },
   { value: "rename_column", label: "Rename column to…", needsValue: true },
   { value: "drop_column", label: "Drop column", needsValue: false },
 ];
 
 const QUICK_FIXES = [
   { key: "dups", action: "drop_duplicates", label: "Remove duplicates" },
+  { key: "trim_all", action: "trim_all_whitespace", label: "Trim all text columns" },
+  { key: "fill_median", action: "fill_all_numeric_median", label: "Fill numeric nulls (median)" },
+  { key: "drop_empty", action: "drop_empty_columns", label: "Drop empty / >90% null columns" },
+  { key: "drop_const", action: "drop_constant_columns", label: "Drop constant columns" },
   { key: "missing", action: "drop_missing_rows", label: "Drop rows with missing values" },
 ];
 
@@ -99,11 +104,13 @@ export function DataQualityPage() {
     }
   };
 
-  const runColumnOp = async () => {
-    if (!op || !column) return;
+  const runColumnOp = async (colName?: string, fixedOp?: string) => {
+    const targetCol = colName || column;
+    const targetOp = fixedOp || op;
+    if (!targetOp || !targetCol) return;
     setBusy("col");
-    const params: { column?: string; value?: string | number } = { column };
-    const selected = availableOps.find((o) => o.value === op);
+    const params: { column?: string; value?: string | number } = { column: targetCol };
+    const selected = availableOps.find((o) => o.value === targetOp);
     const fillMethod = selected?.extraValue ?? value;
     if (selected?.needsValue && !fillMethod) {
       toastError("Please provide a value for this operation.");
@@ -111,7 +118,7 @@ export function DataQualityPage() {
       return;
     }
     if (selected?.needsValue) {
-      if (op === "rename_column") {
+      if (targetOp === "rename_column") {
         params.value = String(fillMethod).trim();
       } else {
         const num = Number(fillMethod);
@@ -119,7 +126,7 @@ export function DataQualityPage() {
       }
     }
     try {
-      const next = await applyClean(op, params);
+      const next = await applyClean(targetOp, params);
       toastSuccess(next?.cleaning?.description ?? "Cleaning step applied.");
       setValue("");
     } catch (e) {
@@ -326,7 +333,7 @@ export function DataQualityPage() {
                     setColumn(issue.column);
                   }
                 }}
-                onDropColumn={() => void runQuick(`drop-${issue.column}`, "drop_column")}
+                onDropColumn={() => void runColumnOp(issue.column, "drop_column")}
               />
             ))}
           </ul>

@@ -39,6 +39,11 @@ CREATE TABLE IF NOT EXISTS session_conversation (
     session_id TEXT PRIMARY KEY,
     messages TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS session_dashboards (
+    session_id TEXT PRIMARY KEY,
+    layout TEXT NOT NULL,
+    updated_at REAL NOT NULL
+);
 """
 
 
@@ -160,9 +165,38 @@ def delete_session(session_id: str) -> bool:
         deleted = cur.rowcount > 0
         conn.execute("DELETE FROM session_history WHERE session_id = ?", (session_id,))
         conn.execute("DELETE FROM session_conversation WHERE session_id = ?", (session_id,))
+        conn.execute("DELETE FROM session_dashboards WHERE session_id = ?", (session_id,))
         conn.commit()
         conn.close()
         return deleted
+
+
+def save_dashboard_layout(session_id: str, layout: dict) -> None:
+    import time
+    with _LOCK:
+        conn = _get_connection()
+        conn.execute(
+            "INSERT OR REPLACE INTO session_dashboards (session_id, layout, updated_at) VALUES (?, ?, ?)",
+            (session_id, json.dumps(layout), time.time()),
+        )
+        conn.commit()
+        conn.close()
+
+
+def load_dashboard_layout(session_id: str) -> dict | None:
+    with _LOCK:
+        conn = _get_connection()
+        row = conn.execute(
+            "SELECT layout FROM session_dashboards WHERE session_id = ?",
+            (session_id,),
+        ).fetchone()
+        conn.close()
+    if row and row[0]:
+        try:
+            return json.loads(row[0])
+        except Exception:
+            return None
+    return None
 
 
 def list_session_records() -> list[dict[str, Any]]:

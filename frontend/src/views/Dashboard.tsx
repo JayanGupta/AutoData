@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, BarChart3, Check, ChevronDown, Download, FileText, FolderUp, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
+import { Activity, BarChart3, Check, ChevronDown, Download, FileSpreadsheet, FileText, FolderUp, GitMerge, LayoutDashboard, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,16 +10,20 @@ import { useDataset } from "@/store/DatasetContext";
 import { BrandMark } from "./landing/Navbar";
 import { cn } from "./landing/primitives";
 import { OverviewPage } from "./Overview";
+import { CustomDashboard } from "./CustomDashboard";
 import { DataQualityPage } from "./DataQuality";
 import { VisualizationsPage } from "./Visualizations";
 import { AnalystPage } from "./Analyst";
 import { InsightsPage } from "./Insights";
 import { ReportPage } from "./Report";
+import { GSheetImportModal } from "../components/GSheetImportModal";
+import { DatasetMergeModal } from "../components/DatasetMergeModal";
 
-type Section = "overview" | "quality" | "viz" | "analyst" | "insights" | "report";
+type Section = "overview" | "custom_dash" | "quality" | "viz" | "analyst" | "insights" | "report";
 
 const NAV: Array<{ key: Section; label: string; icon: typeof Activity }> = [
   { key: "overview", label: "Overview", icon: Activity },
+  { key: "custom_dash", label: "Dashboard Studio", icon: LayoutDashboard },
   { key: "quality", label: "Quality", icon: ShieldCheck },
   { key: "viz", label: "Visualizations", icon: BarChart3 },
   { key: "analyst", label: "AI Analyst", icon: MessagesSquare },
@@ -35,6 +39,8 @@ export function Dashboard() {
   const [exportOpen, setExportOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [restoring, setRestoring] = useState(() => true);
+  const [gsheetModalOpen, setGsheetModalOpen] = useState(false);
+  const [mergeModalOpen, setMergeModalOpen] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
   const switchRef = useRef<HTMLDivElement>(null);
 
@@ -120,6 +126,8 @@ export function Dashboard() {
           onExportCsv={() => window.open(getExportUrl(ds.id, "csv"), "_blank")}
           onExportXlsx={() => window.open(getExportUrl(ds.id, "xlsx"), "_blank")}
           onExportPdf={() => window.open(getReportPdfUrl(ds.id), "_blank")}
+          onOpenGsheet={() => setGsheetModalOpen(true)}
+          onOpenMerge={() => setMergeModalOpen(true)}
         />
         <main className="min-w-0 flex-1">
           <Topbar
@@ -132,6 +140,8 @@ export function Dashboard() {
             onExportCsv={() => window.open(getExportUrl(ds.id, "csv"), "_blank")}
             onExportXlsx={() => window.open(getExportUrl(ds.id, "xlsx"), "_blank")}
             onExportPdf={() => window.open(getReportPdfUrl(ds.id), "_blank")}
+            onOpenGsheet={() => setGsheetModalOpen(true)}
+            onOpenMerge={() => setMergeModalOpen(true)}
             exportOpen={exportOpen}
             setExportOpen={setExportOpen}
             exportRef={exportRef}
@@ -155,6 +165,7 @@ export function Dashboard() {
               className="mx-auto w-full max-w-[72rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
             >
               {section === "overview" && <OverviewPage />}
+              {section === "custom_dash" && <CustomDashboard />}
               {section === "quality" && <DataQualityPage />}
               {section === "viz" && <VisualizationsPage />}
               {section === "analyst" && <AnalystPage pendingQuestion={pendingQuestion} onConsumed={() => setPendingQuestion(null)} />}
@@ -164,6 +175,18 @@ export function Dashboard() {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Global Modals */}
+      <GSheetImportModal
+        open={gsheetModalOpen}
+        onClose={() => setGsheetModalOpen(false)}
+        onSuccess={() => setSection("overview")}
+      />
+      <DatasetMergeModal
+        open={mergeModalOpen}
+        onClose={() => setMergeModalOpen(false)}
+        onSuccess={() => setSection("overview")}
+      />
     </div>
   );
 }
@@ -186,6 +209,8 @@ function Sidebar({
   onExportCsv,
   onExportXlsx,
   onExportPdf,
+  onOpenGsheet,
+  onOpenMerge,
 }: {
   section: Section;
   onSection: (s: Section) => void;
@@ -193,6 +218,8 @@ function Sidebar({
   onExportCsv: () => void;
   onExportXlsx: () => void;
   onExportPdf: () => void;
+  onOpenGsheet: () => void;
+  onOpenMerge: () => void;
 }) {
   return (
     <aside className="sticky top-0 z-30 hidden h-screen w-[15.5rem] shrink-0 flex-col border-r border-white/[0.06] bg-night-950/60 backdrop-blur-xl lg:flex">
@@ -204,7 +231,7 @@ function Sidebar({
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
         <p className="px-3 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Workspace</p>
         {NAV.map((item) => {
           const active = section === item.key;
@@ -232,7 +259,22 @@ function Sidebar({
             </button>
           );
         })}
-        <p className="px-3 pb-2 pt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Manage</p>
+        <p className="px-3 pb-2 pt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Connect &amp; Merge</p>
+        <button
+          onClick={onOpenGsheet}
+          className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-emerald-400 transition-all duration-300 hover:bg-emerald-500/10"
+        >
+          <FileSpreadsheet className="h-[18px] w-[18px] text-emerald-400" />
+          <span>Google Sheets</span>
+        </button>
+        <button
+          onClick={onOpenMerge}
+          className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-cyan-400 transition-all duration-300 hover:bg-cyan-500/10"
+        >
+          <GitMerge className="h-[18px] w-[18px] text-cyan-400" />
+          <span>Merge Datasets</span>
+        </button>
+        <p className="px-3 pb-2 pt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Manage</p>
         <Link
           href="/datasets"
           className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-all duration-300 hover:bg-white/[0.04] hover:text-slate-100"
@@ -289,6 +331,8 @@ function Topbar({
   onExportCsv,
   onExportXlsx,
   onExportPdf,
+  onOpenGsheet,
+  onOpenMerge,
   exportOpen,
   setExportOpen,
   exportRef,
@@ -309,6 +353,8 @@ function Topbar({
   onExportCsv: () => void;
   onExportXlsx: () => void;
   onExportPdf: () => void;
+  onOpenGsheet: () => void;
+  onOpenMerge: () => void;
   exportOpen: boolean;
   setExportOpen: (v: boolean) => void;
   exportRef: React.RefObject<HTMLDivElement>;
@@ -399,6 +445,20 @@ function Topbar({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <button
+            onClick={onOpenGsheet}
+            className="btn-ghost hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
+            title="Import from Google Sheets"
+          >
+            <FileSpreadsheet className="h-3.5 w-3.5" /> Google Sheets
+          </button>
+          <button
+            onClick={onOpenMerge}
+            className="btn-ghost hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/10 transition-colors"
+            title="Merge & Join Datasets"
+          >
+            <GitMerge className="h-3.5 w-3.5" /> Merge
+          </button>
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen(!exportOpen)}

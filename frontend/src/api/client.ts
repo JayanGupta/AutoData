@@ -6,12 +6,18 @@ import type {
   ChartSpec,
   CleaningHistory,
   CleaningResponse,
+  DashboardLayout,
   DatasetInfo,
   ExecutiveSummary,
+  GoogleSheetsImportPayload,
+  GoogleSheetsImportResponse,
   Insight,
+  MergeDatasetsPayload,
+  MergeDatasetsResponse,
   ReportResult,
   RowPage,
   SampleInfo,
+  SqlQueryResult,
 } from "../types";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
@@ -173,3 +179,40 @@ export function getExecutiveSummary(id: string): Promise<ExecutiveSummary> {
 export function getAdvancedCharts(id: string): Promise<AdvancedChartsPayload> {
   return request<AdvancedChartsPayload>(`/datasets/${id}/advanced-charts`);
 }
+
+export function importGoogleSheets(payload: GoogleSheetsImportPayload): Promise<GoogleSheetsImportResponse> {
+  return request<GoogleSheetsImportResponse>("/datasets/google-sheets", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function mergeDatasets(payload: MergeDatasetsPayload): Promise<MergeDatasetsResponse> {
+  return request<MergeDatasetsResponse>("/datasets/merge", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getDashboardLayout(id: string): Promise<{ layout: DashboardLayout | null }> {
+  return request<{ layout: DashboardLayout | null }>(`/datasets/${id}/dashboard-layout`);
+}
+
+export function saveDashboardLayout(id: string, layout: DashboardLayout): Promise<{ ok: boolean }> {
+  return request<{ ok: boolean }>(`/datasets/${id}/dashboard-layout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ layout }),
+  });
+}
+
+export function runSqlQuery(id: string, query: string): Promise<SqlQueryResult> {
+  return request<SqlQueryResult>(`/datasets/${id}/sql`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+}
+

@@ -10,6 +10,7 @@ import io
 import os
 import re
 
+import httpx
 import pandas as pd
 
 from .. import config
@@ -130,3 +131,128 @@ def load_dataframe(data: bytes, filename: str, sheet_name: str | None = None) ->
     # Preserve a stable integer index used by the rest of the engine.
     df = df.reset_index(drop=True)
     return df
+
+
+def extract_google_sheet_details(url_or_id: str) -> tuple[str, str | None]:
+    """Extract spreadsheet ID and optional sheet gid from a Google Sheets URL or raw ID."""
+    clean = url_or_id.strip()
+    match_id = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", clean)
+    sheet_id = match_id.group(1) if match_id else clean.split("/")[0].split("?")[0]
+    if not sheet_id or len(sheet_id) < 5:
+        raise DataLoadError(f"Invalid Google Sheets link or ID: '{url_or_id}'.")
+    match_gid = re.search(r"[#&?]gid=([0-9]+)", clean)
+    gid = match_gid.group(1) if match_gid else None
+    return sheet_id, gid
+
+
+def fetch_google_sheet_tabs(
+    url_or_id: str,
+    target_sheet_name: str | None = None,
+) -> list[tuple[str, pd.DataFrame]]:
+    """Fetch one or all tabs of a public Google Sheet without requiring cloud credentials.
+
+    Returns a list of tuples: [(tab_name, parsed_clean_dataframe), ...].
+    """
+    sheet_id, gid = extract_google_sheet_details(url_or_id)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    }
+
+    # 1. Try downloading as multi-sheet XLSX to retrieve all tabs at once
+    xlsx_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx"
+    tabs_data: list[tuple[str, pd.DataFrame]] = []
+
+    try:
+        with httpx.Client(follow_redirects=True, timeout=30.0) as client:
+            resp = client.get(xlsx_url, headers=headers)
+            if resp.status_code == 200 and resp.content.startswith(b"PK\x03\x04"):
+                xl = pd.ExcelFile(io.BytesIO(resp.content))
+                sheet_names = xl.sheet_names
+                sheets_to_load = [target_sheet_name] if target_sheet_name and target_sheet_name in sheet_names else sheet_names
+                for name in sheets_to_load:
+                    try:
+                        df = pd.read_excel(io.BytesIO(resp.content), sheet_name=name)
+                        df = _normalise_columns(df).dropna(how="all").dropna(axis=1, how="all").reset_index(drop=True)
+                        if not df.empty:
+                            tabs_data.append((name, df))
+                    except Exception:
+                        continue
+                if tabs_data:
+                    return tabs_data
+    except Exception:
+        pass
+
+    # 2. Fallback to CSV export (works for single sheet or specific gid)
+    csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    if gid:
+        csv_url += f"&gid={gid}"
+
+    try:
+        with httpx.Client(follow_redirects=True, timeout=30.0) as client:
+            resp = client.get(csv_url, headers=headers)
+            if resp.status_code == 200:
+                content = resp.content
+                # Check if it was redirected to Google login HTML
+                if b"<html" in content[:300].lower() or b"accounts.google.com" in content:
+                    raise DataLoadError(
+                        "This Google Sheet is private. In Google Sheets, click 'Share' (top right) "
+                        "and set General access to 'Anyone with the link can view'."
+                    )
+                df = parse_csv(content, f"{sheet_id}.csv")
+                df = _normalise_columns(df).dropna(how="all").dropna(axis=1, how="all").reset_index(drop=True)
+                if not df.empty:
+                    tab_name = target_sheet_name or f"Sheet_{gid or '1'}"
+                    return [(tab_name, df)]
+            elif resp.status_code in (401, 403):
+                raise DataLoadError(
+                    "Google Sheet access denied. Please open the sheet, click 'Share', and choose 'Anyone with the link can view'."
+                )
+            elif resp.status_code == 404:
+                raise DataLoadError(f"Google Sheet '{sheet_id}' was not found. Please verify the URL.")
+            else:
+                raise DataLoadError(f"Failed to fetch Google Sheet: HTTP {resp.status_code}")
+    except DataLoadError:
+        raise
+    except Exception as exc:
+        raise DataLoadError(f"Could not connect to Google Sheets: {exc}") from exc
+
+    if not tabs_data:
+        raise DataLoadError("The Google Sheet contains no data rows or could not be loaded.")
+    return tabs_data
+
+
+def merge_dataframes(
+    left_df: pd.DataFrame,
+    right_df: pd.DataFrame,
+    how: str = "inner",
+    left_on: str | None = None,
+    right_on: str | None = None,
+) -> pd.DataFrame:
+    """Combine or merge two DataFrames with clean column naming."""
+    how_clean = (how or "inner").strip().lower()
+    if how_clean == "concat":
+        combined = pd.concat([left_df, right_df], ignore_index=True, sort=False)
+        return _normalise_columns(combined).reset_index(drop=True)
+
+    if not left_on or left_on not in left_df.columns:
+        raise ValueError(f"Key column '{left_on}' not found in the first dataset.")
+    if not right_on or right_on not in right_df.columns:
+        raise ValueError(f"Key column '{right_on}' not found in the second dataset.")
+
+    valid_hows = {"inner", "left", "right", "outer"}
+    if how_clean not in valid_hows:
+        raise ValueError(f"Invalid merge type '{how}'. Allowed: {', '.join(sorted(valid_hows))} or 'concat'.")
+
+    merged = pd.merge(
+        left_df,
+        right_df,
+        how=how_clean,
+        left_on=left_on,
+        right_on=right_on,
+        suffixes=("", "_right"),
+    )
+    merged = _normalise_columns(merged).dropna(how="all").dropna(axis=1, how="all").reset_index(drop=True)
+    if merged.empty:
+        raise ValueError("The merge resulted in 0 rows. Check that your selected key columns have matching values.")
+    return merged
+

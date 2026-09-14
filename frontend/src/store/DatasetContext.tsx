@@ -31,6 +31,8 @@ interface DatasetContextValue {
   upload: (file: File) => Promise<AnalysisSnapshot>;
   uploadViaJob: (file: File, onProgress?: (p: UploadProgress) => void) => Promise<AnalysisSnapshot>;
   uploadSample: (name?: string) => Promise<AnalysisSnapshot>;
+  importGoogleSheets: (urls: string[], combine?: boolean, sheetName?: string) => Promise<AnalysisSnapshot>;
+  mergeDatasets: (leftId: string, rightId: string, how: "inner" | "left" | "right" | "outer" | "concat", leftOn?: string, rightOn?: string, name?: string) => Promise<AnalysisSnapshot>;
   load: (id: string) => Promise<void>;
   listSessions: () => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
@@ -162,6 +164,57 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     }
   }, [adoptSnapshot, setErrorSafe]);
 
+  const importGoogleSheets = useCallback(
+    async (urls: string[], combine?: boolean, sheetName?: string) => {
+      setLoading(true);
+      setErrorSafe(null);
+      try {
+        const res = await api.importGoogleSheets({ urls, combine, sheet_name: sheetName });
+        await adoptSnapshot(res.snapshot);
+        return res.snapshot;
+      } catch (e) {
+        setErrorSafe(e instanceof Error ? e.message : "Google Sheets import failed");
+        throw e;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [adoptSnapshot, setErrorSafe],
+  );
+
+  const mergeDatasets = useCallback(
+    async (
+      leftId: string,
+      rightId: string,
+      how: "inner" | "left" | "right" | "outer" | "concat",
+      leftOn?: string,
+      rightOn?: string,
+      name?: string,
+    ) => {
+      setLoading(true);
+      setErrorSafe(null);
+      try {
+        const res = await api.mergeDatasets({
+          left_session_id: leftId,
+          right_session_id: rightId,
+          how,
+          left_on: leftOn,
+          right_on: rightOn,
+          name,
+        });
+        await adoptSnapshot(res.snapshot);
+        return res.snapshot;
+      } catch (e) {
+        setErrorSafe(e instanceof Error ? e.message : "Dataset merge failed");
+        throw e;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [adoptSnapshot, setErrorSafe],
+  );
+
+
   const load = useCallback(
     async (id: string) => {
       setLoading(true);
@@ -281,6 +334,8 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       upload,
       uploadViaJob,
       uploadSample,
+      importGoogleSheets,
+      mergeDatasets,
       load,
       listSessions,
       deleteSession,
@@ -294,7 +349,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     }),
     [
       snapshot, loading, error, insights, insightsLoading, sessions, cleaningSteps,
-      upload, uploadViaJob, uploadSample, load, listSessions, deleteSession,
+      upload, uploadViaJob, uploadSample, importGoogleSheets, mergeDatasets, load, listSessions, deleteSession,
       refreshInsights, generateInsights, applyClean, undoClean, resumeRecent,
       clear, clearError,
     ],

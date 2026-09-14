@@ -126,6 +126,99 @@ def standardize_dates(df: pd.DataFrame, column: str) -> tuple[pd.DataFrame, str]
     return cleaned, f"Parsed '{column}' as dates ({before_bad:,} unparseable value{'s' if before_bad != 1 else ''} removed)"
 
 
+def trim_all_whitespace(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    cleaned = df.copy()
+    count = 0
+    for col in cleaned.columns:
+        if cleaned[col].dtype == object or pd.api.types.is_string_dtype(cleaned[col]):
+            cleaned[col] = cleaned[col].map(lambda v: v.strip() if isinstance(v, str) else v)
+            count += 1
+    return cleaned, f"Trimmed whitespace across all {count} text columns"
+
+
+def drop_empty_columns(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    before = len(df.columns)
+    # Drop columns where missing percentage > 90% or all null
+    threshold = 0.90
+    cols_to_drop = [col for col in df.columns if df[col].isna().mean() >= threshold]
+    if not cols_to_drop:
+        return df.copy(), "No predominantly empty columns found"
+    cleaned = df.drop(columns=cols_to_drop).reset_index(drop=True)
+    return cleaned, f"Dropped {len(cols_to_drop)} empty or >90% missing column{'s' if len(cols_to_drop) != 1 else ''} ({', '.join(cols_to_drop)})"
+
+
+def drop_constant_columns(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    cols_to_drop = [col for col in df.columns if df[col].nunique(dropna=False) <= 1]
+    if not cols_to_drop:
+        return df.copy(), "No constant columns found"
+    cleaned = df.drop(columns=cols_to_drop).reset_index(drop=True)
+    return cleaned, f"Dropped {len(cols_to_drop)} constant column{'s' if len(cols_to_drop) != 1 else ''} ({', '.join(cols_to_drop)})"
+
+
+def fill_all_numeric_median(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    cleaned = df.copy()
+    filled_cols = 0
+    for col in cleaned.columns:
+        if pd.api.types.is_numeric_dtype(cleaned[col]):
+            med = cleaned[col].median()
+            if not pd.isna(med) and cleaned[col].isna().any():
+                cleaned[col] = cleaned[col].fillna(med)
+                filled_cols += 1
+    return cleaned, f"Filled missing values with column median across {filled_cols} numeric column{'s' if filled_cols != 1 else ''}"
+
+
+def fill_all_numeric_zero(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    cleaned = df.copy()
+    filled_cols = 0
+    for col in cleaned.columns:
+        if pd.api.types.is_numeric_dtype(cleaned[col]):
+            if cleaned[col].isna().any():
+                cleaned[col] = cleaned[col].fillna(0)
+                filled_cols += 1
+    return cleaned, f"Filled missing values with 0 across {filled_cols} numeric column{'s' if filled_cols != 1 else ''}"
+
+
+def filter_rows(df: pd.DataFrame, column: str, value: str | int | float) -> tuple[pd.DataFrame, str]:
+    _require_column(df, column)
+    val_str = str(value).strip()
+    before = len(df)
+    # Check operator prefixes: >10, <5, >=100, <=50, !=active, ==US, contains:xyz
+    if val_str.startswith(">="):
+        target = float(val_str[2:].strip())
+        mask = pd.to_numeric(df[column], errors="coerce") >= target
+        desc = f"Kept rows where '{column}' >= {target}"
+    elif val_str.startswith("<="):
+        target = float(val_str[2:].strip())
+        mask = pd.to_numeric(df[column], errors="coerce") <= target
+        desc = f"Kept rows where '{column}' <= {target}"
+    elif val_str.startswith(">"):
+        target = float(val_str[1:].strip())
+        mask = pd.to_numeric(df[column], errors="coerce") > target
+        desc = f"Kept rows where '{column}' > {target}"
+    elif val_str.startswith("<"):
+        target = float(val_str[1:].strip())
+        mask = pd.to_numeric(df[column], errors="coerce") < target
+        desc = f"Kept rows where '{column}' < {target}"
+    elif val_str.startswith("!="):
+        target = val_str[2:].strip()
+        mask = df[column].astype(str).str.strip().str.lower() != target.lower()
+        desc = f"Kept rows where '{column}' != '{target}'"
+    elif val_str.lower().startswith("contains:"):
+        target = val_str[9:].strip()
+        mask = df[column].astype(str).str.contains(target, case=False, na=False)
+        desc = f"Kept rows where '{column}' contains '{target}'"
+    else:
+        target = val_str.removeprefix("==").strip()
+        mask = df[column].astype(str).str.strip().str.lower() == target.lower()
+        desc = f"Kept rows where '{column}' == '{target}'"
+
+    cleaned = df[mask].reset_index(drop=True)
+    if len(cleaned) == 0:
+        raise ValueError(f"Filter matched 0 rows. No changes were applied.")
+    removed = before - len(cleaned)
+    return cleaned, f"{desc} ({removed:,} rows filtered out)"
+
+
 OPERATIONS: dict[str, object] = {
     "drop_column": drop_column,
     "rename_column": rename_column,
@@ -138,4 +231,11 @@ OPERATIONS: dict[str, object] = {
     "trim_whitespace": trim_whitespace,
     "lowercase_column": lowercase_column,
     "standardize_dates": standardize_dates,
+    "trim_all_whitespace": trim_all_whitespace,
+    "drop_empty_columns": drop_empty_columns,
+    "drop_constant_columns": drop_constant_columns,
+    "fill_all_numeric_median": fill_all_numeric_median,
+    "fill_all_numeric_zero": fill_all_numeric_zero,
+    "filter_rows": filter_rows,
 }
+

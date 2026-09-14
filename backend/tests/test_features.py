@@ -161,5 +161,77 @@ class TestAdvancedChartsJsonSafe(unittest.TestCase):
             _walk(spec)
 
 
+class TestNewPowerFeatures(unittest.TestCase):
+    def test_extract_google_sheet_details(self):
+        from app.data_engine.loader import extract_google_sheet_details, DataLoadError
+
+        url1 = "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit#gid=12345"
+        sheet_id, gid = extract_google_sheet_details(url1)
+        self.assertEqual(sheet_id, "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms")
+        self.assertEqual(gid, "12345")
+
+        raw_id = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+        sheet_id2, gid2 = extract_google_sheet_details(raw_id)
+        self.assertEqual(sheet_id2, raw_id)
+        self.assertIsNone(gid2)
+
+        with self.assertRaises(DataLoadError):
+            extract_google_sheet_details("xyz")
+
+    def test_merge_dataframes(self):
+        import pandas as pd
+        from app.data_engine.loader import merge_dataframes
+
+        left = pd.DataFrame({"id": [1, 2, 3], "val_a": ["A", "B", "C"]})
+        right = pd.DataFrame({"id": [2, 3, 4], "val_b": [20, 30, 40]})
+
+        inner = merge_dataframes(left, right, how="inner", left_on="id", right_on="id")
+        self.assertEqual(len(inner), 2)
+        self.assertIn("val_a", inner.columns)
+        self.assertIn("val_b", inner.columns)
+
+        concat_res = merge_dataframes(left, right, how="concat")
+        self.assertEqual(len(concat_res), 6)
+
+    def test_batch_cleaning_operations(self):
+        import pandas as pd
+        from app.data_engine.cleaning import (
+            trim_all_whitespace,
+            drop_constant_columns,
+            fill_all_numeric_median,
+            filter_rows,
+        )
+
+        df = pd.DataFrame({
+            "name": ["  Alice ", "Bob  ", " Charlie"],
+            "score": [10.0, None, 30.0],
+            "constant": [1, 1, 1],
+        })
+
+        trimmed, _ = trim_all_whitespace(df)
+        self.assertEqual(trimmed["name"].tolist(), ["Alice", "Bob", "Charlie"])
+
+        dropped, _ = drop_constant_columns(df)
+        self.assertNotIn("constant", dropped.columns)
+
+        filled, _ = fill_all_numeric_median(df)
+        self.assertEqual(filled["score"].tolist(), [10.0, 20.0, 30.0])
+
+        filtered, _ = filter_rows(df, "score", ">15")
+        self.assertEqual(len(filtered), 1)
+        self.assertEqual(filtered.iloc[0]["score"], 30.0)
+
+    def test_dashboard_layout_storage(self):
+        from app.data_store.storage import save_dashboard_layout, load_dashboard_layout
+
+        test_id = "test_session_123"
+        layout = {"widgets": [{"id": "w1", "type": "kpi", "column": "revenue"}]}
+        save_dashboard_layout(test_id, layout)
+        loaded = load_dashboard_layout(test_id)
+        self.assertIsNotNone(loaded)
+        self.assertEqual(loaded["widgets"][0]["column"], "revenue")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+

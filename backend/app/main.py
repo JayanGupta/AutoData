@@ -31,8 +31,10 @@ from pydantic import BaseModel
 
 from . import config
 from .ai import generate_insights, nlu
+from .ai.sql_runner import QueryError, run_query
 from .data_engine import preview_rows, rows_slice
-from .data_engine.loader import DataLoadError, load_dataframe
+from .data_engine.loader import DataLoadError, fetch_google_sheet_tabs, load_dataframe, merge_dataframes
+from .data_store.storage import load_dashboard_layout, save_dashboard_layout
 from .report import build_report_html, build_report_markdown, build_report_pdf
 from .security import RateLimitMiddleware
 from .sessions.store import store
@@ -89,6 +91,30 @@ class CleanRequest(BaseModel):
     action: str
     column: str | None = None
     value: str | int | float | None = None
+
+
+class GoogleSheetImportRequest(BaseModel):
+    urls: list[str]
+    combine: bool = False
+    sheet_name: str | None = None
+
+
+class MergeDatasetsRequest(BaseModel):
+    left_session_id: str
+    right_session_id: str
+    how: str = "inner"
+    left_on: str | None = None
+    right_on: str | None = None
+    name: str | None = None
+
+
+class DashboardLayoutRequest(BaseModel):
+    layout: dict
+
+
+class SqlRunRequest(BaseModel):
+    query: str
+
 
 
 class _JobStore:
@@ -545,6 +571,118 @@ def get_advanced_charts(session_id: str):
         "charts": build_advanced_charts(session.engine),
         "recommendations": build_chart_recommendations(session.engine),
     }
+
+
+@app.post("/api/datasets/google-sheets")
+def import_google_sheets(request: GoogleSheetImportRequest):
+    """Import one or multiple Google Sheets / tabs by link or ID."""
+    from .data_engine import analyze
+    import pandas as pd
+
+    valid_urls = [u.strip() for u in request.urls if u.strip()]
+    if not valid_urls:
+        raise HTTPException(status_code=400, detail="Please provide at least one Google Sheet URL or ID.")
+
+    all_tabs: list[tuple[str, pd.DataFrame]] = []
+    for url in valid_urls:
+        try:
+            tabs = fetch_google_sheet_tabs(url, target_sheet_name=request.sheet_name)
+            all_tabs.extend(tabs)
+        except DataLoadError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Failed to import from Google Sheets: {exc}") from exc
+
+    if not all_tabs:
+        raise HTTPException(status_code=400, detail="No readable sheets or data rows were found.")
+
+    created_sessions = []
+    if request.combine and len(all_tabs) > 1:
+        # Combine all tabs into one single unified dataset
+        combined_df = pd.concat([df for _, df in all_tabs], ignore_index=True, sort=False).dropna(how="all").dropna(axis=1, how="all").reset_index(drop=True)
+        engine = analyze(combined_df)
+        session = store.create(f"Combined Google Sheets ({len(all_tabs)} tabs)", engine, file_size=0, file_type=".gsheet")
+        created_sessions.append(session)
+    else:
+        # Create individual dataset sessions for each tab / sheet
+        for tab_name, df in all_tabs:
+            engine = analyze(df)
+            session = store.create(tab_name, engine, file_size=0, file_type=".gsheet")
+            created_sessions.append(session)
+
+    primary_session = created_sessions[0]
+    return {
+        "snapshot": _snapshot(primary_session.id),
+        "created_ids": [s.id for s in created_sessions],
+        "created_count": len(created_sessions),
+        "sessions": store.list_sessions(),
+    }
+
+
+@app.post("/api/datasets/merge")
+def merge_datasets_endpoint(request: MergeDatasetsRequest):
+    """Merge or concatenate two datasets into a new combined dataset session."""
+    from .data_engine import analyze
+
+    left = _get_session_or_404(request.left_session_id)
+    right = _get_session_or_404(request.right_session_id)
+
+    try:
+        merged_df = merge_dataframes(
+            left.engine.df,
+            right.engine.df,
+            how=request.how,
+            left_on=request.left_on,
+            right_on=request.right_on,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Merge failed: {exc}") from exc
+
+    merged_name = (request.name or f"{left.name} + {right.name}").strip()
+    engine = analyze(merged_df)
+    new_session = store.create(merged_name, engine, file_size=0, file_type=left.file_type or ".csv")
+    return {
+        "snapshot": _snapshot(new_session.id),
+        "sessions": store.list_sessions(),
+    }
+
+
+@app.get("/api/datasets/{session_id}/dashboard-layout")
+def get_dashboard_layout(session_id: str):
+    """Load custom dashboard layout for a dataset session."""
+    _get_session_or_404(session_id)
+    layout = load_dashboard_layout(session_id)
+    return {"layout": layout}
+
+
+@app.post("/api/datasets/{session_id}/dashboard-layout")
+def set_dashboard_layout(session_id: str, request: DashboardLayoutRequest):
+    """Save custom dashboard layout for a dataset session."""
+    _get_session_or_404(session_id)
+    save_dashboard_layout(session_id, request.layout)
+    return {"ok": True}
+
+
+@app.post("/api/datasets/{session_id}/sql")
+def execute_sql_query(session_id: str, request: SqlRunRequest):
+    """Safely run SQL query on the dataset in-memory with validation."""
+    session = _get_session_or_404(session_id)
+    query = (request.query or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Query cannot be empty.")
+
+    start_time = time.time()
+    try:
+        result = run_query(session.engine.df, query)
+        elapsed_ms = round((time.time() - start_time) * 1000, 2)
+        result["elapsed_ms"] = elapsed_ms
+        return result
+    except QueryError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"SQL execution error: {exc}") from exc
 
 
 @app.exception_handler(Exception)
