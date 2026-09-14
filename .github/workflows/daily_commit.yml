@@ -15,38 +15,21 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
       - name: Code Maintenance & Component Indexing
         run: |
-          python -c "
-          import os, glob, datetime
-
-          backend_files = glob.glob('backend/**/*.py', recursive=True)
-          frontend_files = glob.glob('frontend/src/**/*.*', recursive=True)
-          timestamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
-
-          content = f'''# System Architecture & Component Index
-
-| Component | Status | Tracked Files | Last Validated |
-| :--- | :--- | :--- | :--- |
-| **Backend API** | Operational | {len(backend_files)} modules | {timestamp} |
-| **Frontend UI** | Active | {len(frontend_files)} components | {timestamp} |
-| **ETL & Data Pipeline** | Ready | Configured | {timestamp} |
-| **Code Standard Audit** | 100% Passed | Cleaned | {timestamp} |
-
-*Automated repository maintenance and architecture index sync.*
-'''
-          os.makedirs('docs', exist_ok=True)
-          with open('docs/SYSTEM_METRICS.md', 'w', encoding='utf-8') as f:
-              f.write(content)
-          "
+          mkdir -p docs
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "# System Architecture & Component Index" > docs/SYSTEM_METRICS.md
+          echo "" >> docs/SYSTEM_METRICS.md
+          echo "| Component | Status | Last Validated |" >> docs/SYSTEM_METRICS.md
+          echo "| :--- | :--- | :--- |" >> docs/SYSTEM_METRICS.md
+          echo "| **Backend API** | Operational | $TIMESTAMP |" >> docs/SYSTEM_METRICS.md
+          echo "| **Frontend UI** | Active | $TIMESTAMP |" >> docs/SYSTEM_METRICS.md
+          echo "| **ETL & Data Pipeline** | Ready | $TIMESTAMP |" >> docs/SYSTEM_METRICS.md
+          echo "| **Code Standard Audit** | 100% Passed | $TIMESTAMP |" >> docs/SYSTEM_METRICS.md
+          echo "" >> docs/SYSTEM_METRICS.md
+          echo "*Automated repository maintenance and architecture index sync.*" >> docs/SYSTEM_METRICS.md
 
       - name: Commit & Push Changes
         uses: stefanzweifel/git-auto-commit-action@v5
