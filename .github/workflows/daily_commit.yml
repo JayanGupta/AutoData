@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,10 +48,11 @@ jobs:
               f.write(content)
           "
 
-      - name: Commit and Push Code Base Updates
-        run: |
-          git config user.name "JayanGupta"
-          git config user.email "jayangupta455@gmail.com"
-          git add docs/SYSTEM_METRICS.md
-          git commit -m "refactor: update architecture index and code audit metrics" || exit 0
-          git push origin main
+      - name: Commit & Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "refactor: update architecture index and code audit metrics"
+          commit_author: "JayanGupta <jayangupta455@gmail.com>"
+          commit_user_name: "JayanGupta"
+          commit_user_email: "jayangupta455@gmail.com"
+          file_pattern: "docs/SYSTEM_METRICS.md"
