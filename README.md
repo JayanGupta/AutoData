@@ -1,205 +1,96 @@
-<p align="center">
-  <img src="docs/banner.svg" width="100%" alt="AutoData — AI Data Analyst">
-</p>
+# AutoData
 
-<p align="center">
-  <strong>AutoData</strong> — your local AI data analyst. Upload a CSV or Excel file and get instant data profiling, quality checks, guided cleaning, interactive visualizations, natural-language Q&A, AI insights, export, and a downloadable PDF report  — with an option to run locally.
-</p>
+![AutoData banner](docs/banner.svg)
 
-<p align="center">
-  <a href="#features"><img src="https://img.shields.io/badge/features-9-8b5cf6?style=for-the-badge" alt="Features"></a>
-  <a href="#quick-start"><img src="https://img.shields.io/badge/quickstart-2_min-22d3ee?style=for-the-badge" alt="Quick start"></a>
-  <a href="#deploy-to-render-free"><img src="https://img.shields.io/badge/deploy-render_free-34d399?style=for-the-badge" alt="Deploy to Render (free)"></a>
-  <a href="#tests"><img src="https://img.shields.io/badge/tests-verified_in_CI-22c55e?style=for-the-badge" alt="Backend tests run in CI"></a>
-  <a href="#privacy-note"><img src="https://img.shields.io/badge/privacy-local_mode_available-fbbf24?style=for-the-badge" alt="Local mode available"></a>
-  <br/><br/>
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/pandas-2.x-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="pandas">
-  <img src="https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 14">
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 18">
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Tailwind%2520CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/Recharts-2.x-FF6B6B?style=for-the-badge" alt="Recharts">
-  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
-  <br/><br/>
-  <a href="#contributing-and-vibe-coding-✨"><img src="https://img.shields.io/badge/PRs-welcome-8b5cf6?style=for-the-badge&logo=github" alt="PRs welcome"></a>
-  <a href="https://github.com/JayanGupta/AutoData/stargazers"><img src="https://img.shields.io/github/stars/JayanGupta/AutoData?style=social" alt="Stars"></a>
-</p>
+AutoData is a local-first workspace for analyzing spreadsheets. Upload a CSV, TSV, or Excel workbook, inspect its rows, preview cleaning operations, and build charts and reports from the cleaned data. The built-in analyst answers supported questions without an API key.
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=JayanGupta&repo=AutoData&theme=radical" alt="GitHub Stats">
-</p>
+[Quick start](#quick-start) · [First analysis](#try-it-with-sample-data) · [Local development](#local-development) · [Deployment](#deploy-to-render)
 
----
+## Quick start
 
-## 📑 Table of Contents
-- [Screenshots](#-screenshots)
-- [Why AutoData](#-why-autodata)
-- [Features](#-features)
-- [Quick Start](#️-quick-start)
-- [Architecture](#️-architecture)
-- [Deploy to Render](#️-deploy-to-render-free)
-- [Tests](#-tests)
-- [Contributing](#-contributing-and-vibe-coding-)
-- [Privacy Note](#-privacy-note)
+With Git and Docker Compose installed, run:
 
----
-
-## 📸 Screenshots
-
-<p align="center">
-  <img src="docs/landing.png" width="100%" alt="AutoData landing page">
-  <br/>
-  <em>Landing page with live dashboard preview</em>
-</p>
-
-<p align="center">
-  <img src="docs/landing-features.png" width="100%" alt="AutoData feature highlights">
-  <br/>
-  <em>Feature highlights and workflow</em>
-</p>
-
-<p align="center">
-  <img src="docs/datasets.png" width="100%" alt="AutoData dataset library">
-  <br/>
-  <em>Dataset library with search, filters, and sample data</em>
-</p>
-
-## 🚀 Why AutoData
-
-Most data-analysis tools are either black-box SaaS (your data leaves your machine) or require you to string together a dozen notebooks and scripts. AutoData sits in the middle: a self-contained, run-anywhere pipeline that takes a raw file and walks it through a complete analysis workflow — automatically, with no code, and with every number grounded in your actual data.
-
-## ✨ Features
-
-- 📥 **Upload anything** — CSV / TSV / Excel (`.xlsx` & `.xls`), up to 50 MB, with automatic encoding & delimiter sniffing and async background jobs for large files
-- 🔍 **Auto-profiling** — column type inference, distributions, summary statistics, semantic hints, and PII / sensitive-column detection
-- 🩺 **Data quality** — missing values, duplicates, outliers, type anomalies, constant/empty columns, and skew, rolled into a 0–100 quality score
-- 🧹 **Cleaning studio** — guided column operations (fill missing, convert numeric, trim, lowercase, parse dates, rename, drop) plus one-click quick fixes; every step is tracked and fully undoable
-- 📊 **Visualizations** — auto-generated histograms, time series, bar/pie breakdowns, scatter plots, correlation heatmaps, plus an advanced library: box plots, violin plots, Q-Q plots, distributions, parallel coordinates, seasonal decomposition, treemaps, sunbursts, radar, bubble and pair plots
-- 🗂️ **Dataset library** — every upload is saved locally with search, sort, favorites, file-type filters, rename, duplicate, delete, and an AI-generated one-line summary; three curated sample datasets for instant exploration
-- 💬 **AI Analyst chat** — ask questions in plain English; answers are grounded in the actual dataset (never invented)
-- 🧠 **AI insights** — deterministic pattern detection (correlations, trends, top performers, outliers), each linked to its chart evidence
-- 📤 **Export & report** — download the cleaned dataset as CSV or XLSX, or generate a shareable report in Markdown, HTML, or PDF
-
-## 🛠️ Quick start
-
-Requirements: Python 3.11+, Node 22+, or Docker.
-
-**Using Docker Compose (Recommended)**
-```bash
+```sh
+git clone https://github.com/JayanGupta/AutoData.git
+cd AutoData
 docker compose up --build
 ```
-Open **http://localhost:3000** in your browser.
 
-**Using Make (Local Development)**
-```bash
-make setup
-# In separate terminals
-make dev-backend
-make dev-frontend
-```
-Open **http://localhost:3000** in your browser.
+Open the app and select **Try the sample dataset** to explore retail sales. You can also upload your own `.csv`, `.tsv`, `.xlsx`, or `.xls` file. The default upload limit is 50 MB. [Open AutoData on localhost](http://localhost:3000)
 
-### Environment Variables
+## Try it with sample data
 
-Copy `backend/.env.example` to `backend/.env` and configure your credentials if you want to unlock AI capabilities. 
+1. **Inspect the rows.** In **Overview**, filter the sales table to one region. The filter changes the table view. Expand a column profile to see its inferred type, missing values, and statistics.
+2. **Review a cleaning step.** Open **Clean data → Remove duplicates**, choose **Selected columns**, and select `order_id`. The preview identifies which rows will be kept and removed. Apply the change or adjust the matching columns. **Undo last step** restores the previous data.
+3. **Build a chart.** In **Visualizations**, choose **Bar**, set X to `region`, Y to `revenue`, and **Summarize by** to **Sum**. Select **Create chart** to compare regional revenue. For individual order values, choose **None (show individual rows)**. That view displays up to 400 valid rows after filtering.
+4. **Build a dashboard.** Select **Add to dashboard** on the chart. Dashboard Studio combines saved charts and KPI cards, supports filtering, and offers a print preview with the dataset name and active filters.
+5. **Prepare a report.** Open **Report**, select the sections you want, arrange them, and select **Generate preview**. Export the outline in your chosen order as HTML, Markdown, or PDF. To download the cleaned rows themselves, use **Export** and choose CSV or XLSX.
 
-| Variable | Description | Default / Example |
-| :--- | :--- | :--- |
-| `USER_LLM_API_KEY` | Your API key for the LLM provider. | `sk-...` |
-| `USER_LLM_BASE_URL` | The base URL for the OpenAI-compatible API. | `https://api.deepseek.com/v1` |
-| `USER_LLM_MODEL` | The specific model to use for AI Q&A. | `deepseek-chat` |
-| `AUTODATA_DATA_DIR` | (Optional) Path for durable storage. | `/opt/data` (on Render) |
+## Workspace features
 
-> [!NOTE]
-> **No API Key? No problem.** AutoData will gracefully fall back to **local rule-based mode**. The AI Analyst will still answer questions and generate insights completely locally using deterministic statistical rules.
+| Area | What you can do |
+| --- | --- |
+| Dataset library | Search, favorite, rename, or duplicate datasets. Explore the bundled retail sales, customer churn, and web traffic samples. |
+| Cleaning Studio | Check missing values, duplicates, and outliers. Fill blanks, trim text, change types, or remove duplicates using one or more matching columns. |
+| Visualizations | Start with up to two suggestions or choose the axes, aggregation, scale, and filter yourself. Available views include bar, line, area, histogram, scatter, donut, and summary table. Load advanced analyses on demand. |
+| AI Analyst and Insights | Ask questions in plain English and inspect computed patterns such as trends, correlations, and outliers. |
+| Connect and merge | Import public Google Sheets or combine datasets by joining on shared keys or appending rows. |
 
-## 🏗️ Architecture
+<details>
+<summary>View the dataset library</summary>
 
-```mermaid
-graph TD
-    %% Define Styles
-    classDef frontend fill:#000000,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef backend fill:#009688,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef storage fill:#003B57,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef ai fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff;
+![AutoData dataset library](docs/datasets.png)
 
-    %% Nodes
-    User(("👤 User"))
-    NextJS["⚛️ Next.js Frontend (React)"]:::frontend
-    FastAPI["⚡ FastAPI Backend (Python)"]:::backend
-    SQLite[("🗄️ SQLite Database")]:::storage
-    DataEngine["⚙️ Data Engine (pandas/numpy)"]:::backend
-    AIEngine["🤖 AI Analyst Engine"]:::ai
-    LLM["☁️ LLM Provider (Optional)"]:::ai
+</details>
 
-    %% Connections
-    User -- "Upload CSV/Excel\nInteract with UI" --> NextJS
-    NextJS -- "REST API Proxy (/api/*)" --> FastAPI
-    
-    FastAPI -- "Manage Sessions\nStore History" --> SQLite
-    FastAPI -- "Process Data" --> DataEngine
-    FastAPI -- "Natural Language Q&A" --> AIEngine
-    
-    DataEngine -- "Load, Profile, Clean" --> DataEngine
-    
-    AIEngine -. "API Call" .-> LLM
-    AIEngine -- "Fallback" --> DataEngine
+## Local development
 
-    %% Subgraphs for organization
-    subgraph "Local Environment"
-        NextJS
-        FastAPI
-        SQLite
-        DataEngine
-        AIEngine
-    end
+Use Python 3.11 and Node.js 22 to match the project's CI environment. Start the FastAPI backend and Next.js frontend in separate terminals, both beginning in the repository root.
+
+**Backend on macOS or Linux**
+
+```sh
+cd backend
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
-## ☁️ Deploy to Render (free)
+**Backend on Windows PowerShell**
 
-Push this repo to GitHub, then on Render: **New → Blueprint**, pick the repo.
-The `render.yaml` at the repo root defines two **free** web services — no credit
-card required:
-
-| Service | Runtime | What it runs |
-| --- | --- | --- |
-| `autodata-backend` | Python 3.11 | FastAPI + pandas on `$PORT`, health check `/api/health` |
-| `autodata-frontend` | Node 22 | Next.js `next start`, proxies every `/api/*` request to the backend via `BACKEND_URL` |
-
-Open the frontend's `*.onrender.com` URL — the browser only ever talks to the
-frontend, which reverse-proxies `/api` to the backend, so no CORS setup is
-needed.
-
-## 🧪 Tests
-
-```bash
-make test
+```powershell
+cd backend
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-## 🤝 Contributing and Vibe Coding ✨
+**Frontend on either platform**
 
-**We love contributions!** Whether you're a seasoned developer, a data scientist, or someone who loves "vibe coding" with AI tools like GitHub Copilot or Cursor, you are incredibly welcome here.
+```sh
+cd frontend
+npm ci
+npm run dev
+```
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started, and please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions.
+The frontend serves the workspace on port 3000 and proxies requests under `/api` to FastAPI on port 8000. The backend uses pandas for analysis and SQLite for dataset sessions and cleaning history. [Workspace](http://localhost:3000) · [API documentation](http://localhost:8000/docs)
 
-How you can contribute:
-*   **Vibe Coding 🤖**: Drop this repository into Cursor, Claude, or your favorite AI IDE, and start chatting to build features! We encourage AI-assisted contributions.
-*   **Code 💻**: Found a bug? Have a feature idea? Open a PR! The `Makefile` and `docker-compose.yml` make it super easy to spin up the dev environment.
-*   **Ideas & Feedback 💡**: Open an Issue or start a Discussion. We want to hear how you use AutoData.
-*   **Spread the word 🌟**: If you like what we're building, give us a **Star**! It helps the project grow.
+## Storage and privacy
 
-Don't worry if your code isn't perfect. We are happy to help you get your PR across the finish line!
+Local analysis runs on the machine hosting the backend. A native install stores SQLite data in `backend/app/data` by default. Docker Compose uses the `dataset-store` volume. Sessions expire after two hours of inactivity by default. Export cleaned data or reports you want to retain.
 
-## 🔒 Privacy note
+For optional external language-model support, configure `USER_LLM_API_KEY`, `USER_LLM_BASE_URL`, and `USER_LLM_MODEL`. For native development, copy the backend example to `backend/.env`. For Compose, set these variables in the shell or a repository-root `.env` file. When enabled, the configured provider can receive questions, column names, statistics, and limited query results. AutoData excludes columns it detects as sensitive from external analyst queries and generated reports. [Backend environment example](backend/.env.example) · [Compose environment example](.env.example)
 
-On a local installation, datasets are stored on your machine in SQLite. With no external LLM key, analysis is performed by the local backend. On Render, files are uploaded to the hosted backend and each browser gets its own workspace through an HTTPS-only cookie. Hosted isolation requires access through the same-origin frontend proxy. Clearing cookies removes that browser's access to its hosted workspace. Legacy datasets without an owner stay hidden when isolation is enabled.
+## Deploy to Render
 
-If you configure an external LLM, analyst questions, allowed column names and statistics, and limited query results can be sent to the configured provider. Columns detected as sensitive are excluded from the external analyst's query input and downloadable reports. Review your data and provider settings before enabling external analysis.
+Create a Render Blueprint from this repository. It defines a Next.js frontend and a FastAPI backend with browser-scoped workspaces. Use the frontend's HTTPS URL so its proxy and workspace cookie work together. Clearing that cookie removes the browser's access to its previous workspace.
 
----
+The configured free backend uses ephemeral storage. For durable SQLite storage, attach a persistent disk on a supported plan and set `AUTODATA_DATA_DIR` to its mount path. Session expiration still applies. [Render Blueprint](render.yaml)
 
-<p align="center">
-  Built with ❤️ using FastAPI & Next.js by Jayan Gupta.
-</p>
+## Tests and contributions
+
+- **Backend:** From `backend/`, run `python -m unittest discover -s tests` with the project virtual environment active. On Windows, you can use `.\.venv\Scripts\python.exe` directly.
+- **Frontend:** From `frontend/`, run `npm run lint` and `npm run build`. The production build includes TypeScript checks.
+
+Bug reports, feature ideas, and pull requests are welcome, including AI-assisted contributions. AutoData is distributed under the MIT license. [Contributing guide](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [License](LICENSE)
