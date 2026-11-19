@@ -14,8 +14,6 @@ jobs:
     defaults:
       run:
         working-directory: backend
-    env:
-      AUTODATA_DATA_DIR: ${{ runner.temp }}/autodata-test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,6 +22,8 @@ jobs:
           cache: pip
       - run: python -m pip install -r requirements.txt pip-audit
       - run: python -m unittest discover -s tests
+        env:
+          AUTODATA_DATA_DIR: ${{ runner.temp }}/autodata-test
       - run: python -m pip_audit -r requirements.txt
 
   frontend:
