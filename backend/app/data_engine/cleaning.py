@@ -8,6 +8,8 @@ artefact (summary, profiles, quality, charts) consistent with the cleaned data.
 
 from __future__ import annotations
 
+import math
+
 import pandas as pd
 
 
@@ -42,16 +44,32 @@ def rename_column(df: pd.DataFrame, column: str, value: str) -> tuple[pd.DataFra
     return cleaned, f"Renamed column '{column}' to '{new_name}'"
 
 
-def drop_duplicates(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
-    before = len(df)
-    cleaned = df.drop_duplicates().reset_index(drop=True)
-    removed = before - len(cleaned)
-    return cleaned, f"Removed {removed:,} duplicate row{'s' if removed != 1 else ''}"
+def blank_cells(series: pd.Series) -> pd.Series:
+    return series.isna() | series.map(lambda v: isinstance(v, str) and not v.strip())
+
+
+def drop_duplicates(df: pd.DataFrame, columns: list[str] | None = None,
+                    keep: str = "first") -> tuple[pd.DataFrame, str]:
+    if keep not in ("first", "last"):
+        raise ValueError("Choose the first or last row to keep.")
+    eligible = df
+    if columns is not None:
+        if not columns or len(columns) != len(set(columns)):
+            raise ValueError("Select one or more distinct matching columns.")
+        for column in columns:
+            _require_column(df, column)
+        incomplete = df[columns].apply(blank_cells).any(axis=1)
+        eligible = df.loc[~incomplete]
+    remove = eligible.index[eligible.duplicated(subset=columns, keep=keep)]
+    cleaned = df.drop(index=remove)
+    scope = ", ".join(columns) if columns else "all columns"
+    noun = "row" if len(remove) == 1 else "rows"
+    return cleaned, f"Removed {len(remove):,} duplicate {noun} matching {scope} (kept {keep})"
 
 
 def drop_missing_rows(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     before = len(df)
-    cleaned = df.dropna().reset_index(drop=True)
+    cleaned = df.loc[~df.apply(blank_cells).any(axis=1)]
     removed = before - len(cleaned)
     return cleaned, f"Removed {removed:,} row{'s' if removed != 1 else ''} with missing values"
 
@@ -59,7 +77,7 @@ def drop_missing_rows(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 def drop_missing_in_column(df: pd.DataFrame, column: str) -> tuple[pd.DataFrame, str]:
     _require_column(df, column)
     before = len(df)
-    cleaned = df.dropna(subset=[column]).reset_index(drop=True)
+    cleaned = df.loc[~blank_cells(df[column])]
     removed = before - len(cleaned)
     return cleaned, f"Removed {removed:,} row{'s' if removed != 1 else ''} with missing '{column}'"
 
@@ -67,7 +85,16 @@ def drop_missing_in_column(df: pd.DataFrame, column: str) -> tuple[pd.DataFrame,
 def fill_missing(df: pd.DataFrame, column: str, value) -> tuple[pd.DataFrame, str]:
     _require_column(df, column)
     cleaned = df.copy()
-    cleaned[column] = cleaned[column].fillna(value)
+    if isinstance(value, str) and not value.strip():
+        raise ValueError("Enter a replacement for blank cells.")
+    if pd.api.types.is_numeric_dtype(df[column]) and not pd.api.types.is_bool_dtype(df[column]):
+        try:
+            value = pd.to_numeric(value, errors="raise")
+        except ValueError:
+            raise ValueError("Enter a number to fill this numeric column.") from None
+        if not math.isfinite(value):
+            raise ValueError("Enter a finite number.")
+    cleaned[column] = cleaned[column].astype(object).mask(blank_cells(df[column]), value).infer_objects()
     return cleaned, f"Filled missing values in '{column}' with {value!r}"
 
 
@@ -75,18 +102,20 @@ def fill_missing_numeric(df: pd.DataFrame, column: str, value) -> tuple[pd.DataF
     _require_column(df, column)
     cleaned = df.copy()
     vals = _coerce_numeric(cleaned[column])
-    cleaned[column] = cleaned[column].astype(object).where(vals.notna(), None)
+    blanks = blank_cells(cleaned[column])
     if value in ("mean", "median"):
         stat = vals.mean() if value == "mean" else vals.median()
         if pd.isna(stat):
             raise ValueError(f"Cannot compute {value} for '{column}' (no valid numbers).")
-        cleaned[column] = cleaned[column].fillna(stat)
+        cleaned[column] = cleaned[column].astype(object).mask(blanks, stat).infer_objects()
         return cleaned, f"Filled missing values in '{column}' with the {value} ({stat:,.2f})"
     try:
         replacement = float(value)
     except (TypeError, ValueError):
         raise ValueError("value must be a number, 'mean' or 'median'.")
-    cleaned[column] = cleaned[column].fillna(replacement)
+    if not math.isfinite(replacement):
+        raise ValueError("Enter a finite number.")
+    cleaned[column] = cleaned[column].astype(object).mask(blanks, replacement).infer_objects()
     return cleaned, f"Filled missing values in '{column}' with {replacement:,.2f}"
 
 
@@ -205,18 +234,60 @@ def filter_rows(df: pd.DataFrame, column: str, value: str | int | float) -> tupl
         desc = f"Kept rows where '{column}' != '{target}'"
     elif val_str.lower().startswith("contains:"):
         target = val_str[9:].strip()
-        mask = df[column].astype(str).str.contains(target, case=False, na=False)
+        mask = df[column].astype(str).str.contains(target, case=False, na=False, regex=False)
         desc = f"Kept rows where '{column}' contains '{target}'"
     else:
         target = val_str.removeprefix("==").strip()
         mask = df[column].astype(str).str.strip().str.lower() == target.lower()
         desc = f"Kept rows where '{column}' == '{target}'"
 
-    cleaned = df[mask].reset_index(drop=True)
+    cleaned = df[mask]
     if len(cleaned) == 0:
         raise ValueError(f"Filter matched 0 rows. No changes were applied.")
     removed = before - len(cleaned)
     return cleaned, f"{desc} ({removed:,} rows filtered out)"
+
+
+def matching_rows(df: pd.DataFrame, column: str, operator: str,
+                  value: str | int | float = "") -> pd.Series:
+    _require_column(df, column)
+    series = df[column]
+    if operator == "blank":
+        return blank_cells(series)
+    target = str(value).strip()
+    if not target:
+        raise ValueError("Enter a comparison value.")
+    if operator in ("gt", "lt"):
+        try:
+            number = float(target)
+        except ValueError:
+            raise ValueError("Enter a number for this comparison.") from None
+        if not math.isfinite(number):
+            raise ValueError("Enter a finite number for this comparison.")
+        numbers = _coerce_numeric(series)
+        return numbers.gt(number) if operator == "gt" else numbers.lt(number)
+    if operator == "equals" and pd.api.types.is_numeric_dtype(series) and not pd.api.types.is_bool_dtype(series):
+        try:
+            return series.eq(pd.to_numeric(target, errors="raise")).fillna(False)
+        except ValueError:
+            return pd.Series(False, index=series.index)
+    strings = series.astype("string").str.strip().str.casefold()
+    if operator == "equals":
+        return strings.eq(target.casefold()).fillna(False)
+    if operator == "contains":
+        return strings.str.contains(target.casefold(), regex=False, na=False)
+    raise ValueError("Unknown filter condition.")
+
+
+def keep_matching_rows(df: pd.DataFrame, column: str, operator: str,
+                       value: str | int | float = "") -> tuple[pd.DataFrame, str]:
+    mask = matching_rows(df, column, operator, value)
+    labels = {"gt": "greater than", "lt": "less than", "equals": "equals",
+              "contains": "contains", "blank": "is blank"}
+    condition = f"{column} {labels[operator]}"
+    if operator != "blank":
+        condition += f" {value}"
+    return df.loc[mask], f"Kept {int(mask.sum()):,} rows where {condition}"
 
 
 OPERATIONS: dict[str, object] = {
@@ -237,5 +308,60 @@ OPERATIONS: dict[str, object] = {
     "fill_all_numeric_median": fill_all_numeric_median,
     "fill_all_numeric_zero": fill_all_numeric_zero,
     "filter_rows": filter_rows,
+    "keep_matching_rows": keep_matching_rows,
 }
 
+
+
+def prepare_clean(df: pd.DataFrame, action: str, params: dict) -> tuple[pd.DataFrame, str]:
+    operation = OPERATIONS.get(action)
+    if operation is None:
+        raise ValueError(f"Unknown cleaning action '{action}'.")
+    try:
+        result, description = operation(df, **params)
+    except TypeError as exc:
+        raise ValueError(f"Invalid parameters for '{action}': {exc}") from exc
+    if result.empty:
+        raise ValueError("That cleaning step would leave the dataset empty.")
+    return result, description
+
+
+def review_clean(df: pd.DataFrame, result: pd.DataFrame, description: str,
+                 action: str, params: dict) -> dict:
+    """Compare against source row indexes before the applied result is reindexed."""
+    from .engine import preview_rows
+
+    removed = df.index.difference(result.index, sort=False)
+    dropped = df.columns.difference(result.columns, sort=False).tolist()
+    changed_cells = 0
+    new_blanks = 0
+    changed_rows = pd.Series(False, index=result.index)
+    examples = []
+    if len(removed):
+        sample = df.loc[removed[:5]]
+        examples = [{"row": int(idx) + 1, "before": record}
+                    for idx, record in zip(sample.index, preview_rows(sample))]
+        keys = params.get("columns")
+        if action == "drop_duplicates" and keys:
+            complete = result.loc[~result[keys].apply(blank_cells).any(axis=1)]
+            lookup = pd.MultiIndex.from_frame(complete[keys])
+            kept = complete.iloc[lookup.get_indexer(pd.MultiIndex.from_frame(sample[keys]))]
+            for example, idx, record in zip(examples, kept.index, preview_rows(kept)):
+                example.update(kept_row=int(idx) + 1, kept=record)
+    elif not dropped:
+        for col in result.columns:
+            before, after = df[col], result[col]
+            changed = ~(before.eq(after).fillna(False) | (before.isna() & after.isna()))
+            changed_cells += int(changed.sum())
+            new_blanks += int((before.notna() & after.isna()).sum())
+            changed_rows |= changed
+            for idx in changed[changed].index[:5 - len(examples)]:
+                examples.append({"row": int(idx) + 1, "column": col,
+                                 "before": preview_rows(df.loc[[idx], [col]])[0],
+                                 "after": preview_rows(result.loc[[idx], [col]])[0]})
+    return {"description": description, "rows_before": len(df), "rows_after": len(result),
+            "rows_removed": len(removed), "columns_removed": dropped,
+            "columns_added": result.columns.difference(df.columns, sort=False).tolist(),
+            "cells_changed": changed_cells, "new_blanks": new_blanks, "rows_edited": int(changed_rows.sum()),
+            "changed": bool(len(removed) or dropped or changed_cells or not df.dtypes.equals(result.dtypes)),
+            "examples": examples}

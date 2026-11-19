@@ -1,13 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Sparkles, UploadCloud, X } from "lucide-react";
+import { Menu, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { NAV_LINKS, ROUTE_LINKS } from "./constants";
 import { cn } from "./primitives";
-import { UploadButton } from "@/components/UploadButton";
 
 export function BrandMark({ className }: { className?: string }) {
   return (
@@ -19,19 +18,7 @@ export function BrandMark({ className }: { className?: string }) {
   );
 }
 
-export function Navbar({
-  onSample,
-  onResume,
-  loadingSample,
-  hasSessions,
-  sessionCount = 0,
-}: {
-  onSample: () => void;
-  onResume: () => void;
-  loadingSample: boolean;
-  hasSessions?: boolean;
-  sessionCount?: number;
-}) {
+export function Navbar({ landing = true }: { landing?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -58,7 +45,7 @@ export function Navbar({
               : "border-transparent bg-transparent",
           )}
         >
-          <a href="#top" className="group flex items-center gap-3">
+          <a href={landing ? "#top" : "/"} className="group flex items-center gap-3">
             <BrandMark className="transition-transform duration-300 group-hover:scale-105" />
             <span className="flex flex-col leading-none">
               <span className="font-display text-[15px] font-semibold tracking-tight text-white">AutoData</span>
@@ -82,7 +69,7 @@ export function Navbar({
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={landing ? link.href : `/${link.href}`}
                 className="rounded-full px-3.5 py-2 text-sm font-medium text-slate-400 transition hover:bg-white/[0.06] hover:text-white"
               >
                 {link.label}
@@ -91,45 +78,12 @@ export function Navbar({
           </nav>
 
           <div className="flex items-center gap-2">
-            {hasSessions ? (
-              <Link
-                href="/datasets"
-                className="inline-flex items-center gap-2 rounded-full border border-violet-500/40 bg-violet-500/10 px-3.5 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-500/20 hover:text-white"
-              >
-                <Sparkles className="h-4 w-4 text-violet-400" />
-                <span>My Workspace ({sessionCount})</span>
-              </Link>
-            ) : (
-              <UploadButton className="btn-ghost hidden px-3.5 py-2 text-sm sm:inline-flex">
-                <UploadCloud className="h-4 w-4" />
-                Upload data
-              </UploadButton>
-            )}
-            <button
-              type="button"
-              onClick={onResume}
-              className="hidden rounded-full px-3.5 py-2 text-sm font-medium text-slate-400 transition hover:text-white lg:block"
+            <Link
+              href="/datasets"
+              className="inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-3.5 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-500/20 hover:text-white"
             >
-              Resume last dataset
-            </button>
-            <button
-              type="button"
-              onClick={onSample}
-              disabled={loadingSample}
-              className="btn-gradient px-4 py-2 text-sm font-semibold"
-            >
-              {loadingSample ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Loading
-                </span>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Try sample
-                </>
-              )}
-            </button>
+              Open workspace
+            </Link>
             <button
               type="button"
               aria-label="Toggle menu"
@@ -165,23 +119,13 @@ export function Navbar({
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={landing ? link.href : `/${link.href}`}
                 onClick={() => setOpen(false)}
                 className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
               >
                 {link.label}
               </a>
             ))}
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onResume();
-              }}
-              className="mt-1 block w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
-            >
-              Resume last dataset
-            </button>
           </motion.div>
         ) : null}
       </AnimatePresence>

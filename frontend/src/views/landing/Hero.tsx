@@ -1,11 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Bot, ShieldCheck, Sparkles, UploadCloud } from "lucide-react";
+import { Bot, ShieldCheck, Sparkles, UploadCloud } from "lucide-react";
 import type { ReactNode } from "react";
 import { AuroraBackground, Magnetic, MouseGlow, Particles, cn } from "./primitives";
 import { HeroDashboard } from "./HeroDashboard";
-import { UploadButton } from "@/components/UploadButton";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -30,12 +29,12 @@ function FloatingCard({
 
 export function Hero({
   onSample,
-  onResume,
   loadingSample,
+  disabled,
 }: {
   onSample: () => void;
-  onResume: () => void;
   loadingSample: boolean;
+  disabled: boolean;
 }) {
   const prefersReduced = useReducedMotion();
 
@@ -55,24 +54,10 @@ export function Hero({
 
       <MouseGlow color="rgba(139, 92, 246, 0.13)" size={760} className="relative z-10 flex flex-1 flex-col items-center px-5 sm:px-8">
         <div className="flex flex-1 flex-col items-center justify-center pt-32 pb-10 text-center">
-          <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.25 }}>
-            <a
-              href="#analyst"
-              className="group inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-1.5 pr-4 text-xs font-medium text-slate-300 backdrop-blur-md transition hover:border-violet-400/40 hover:bg-white/[0.07]"
-            >
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                <Sparkles className="h-3 w-3" />
-                New
-              </span>
-              Local-first AI data analyst
-              <ArrowRight className="h-3.5 w-3.5 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-violet-300" />
-            </a>
-          </motion.div>
-
           <motion.h1
             {...fadeUp}
             transition={{ ...fadeUp.transition, delay: 0.4 }}
-            className="mx-auto mt-8 max-w-5xl font-display text-[2.75rem] font-bold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl"
+            className="mx-auto max-w-5xl font-display text-[2.75rem] font-bold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl"
           >
             Your data, finally
             <br />
@@ -85,7 +70,7 @@ export function Hero({
             className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg"
           >
             AutoData turns raw CSV and Excel files into clean datasets, honest quality scores, beautiful charts and
-            answers you can act on — <span className="text-slate-200">entirely on your own machine.</span>
+            answers you can act on.
           </motion.p>
 
           <motion.div
@@ -94,16 +79,16 @@ export function Hero({
             className="mt-10 flex flex-col items-center gap-3 sm:flex-row"
           >
             <Magnetic strength={0.2}>
-              <UploadButton className="btn-primary px-7 py-3.5 text-sm font-semibold">
+              <a href="#upload" className="btn-primary px-7 py-3.5 text-sm font-semibold">
                 <UploadCloud className="h-4 w-4" />
                 Upload your data
-              </UploadButton>
+              </a>
             </Magnetic>
             <Magnetic strength={0.2}>
               <button
                 type="button"
                 onClick={onSample}
-                disabled={loadingSample}
+                disabled={loadingSample || disabled}
                 className="btn-gradient px-7 py-3.5 text-sm font-semibold"
               >
                 {loadingSample ? (
@@ -119,9 +104,6 @@ export function Hero({
                 )}
               </button>
             </Magnetic>
-            <button type="button" onClick={onResume} className="text-xs font-medium text-slate-500 transition hover:text-white">
-              or resume your last analysis →
-            </button>
           </motion.div>
 
           <motion.div
@@ -130,7 +112,7 @@ export function Hero({
             className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-600"
           >
             <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-400" /> Free &amp; open source</span>
-            <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-violet-400" /> No account needed</span>
+            <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-violet-400" /> Local analysis available</span>
             <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-cyan-400" /> CSV · Excel · TSV</span>
           </motion.div>
         </div>

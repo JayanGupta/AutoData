@@ -128,15 +128,15 @@ export function AnalystPage({
     }
   };
 
-  const handleInsertColumn = (colName: string) => {
+  const handleInsertColumn = (alias: string) => {
     const textarea = sqlTextareaRef.current;
     if (!textarea) {
-      setSqlQuery((prev) => `${prev} \`${colName}\``);
+      setSqlQuery((prev) => `${prev} ${alias}`);
       return;
     }
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const insert = `\`${colName}\``;
+    const insert = alias;
     setSqlQuery((prev) => prev.slice(0, start) + insert + prev.slice(end));
     setTimeout(() => {
       textarea.focus();
@@ -154,11 +154,12 @@ export function AnalystPage({
     }
   };
 
+  const numericIndex = snapshot?.columns.findIndex((column) => ["integer", "float"].includes(column.inferred_type)) ?? -1;
   const SQL_TEMPLATES = [
     { label: "Select all", sql: "SELECT * FROM data LIMIT 20" },
     { label: "Row count", sql: "SELECT COUNT(*) as total_rows FROM data" },
-    { label: "Distinct", sql: snapshot?.columns[0] ? `SELECT DISTINCT \`${snapshot.columns[0].name}\`, COUNT(*) as count FROM data GROUP BY \`${snapshot.columns[0].name}\` ORDER BY count DESC LIMIT 20` : "SELECT DISTINCT * FROM data LIMIT 20" },
-    { label: "Top 10", sql: snapshot?.columns.find(c => c.inferred_type === 'integer' || c.inferred_type === 'float') ? `SELECT * FROM data ORDER BY \`${snapshot.columns.find(c => c.inferred_type === 'integer' || c.inferred_type === 'float')!.name}\` DESC LIMIT 10` : "SELECT * FROM data LIMIT 10" },
+    { label: "Distinct", sql: "SELECT c0, COUNT(*) as count FROM data GROUP BY c0 ORDER BY count DESC LIMIT 20" },
+    { label: "Top 10", sql: numericIndex >= 0 ? `SELECT * FROM data ORDER BY c${numericIndex} DESC LIMIT 10` : "SELECT * FROM data LIMIT 10" },
   ];
 
   return (
@@ -276,13 +277,13 @@ export function AnalystPage({
               <span className="text-slate-700">|</span>
               <div className="flex flex-wrap items-center gap-1">
                 <span className="text-[10px] text-slate-600 mr-1">Insert column:</span>
-                {snapshot?.columns.slice(0, 12).map((c) => (
+                {snapshot?.columns.slice(0, 12).map((c, index) => (
                   <button
                     key={c.name}
                     type="button"
-                    onClick={() => handleInsertColumn(c.name)}
+                    onClick={() => handleInsertColumn(`c${index}`)}
                     className="rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-mono text-slate-300 hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200 transition-colors"
-                    title={`Insert column '${c.name}' at cursor`}
+                    title={`Insert c${index} for ${c.name}`}
                   >
                     {c.name}
                   </button>

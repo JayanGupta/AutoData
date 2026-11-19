@@ -9,7 +9,6 @@ import {
   FileSpreadsheet,
   History,
   ShieldCheck,
-  Sparkles,
   UploadCloud,
   X,
 } from "lucide-react";
@@ -45,7 +44,7 @@ function validateFile(file: File): string | null {
 }
 
 export function UploadSection() {
-  const { uploadViaJob, sessions, listSessions, load, uploadSample } = useDataset();
+  const { uploadViaJob, sessions, listSessions, load, loading } = useDataset();
   const { error: toastError, success: toastSuccess } = useToast();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +57,6 @@ export function UploadSection() {
   const [stage, setStage] = useState("validating");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingSample, setLoadingSample] = useState(false);
 
   useEffect(() => {
     void listSessions();
@@ -66,6 +64,7 @@ export function UploadSection() {
 
   const handleFile = useCallback(
     async (file: File) => {
+      if (loading) return;
       const problem = validateFile(file);
       if (problem) {
         setError(problem);
@@ -94,7 +93,7 @@ export function UploadSection() {
         setBusy(false);
       }
     },
-    [uploadViaJob, router, toastError, toastSuccess],
+    [loading, uploadViaJob, router, toastError, toastSuccess],
   );
 
   const onDrop = useCallback(
@@ -114,19 +113,6 @@ export function UploadSection() {
     setDragging(true);
     setDragRejected(!isFile);
   }, []);
-
-  const handleSample = async () => {
-    setLoadingSample(true);
-    try {
-      await uploadSample();
-      toastSuccess("Sample dataset loaded — opening your workspace.");
-      router.push("/dashboard");
-    } catch (e) {
-      toastError(e instanceof Error ? e.message : "Sample dataset failed to load");
-    } finally {
-      setLoadingSample(false);
-    }
-  };
 
   const openRecent = async (id: string) => {
     try {
@@ -151,11 +137,10 @@ export function UploadSection() {
           <h2 className="mx-auto mt-6 max-w-2xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
             Drop a file.
             <br />
-            Get answers <span className="text-gradient-animated">in seconds.</span>
+            Start <span className="text-gradient-animated">analyzing.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-slate-400">
-            Everything runs locally. Upload a CSV, TSV or Excel workbook and AutoData profiles it, scores its quality
-            and opens the full analytics workspace.
+            Upload a CSV, TSV or Excel workbook to open it in the analysis workspace.
           </p>
         </div>
       </Reveal>
@@ -167,8 +152,13 @@ export function UploadSection() {
             <div
               role="button"
               tabIndex={0}
-              onClick={() => !busy && inputRef.current?.click()}
-              onKeyDown={(e) => e.key === "Enter" && !busy && inputRef.current?.click()}
+              onClick={() => !loading && inputRef.current?.click()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  if (!loading) inputRef.current?.click();
+                }
+              }}
               onDragOver={onDragOver}
               onDragLeave={() => {
                 setDragging(false);
@@ -176,6 +166,7 @@ export function UploadSection() {
               }}
               onDrop={onDrop}
               aria-label="Upload a CSV or Excel file"
+              aria-disabled={loading}
               className={cn(
                 "group relative flex min-h-[22rem] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border-2 border-dashed px-6 py-12 text-center transition-all duration-300",
                 dragRejected
@@ -244,7 +235,7 @@ export function UploadSection() {
                   </div>
                   <p className="mt-5 flex items-center gap-1.5 text-xs text-slate-500">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                    Processed locally · up to {MAX_MB} MB · no account needed
+                    Files up to {MAX_MB} MB
                   </p>
                 </>
               )}
@@ -280,7 +271,7 @@ export function UploadSection() {
                     <span className="absolute h-full w-full rounded-full bg-emerald-400 animate-ping-soft" />
                     <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   </span>
-                  {sessions.length} on this machine
+                  {sessions.length} in workspace
                 </span>
               </div>
 
@@ -336,24 +327,6 @@ export function UploadSection() {
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => void handleSample()}
-                disabled={loadingSample}
-                className="btn-gradient mt-5 w-full px-4 py-3 text-sm font-semibold"
-              >
-                {loadingSample ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Loading sample…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    Try the sample dataset
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>

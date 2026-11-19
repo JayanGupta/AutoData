@@ -4,17 +4,18 @@ services:
   - type: web
     name: autodata-backend
     runtime: python
-    rootDir: backend
     plan: free
     region: singapore
     healthCheckPath: /api/health
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: WORKSPACE_ISOLATION
+        value: "true"
       - key: CORS_ORIGINS
-        value: "*"
+        value: ""
       # Data lives here. Free tier is ephemeral: data is lost on spin-down or
       # redeploy. To persist, upgrade to a paid instance type and attach a
       # disk mounted at /opt/data (see https://render.com/docs/disks).
@@ -32,7 +33,7 @@ services:
     startCommand: npm run start
     envVars:
       - key: NODE_VERSION
-        value: 20.11.1
+        value: 22.22.0
       - key: BACKEND_URL
         fromService:
           name: autodata-backend

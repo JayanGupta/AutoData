@@ -90,7 +90,7 @@ def run_query(df: pd.DataFrame, sql: str) -> dict:
     try:
         cur = conn.execute(sql)
         names = [d[0] for d in cur.description][:_MAX_COLUMNS]
-        rows = [list(r)[:_MAX_COLUMNS] for r in cur.fetchall()[:_MAX_ROWS]]
+        rows = [list(r)[:_MAX_COLUMNS] for r in cur.fetchmany(_MAX_ROWS)]
     except sqlite3.Error as exc:
         raise QueryError(f"Query execution failed: {exc}") from exc
     finally:

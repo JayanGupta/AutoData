@@ -111,6 +111,8 @@ export interface ChartSpec {
   y: string;
   data: Array<Record<string, unknown>>;
   aggregation?: string;
+  source_x?: string;
+  source_y?: string;
   columns?: string[];
   matrix?: Array<Array<number | null>>;
 }
@@ -142,6 +144,7 @@ export interface AnalystResponse {
 }
 
 export interface ReportResult {
+  revision: string;
   format: string;
   content: string;
   markdown: string;
@@ -161,11 +164,51 @@ export interface CleaningResult {
   undone?: boolean;
 }
 
+export type RowOperator = "equals" | "contains" | "gt" | "lt" | "blank";
+
+export interface RowFilter {
+  column: string;
+  operator: RowOperator;
+  value: string;
+}
+
+export interface CleanParams {
+  column?: string;
+  value?: string | number | null;
+  columns?: string[];
+  keep?: "first" | "last";
+  operator?: RowOperator;
+  expected_revision?: string;
+}
+
+export interface CleanReview {
+  revision: string;
+  description: string;
+  rows_before: number;
+  rows_after: number;
+  rows_removed: number;
+  cells_changed: number;
+  new_blanks: number;
+  rows_edited: number;
+  columns_removed: string[];
+  columns_added: string[];
+  changed: boolean;
+  examples: Array<{
+    row: number;
+    before: Record<string, unknown>;
+    column?: string;
+    after?: Record<string, unknown>;
+    kept_row?: number;
+    kept?: Record<string, unknown>;
+  }>;
+}
+
 export interface CleaningResponse extends AnalysisSnapshot {
   cleaning?: CleaningResult;
 }
 
 export interface AnalysisSnapshot {
+  revision: string;
   dataset: DatasetInfo;
   summary: Summary;
   columns: ColumnProfile[];
@@ -276,16 +319,25 @@ export interface DashboardWidget {
   span?: 1 | 2 | 3 | 4; // grid column span
   // KPI widget properties
   column?: string;
-  aggregation?: "sum" | "avg" | "min" | "max" | "count" | "unique";
+  aggregation?: "sum" | "avg" | "min" | "max" | "count" | "unique" | "none";
   color?: string;
   prefix?: string;
   suffix?: string;
   // Chart widget properties
-  chart_type?: "bar" | "line" | "area" | "pie" | "scatter";
+  chart_type?: "bar" | "line" | "area" | "pie" | "scatter" | "histogram" | "table";
+  scale?: "linear" | "log";
+  date_axis?: boolean;
+  row_filter?: RowFilter;
   x?: string;
   y?: string;
   // Note widget properties
   content?: string;
+}
+
+export interface DashboardMetrics {
+  matched_rows: number;
+  kpis: Record<string, number | null>;
+  charts: Record<string, Array<{ name: string; value: number }>>;
 }
 
 export interface DashboardLayout {

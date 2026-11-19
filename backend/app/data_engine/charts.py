@@ -39,122 +39,35 @@ def _mk(chart_id: str, chart_type: str, title: str, data: list, x_key: str, y_ke
     }
 
 
-def _sample_for_scatter(df: pd.DataFrame) -> pd.DataFrame:
-    if len(df) > config.CHART_SAMPLE_ROWS:
-        return df.sample(n=config.CHART_SAMPLE_ROWS, random_state=42)
-    return df
-
-
 def build_chart_suggestions(df: pd.DataFrame, profiles: list[dict]) -> list[dict]:
-    charts = []
-    seen = set()
-
     numeric = [p for p in profiles if p["inferred_type"] in NUMERIC_TYPES]
-    categorical = [p for p in profiles if p["inferred_type"] in (TYPE_CATEGORICAL, TYPE_BOOLEAN)]
-    datetime_cols = [p for p in profiles if p["inferred_type"] == TYPE_DATETIME]
-
-    idx = 0
-
-    # 1. Histograms for numeric columns
-    for p in numeric[:6]:
-        hist = p["histogram"]
-        if not hist:
-            continue
-        data = [
-            {"label": f"{b['bin_start']:g}-{b['bin_end']:g}", "count": b["count"]}
-            for b in hist
-        ]
-        charts.append(_mk(
-            f"c{idx}", CHART_HISTOGRAM, f"Distribution of {p['name']}", data, "label", "count",
-        ))
-        seen.add(("hist", p["name"]))
-        idx += 1
-
-    # 2. Time series: datetime vs numeric
-    for dt in datetime_cols[:3]:
-        for num in numeric[:3]:
-            key = ("ts", dt["name"], num["name"])
-            if key in seen:
-                continue
-            data = analysis.time_series(df, dt["name"], num["name"], agg="mean")
-            if len(data) < 2:
-                continue
-            charts.append(_mk(
-                f"c{idx}", CHART_LINE, f"{num['name']} over time", data, "date", "value",
-            ))
-            seen.add(key)
-            idx += 1
-
-    # 3. Categorical breakdowns: category vs numeric aggregate
-    for cat in categorical[:5]:
-        for num in numeric[:3]:
-            key = ("agg", cat["name"], num["name"])
-            if key in seen:
-                continue
-            data = analysis.grouped_aggregate(df, cat["name"], num["name"], agg="sum", limit=config.TOP_K_CATEGORIES)
-            if len(data) < 2:
-                continue
-            charts.append(_mk(
-                f"c{idx}", CHART_BAR, f"{num['name']} by {cat['name']}", data, "group", "value",
-                aggregation="sum",
-            ))
-            seen.add(key)
-            idx += 1
-
-    # 4. Category counts
-    for cat in categorical[:5]:
-        key = ("count", cat["name"])
-        if key in seen:
-            continue
-        data = analysis.count_by_category(df, cat["name"], limit=config.TOP_K_CATEGORIES)
-        if len(data) < 2:
-            continue
-        charts.append(_mk(
-            f"c{idx}", CHART_PIE, f"Distribution of {cat['name']}", data, "group", "value",
-        ))
-        seen.add(key)
-        idx += 1
-
-    # 5. Scatter plots for numeric pairs
-    scatter_pairs = 0
-    for i in range(len(numeric)):
-        for j in range(i + 1, len(numeric)):
-            if scatter_pairs >= 4:
-                break
-            a, b = numeric[i], numeric[j]
-            key = ("scatter", a["name"], b["name"])
-            if key in seen:
-                continue
-            sub = _sample_for_scatter(df[[a["name"], b["name"]]])
-            clean = sub.copy()
-            for col in (a["name"], b["name"]):
-                clean[col] = pd.to_numeric(
-                    sub[col].astype(object).map(
-                        lambda v: None if v is None or (isinstance(v, float) and pd.isna(v)) else str(v).replace(",", "").strip()
-                    ),
-                    errors="coerce",
-                )
-            clean = clean.dropna()
-            if len(clean) < 5:
-                continue
-            data = clean.head(config.CHART_SAMPLE_ROWS).to_dict("records")
-            charts.append(_mk(
-                f"c{idx}", CHART_SCATTER, f"{a['name']} vs {b['name']}",
-                data, a["name"], b["name"],
-            ))
-            seen.add(key)
-            idx += 1
-            scatter_pairs += 1
-        if scatter_pairs >= 4:
+    groups = sorted(
+        (p for p in profiles if p["inferred_type"] in (TYPE_CATEGORICAL, TYPE_BOOLEAN)
+         and p["distinct_count"] > 1 and p["distinct_count"] < max(3, len(df))),
+        key=lambda p: p["distinct_count"],
+    )
+    dates = [p for p in profiles if p["inferred_type"] == TYPE_DATETIME]
+    charts = []
+    if dates and numeric:
+        x, y = dates[0]["name"], numeric[0]["name"]
+        points = analysis.time_series(df, x, y, agg="mean")
+        if len(points) > 1:
+            charts.append(_mk("trend", CHART_LINE, f"Average {y} over time", points,
+                              "date", "value", source_x=x, source_y=y, aggregation="avg"))
+    if groups:
+        x = groups[0]["name"]
+        y = numeric[0]["name"] if numeric else None
+        points = (analysis.grouped_aggregate(df, x, y, agg="sum", limit=config.TOP_K_CATEGORIES)
+                  if y else analysis.count_by_category(df, x, limit=config.TOP_K_CATEGORIES))
+        if points:
+            charts.append(_mk("breakdown", CHART_BAR, f"{y or 'Rows'} by {x}", points,
+                              "group", "value", source_x=x, source_y=y, aggregation="sum" if y else "count"))
+    for col in numeric:
+        if len(charts) >= 2:
             break
-
-    # 6. Correlation heatmap when there are 2+ numeric columns
-    corr = analysis.correlation_matrix(df, profiles)
-    if len(corr["columns"]) >= 2:
-        charts.append(_mk(
-            f"c{idx}", CHART_HEATMAP, "Correlation heatmap",
-            [], "", "", columns=corr["columns"], matrix=corr["matrix"],
-        ))
-        idx += 1
-
+        points = [{"label": f"{b['bin_start']:g}–{b['bin_end']:g}", "count": b["count"]}
+                  for b in col["histogram"]]
+        if points:
+            charts.append(_mk(f"hist-{len(charts)}", CHART_HISTOGRAM,
+                              f"Distribution of {col['name']}", points, "label", "count", source_x=col["name"]))
     return charts

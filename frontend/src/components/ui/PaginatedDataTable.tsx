@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as api from "../../api/client";
+import type { RowFilter } from "../../types";
+import { FilterFields } from "./FilterFields";
+import { Button } from "./Button";
 import { DataTable } from "./DataTable";
 import { cn } from "@/views/landing/primitives";
 
@@ -14,6 +17,9 @@ const PAGE_SIZES = [50, 100, 200];
 
 export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: PaginatedDataTableProps) {
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([]);
+  const [filter, setFilter] = useState<RowFilter>();
+  const [draft, setDraft] = useState<RowFilter>({ column: columns[0], operator: "equals", value: "" });
+  const [editing, setEditing] = useState(false);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
   const [size, setSize] = useState(pageSize);
@@ -29,15 +35,15 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
     setLoading(true);
     setError(null);
     api
-      .getRows(sessionId, offset, size)
+      .getRows(sessionId, offset, size, filter)
       .then((page) => {
         if (cancelled) return;
         setRows(page.rows);
         setTotal(page.total);
       })
-      .catch(() => {
+      .catch((cause: unknown) => {
         if (cancelled) return;
-        setError("Could not load the dataset rows.");
+        setError(cause instanceof Error ? cause.message : "Could not load the dataset rows.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -45,7 +51,7 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
     return () => {
       cancelled = true;
     };
-  }, [sessionId, offset, size]);
+  }, [sessionId, offset, size, filter]);
 
   const clamp = useCallback((next: number) => Math.max(0, Math.min(total - 1, next)), [total]);
 
@@ -55,12 +61,30 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
 
   return (
     <div>
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <Button variant="outline" aria-expanded={editing} onClick={() => setEditing(!editing)}>
+          {editing ? "Close filter" : filter ? "Edit filter" : "Filter rows"}
+        </Button>
+        {filter && <><span role="status" className="text-sm text-slate-300">
+          {filter.column} {({ equals: "=", contains: "contains", gt: ">", lt: "<", blank: "is blank" })[filter.operator]} {filter.operator !== "blank" && filter.value}
+          {!loading && !error && ` · ${total.toLocaleString()} matching rows`}
+        </span><Button variant="ghost" onClick={() => { setFilter(undefined); setOffset(0); setEditing(false); }}>Clear filter</Button></>}
+      </div>
+      {editing && <form className="mb-4 space-y-3 rounded-xl border border-white/10 p-4" onSubmit={e => {
+        e.preventDefault(); setOffset(0); setFilter({ ...draft }); setEditing(false);
+      }}>
+        <FilterFields columns={columns} filter={draft} onChange={setDraft} />
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" variant="secondary">Show matches</Button>
+          <span className="text-sm text-slate-400">Filters only this table view.</span>
+        </div>
+      </form>}
       {error ? (
         <div className="rounded-lg border border-rose-500/25 bg-rose-500/[0.06] px-4 py-3 text-sm text-rose-300">{error}</div>
       ) : (
         <>
-          <DataTable columns={columns} rows={rows} maxHeight="420px" emptyMessage={loading ? "Loading rows…" : "No rows"} />
-          {total > size && (
+          <DataTable columns={columns} rows={loading ? [] : rows} offset={offset} maxHeight="420px" emptyMessage={loading ? "Loading rows…" : "No matching rows"} />
+          {(total > size || size !== pageSize) && (
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <span>
@@ -68,7 +92,7 @@ export function PaginatedDataTable({ sessionId, columns, pageSize = 100 }: Pagin
                 </span>
                 <select
                   value={size}
-                  onChange={(e) => setSize(Number(e.target.value))}
+                  onChange={(e) => { setOffset(0); setSize(Number(e.target.value)); }}
                   aria-label="Rows per page"
                   className={cn("field !w-auto !py-1.5 text-xs")}
                 >

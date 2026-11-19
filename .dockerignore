@@ -1,0 +1,9 @@
+**
+!backend/
+!backend/requirements.txt
+!backend/app/
+!backend/app/**
+!sample_data/
+!sample_data/*.csv
+backend/app/**/__pycache__/
+backend/app/data/

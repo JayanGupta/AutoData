@@ -28,6 +28,29 @@ def load_sample() -> "object":
 
 
 class TestLoader(unittest.TestCase):
+    def test_excel_text_identifiers_survive_import(self):
+        import pandas as pd
+        out = io.BytesIO()
+        pd.DataFrame({"id": ["001", "1"], "amount": [1, 2]}).to_excel(out, index=False)
+        df = load_dataframe(out.getvalue(), "orders.xlsx")
+        self.assertEqual(df["id"].tolist(), ["001", "1"])
+        self.assertEqual(analyze(df).columns[0]["inferred_type"], "text")
+
+    def test_fill_statistics_only_replace_blanks(self):
+        import pandas as pd
+        from app.data_engine.cleaning import fill_missing_numeric, review_clean
+        df = pd.DataFrame({"amount": ["1", "2", "12", "unknown", " ", None]})
+        for method, expected in (("mean", 5), ("median", 2)):
+            result, description = fill_missing_numeric(df, "amount", method)
+            self.assertEqual(result["amount"].tolist(), ["1", "2", "12", "unknown", expected, expected])
+            review = review_clean(df, result, description, "fill_missing_numeric", {"column": "amount"})
+            self.assertEqual(review["cells_changed"], 2)
+            self.assertEqual(review["examples"][0]["row"], 5)
+
+    def test_rejects_extra_fields_in_first_record(self):
+        with self.assertRaisesRegex(DataLoadError, "CSV line 2 has 3 fields"):
+            load_dataframe(b"left,right\n1,2,3\n4,5\n", "malformed.csv")
+
     def test_rejects_bad_extension(self):
         with self.assertRaises(DataLoadError):
             load_dataframe(b"a,b\n1,2\n", "notes.txt")
@@ -43,6 +66,14 @@ class TestLoader(unittest.TestCase):
 
 
 class TestProfiler(unittest.TestCase):
+    def test_profiles_keep_dates_and_decimal_values_visible(self):
+        engine = analyze(load_dataframe(
+            b"order_date,revenue,email\n2025-01-01,1234.50,one@example.com\n2025-01-02,2468.10,two@example.com\n",
+            "visibility.csv",
+        ))
+        sensitive = {column["name"] for column in engine.columns if column["sensitive"]}
+        self.assertEqual(sensitive, {"email"})
+
     def setUp(self):
         self.engine = load_sample()
 

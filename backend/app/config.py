@@ -25,6 +25,7 @@ CHART_SAMPLE_ROWS = int(os.getenv("CHART_SAMPLE_ROWS", "2000"))
 TOP_K_CATEGORIES = int(os.getenv("TOP_K_CATEGORIES", "10"))
 
 # Security / robustness
+WORKSPACE_ISOLATION = os.getenv("WORKSPACE_ISOLATION", "").lower() in {"1", "true", "yes"}
 RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
 # Comma-separated list of allowed CORS origins; "*" allows all (default).

@@ -6,7 +6,12 @@ import type {
   ChartSpec,
   CleaningHistory,
   CleaningResponse,
+  CleanParams,
+  CleanReview,
+  RowFilter,
   DashboardLayout,
+  DashboardMetrics,
+  DashboardWidget,
   DatasetInfo,
   ExecutiveSummary,
   GoogleSheetsImportPayload,
@@ -23,25 +28,60 @@ import type {
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
 const REQUEST_TIMEOUT_MS = 120_000;
 
-function timeoutSignal(): AbortSignal {
-  const controller = new AbortController();
-  setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  return controller.signal;
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number, public readonly retryAfterMs?: number) {
+    super(message);
+    this.name = "ApiError";
+  }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { ...init, signal: init?.signal ?? timeoutSignal() });
-  if (!res.ok) {
-    let message = `Request failed with status ${res.status}`;
+let workspaceReady: Promise<void> | undefined;
+
+function ensureWorkspace(): Promise<void> {
+  workspaceReady ??= fetch(`${BASE}/workspace`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(15_000),
+  }).then((res) => {
+    if (!res.ok) throw new ApiError("Could not open the workspace. Try again.", res.status);
+  }).catch((error: unknown) => {
+    workspaceReady = undefined;
+    throw error;
+  });
+  return workspaceReady;
+}
+
+async function fetchApi(path: string, init?: RequestInit): Promise<Response> {
+  await ensureWorkspace();
+  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+  const signal = init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
+  const res = await fetch(`${BASE}${path}`, { ...init, signal });
+  if (res.ok) return res;
+  if (res.status === 401) workspaceReady = undefined;
+
+  let message = `Request failed with status ${res.status}`;
+  const retryHeader = res.headers.get("Retry-After");
+  let retryAfterMs: number | undefined;
+  if (res.status === 429) {
+    const delay = retryHeader === null ? NaN : /^\d+$/.test(retryHeader)
+      ? Number(retryHeader) * 1000
+      : Date.parse(retryHeader) - Date.now();
+    retryAfterMs = Number.isFinite(delay) ? Math.max(1000, delay) : undefined;
+    message = retryAfterMs === undefined
+      ? "Too many requests. Wait a moment and try again."
+      : `Too many requests. Try again in ${Math.ceil(retryAfterMs / 1000)} seconds.`;
+  } else {
     try {
       const body = await res.json();
       if (typeof body.detail === "string") message = body.detail;
     } catch {
-      /* ignore parse errors */
+      // Proxies can return HTML or an empty body.
     }
-    throw new Error(message);
   }
-  return (await res.json()) as T;
+  throw new ApiError(message, res.status, retryAfterMs);
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  return (await (await fetchApi(path, init)).json()) as T;
 }
 
 export function getHealth() {
@@ -66,8 +106,8 @@ export function createUploadJob(file: File): Promise<{ job_id: string; name: str
   return request<{ job_id: string; name: string }>("/jobs/upload", { method: "POST", body: form });
 }
 
-export function getJob(jobId: string): Promise<AnalysisJob> {
-  return request<AnalysisJob>(`/jobs/${jobId}`);
+export function getJob(jobId: string, signal?: AbortSignal): Promise<AnalysisJob> {
+  return request<AnalysisJob>(`/jobs/${jobId}`, { signal });
 }
 
 export function getDataset(id: string): Promise<AnalysisSnapshot> {
@@ -98,8 +138,18 @@ export function askQuestion(id: string, question: string): Promise<AnalystRespon
   });
 }
 
-export function getReport(id: string, fmt: "markdown" | "html" = "markdown"): Promise<ReportResult> {
-  return request<ReportResult>(`/datasets/${id}/report?fmt=${fmt}`);
+export function getReport(id: string, fmt: "markdown" | "html" = "markdown", signal?: AbortSignal, sections?: string[], revision?: string): Promise<ReportResult> {
+  const query = new URLSearchParams({ fmt });
+  if (sections) query.set("sections", sections.join(","));
+  if (revision) query.set("revision", revision);
+  return request<ReportResult>(`/datasets/${id}/report?${query}`, { signal });
+}
+
+export async function downloadReportPdf(id: string, revision: string, sections?: string[]): Promise<Blob> {
+  const query = new URLSearchParams({ fmt: "pdf", revision });
+  if (sections) query.set("sections", sections.join(","));
+  const response = await fetchApi(`/datasets/${id}/report?${query}`);
+  return response.blob();
 }
 
 export function getReportPdfUrl(id: string): string {
@@ -127,24 +177,33 @@ export function deleteDataset(id: string): Promise<{ ok: boolean }> {
   return request<{ ok: boolean }>(`/datasets/${id}`, { method: "DELETE" });
 }
 
-export function getRows(id: string, offset: number, limit: number): Promise<RowPage> {
-  return request<RowPage>(`/datasets/${id}/rows?offset=${offset}&limit=${limit}`);
+export function getRows(id: string, offset: number, limit: number, filter?: RowFilter): Promise<RowPage> {
+  const query = new URLSearchParams({ offset: String(offset), limit: String(limit), ...filter });
+  return request<RowPage>(`/datasets/${id}/rows?${query}`);
+}
+
+export function previewClean(id: string, action: string, params: CleanParams): Promise<CleanReview> {
+  return request<CleanReview>(`/datasets/${id}/clean/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...params }),
+  });
 }
 
 export function cleanDataset(
   id: string,
   action: string,
-  params: { column?: string; value?: string | number | null } = {},
+  params: CleanParams = {},
 ): Promise<CleaningResponse> {
   return request<CleaningResponse>(`/datasets/${id}/clean`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, column: params.column ?? null, value: params.value ?? null }),
+    body: JSON.stringify({ action, ...params }),
   });
 }
 
-export function undoClean(id: string): Promise<CleaningResponse> {
-  return request<CleaningResponse>(`/datasets/${id}/clean/undo`, { method: "POST" });
+export function undoClean(id: string, revision: string): Promise<CleaningResponse | { ok: true; undone: false }> {
+  return request<CleaningResponse | { ok: true; undone: false }>(`/datasets/${id}/clean/undo?expected_revision=${encodeURIComponent(revision)}`, { method: "POST" });
 }
 
 export function getCleaningHistory(id: string): Promise<CleaningHistory> {
@@ -193,6 +252,19 @@ export function mergeDatasets(payload: MergeDatasetsPayload): Promise<MergeDatas
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+  });
+}
+
+export function getDashboardMetrics(
+  id: string,
+  payload: { widgets: DashboardWidget[]; search: string; category_column: string; category_value: string; row_filter?: RowFilter },
+  signal: AbortSignal,
+): Promise<DashboardMetrics> {
+  return request(`/datasets/${id}/dashboard-metrics`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    signal,
   });
 }
 

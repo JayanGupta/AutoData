@@ -136,7 +136,8 @@ _SENSITIVE_NAME_RE = re.compile(
     re.IGNORECASE,
 )
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-_PHONE_RE = re.compile(r"^\+?[\d\s\-().]{7,20}$")
+_PHONE_RE = re.compile(r"^(?:\+?\d{10,15}|\+?[\d() ]*[ ()-]\d[\d ()-]{5,18})$")
+_DATE_LITERAL_RE = re.compile(r"^\d{1,4}[-/]\d{1,2}[-/]\d{1,4}(?:[ T].*)?$")
 _SSN_RE = re.compile(r"^\d{3}-\d{2}-\d{4}$")
 _IP_RE = re.compile(r"^\d{1,3}(\.\d{1,3}){3}$")
 
@@ -150,7 +151,7 @@ def detect_sensitive_column(name: str, series: pd.Series) -> bool:
         return False
     sample = non_null.str.strip()
     email_hits = sample.str.match(_EMAIL_RE).sum()
-    phone_hits = sample.str.fullmatch(_PHONE_RE).sum()
+    phone_hits = (sample.str.fullmatch(_PHONE_RE) & ~sample.str.fullmatch(_DATE_LITERAL_RE)).sum()
     ssn_hits = sample.str.fullmatch(_SSN_RE).sum()
     ip_hits = sample.str.fullmatch(_IP_RE).sum()
     hits = email_hits + phone_hits + ssn_hits + ip_hits
@@ -169,6 +170,9 @@ def _detect_type(name: str, series: pd.Series) -> tuple[str, float, pd.Series]:
 
     if non_null.dtype == bool or (non_null.dtype == object and non_null.map(type).eq(bool).all()):
         return TYPE_BOOLEAN, 1.0, non_null
+
+    if non_null.map(lambda v: isinstance(v, str) and bool(re.fullmatch(r"[+-]?0[0-9]+", v.strip()))).any():
+        return TYPE_TEXT, 1.0, non_null
 
     # datetime check first (date-looking strings fail numeric parse anyway)
     dt_coerced, dt_score = _coerce_datetime(non_null)

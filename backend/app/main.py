@@ -16,28 +16,33 @@ from __future__ import annotations
 import io
 import json
 import logging
-import tempfile
 import threading
 import time
-import traceback
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
+from pydantic import BaseModel, Field
 
 from . import config
-from .ai import generate_insights, nlu
+from .ai import nlu
 from .ai.sql_runner import QueryError, run_query
 from .data_engine import preview_rows, rows_slice
+from .data_engine.cleaning import matching_rows, prepare_clean, review_clean
+from .data_engine.dashboard import calculate_dashboard_metrics
 from .data_engine.loader import DataLoadError, fetch_google_sheet_tabs, load_dataframe, merge_dataframes
 from .data_store.storage import load_dashboard_layout, save_dashboard_layout
-from .report import build_report_html, build_report_markdown, build_report_pdf
+from .report import build_report_html, build_report_markdown, build_report_pdf, prepare_report
 from .security import RateLimitMiddleware
 from .sessions.store import store
+from .workspace import WorkspaceMiddleware, can_access, workspace_owner
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("autodata")
@@ -73,14 +78,16 @@ SAMPLE_CATALOG = [
 
 app = FastAPI(title="AI Data Analyst", version="2.0.0")
 
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(WorkspaceMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.CORS_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Retry-After"],
 )
-app.add_middleware(RateLimitMiddleware)
 
 
 class AskRequest(BaseModel):
@@ -91,6 +98,13 @@ class CleanRequest(BaseModel):
     action: str
     column: str | None = None
     value: str | int | float | None = None
+    columns: list[str] | None = None
+    keep: Literal["first", "last"] | None = None
+    operator: str | None = None
+    expected_revision: str | None = None
+
+    def operation_params(self) -> dict:
+        return self.model_dump(exclude={"action", "expected_revision"}, exclude_none=True)
 
 
 class GoogleSheetImportRequest(BaseModel):
@@ -112,6 +126,34 @@ class DashboardLayoutRequest(BaseModel):
     layout: dict
 
 
+class ChartFilter(BaseModel):
+    column: str
+    operator: Literal["equals", "contains", "gt", "lt", "blank"]
+    value: str = ""
+
+
+class DashboardMetric(BaseModel):
+    id: str = Field(max_length=160)
+    type: Literal["kpi", "chart", "note"]
+    column: str | None = None
+    aggregation: Literal["sum", "avg", "min", "max", "count", "unique", "none"] | None = None
+    x: str | None = None
+    y: str | None = None
+
+
+    chart_type: str | None = None
+    date_axis: bool = False
+    row_filter: ChartFilter | None = None
+
+
+class DashboardMetricsRequest(BaseModel):
+    row_filter: ChartFilter | None = None
+    widgets: list[DashboardMetric] = Field(max_length=100)
+    search: str = Field(default="", max_length=200)
+    category_column: str = ""
+    category_value: str = ""
+
+
 class SqlRunRequest(BaseModel):
     query: str
 
@@ -123,10 +165,21 @@ class _JobStore:
     def __init__(self):
         self._jobs: dict[str, dict] = {}
         self._lock = threading.Lock()
+        self._last_sweep = time.monotonic()
+
+    def _prune(self):
+        now = time.monotonic()
+        if now - self._last_sweep >= 60:
+            self._jobs = {
+                job_id: job for job_id, job in self._jobs.items()
+                if job["finished_at"] is None or now - job["finished_at"] < 3600
+            }
+            self._last_sweep = now
 
     def create(self, name: str) -> str:
         job_id = uuid.uuid4().hex
         with self._lock:
+            self._prune()
             self._jobs[job_id] = {
                 "id": job_id,
                 "name": name,
@@ -136,6 +189,8 @@ class _JobStore:
                 "message": "Waiting to start",
                 "error": None,
                 "session_id": None,
+                "finished_at": None,
+                "owner": workspace_owner.get(),
             }
         return job_id
 
@@ -144,14 +199,21 @@ class _JobStore:
             job = self._jobs.get(job_id)
             if job is not None:
                 job.update(fields)
+                if job["status"] in {"done", "error"}:
+                    job["finished_at"] = time.monotonic()
 
     def get(self, job_id: str) -> dict | None:
         with self._lock:
+            self._prune()
             job = self._jobs.get(job_id)
-            return dict(job) if job else None
+            if job is None or not can_access(job["owner"]):
+                return None
+            return {key: value for key, value in job.items() if key not in {"finished_at", "owner"}}
 
 
 jobs = _JobStore()
+upload_workers = ThreadPoolExecutor(max_workers=2, thread_name_prefix="autodata-upload")
+upload_slots = threading.BoundedSemaphore(6)
 
 
 def _validate_upload(filename: str, data: bytes) -> None:
@@ -204,6 +266,7 @@ def _snapshot(session_id: str) -> dict:
             "favorite": session.favorite,
             "preview": preview_rows(engine.df),
         },
+        "revision": engine.revision,
         "summary": engine.summary,
         "columns": engine.columns,
         "quality": engine.quality,
@@ -233,6 +296,11 @@ def _run_analysis_job(job_id: str, data: bytes, filename: str, sheet_name: str |
         jobs.update(job_id, status="error", error=f"Analysis failed: {exc}")
 
 
+@app.get("/api/workspace")
+def initialize_workspace():
+    return {"isolated": config.WORKSPACE_ISOLATION}
+
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "llm_enabled": config.llm_enabled(), "time": time.time()}
@@ -255,13 +323,17 @@ async def create_upload_job(
 ):
     if file.filename is None:
         raise HTTPException(status_code=400, detail="No file name provided.")
-    data = await file.read()
-    _validate_upload(file.filename, data)
-    job_id = jobs.create(file.filename)
-    thread = threading.Thread(
-        target=_run_analysis_job, args=(job_id, data, file.filename, sheet_name), daemon=True
-    )
-    thread.start()
+    if not upload_slots.acquire(blocking=False):
+        raise HTTPException(status_code=429, detail="Upload queue is busy.", headers={"Retry-After": "5"})
+    try:
+        data = await file.read(config.MAX_UPLOAD_BYTES + 1)
+        _validate_upload(file.filename, data)
+        job_id = jobs.create(file.filename)
+        future = upload_workers.submit(copy_context().run, _run_analysis_job, job_id, data, file.filename, sheet_name)
+    except BaseException:
+        upload_slots.release()
+        raise
+    future.add_done_callback(lambda _: upload_slots.release())
     return {"job_id": job_id, "name": file.filename}
 
 
@@ -280,19 +352,20 @@ async def upload_dataset(
 ):
     if file.filename is None:
         raise HTTPException(status_code=400, detail="No file name provided.")
-    data = await file.read()
+    data = await file.read(config.MAX_UPLOAD_BYTES + 1)
     _validate_upload(file.filename, data)
     try:
-        df = load_dataframe(data, file.filename, sheet_name)
+        df = await run_in_threadpool(load_dataframe, data, file.filename, sheet_name)
     except DataLoadError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     from .data_engine import analyze
 
-    engine = analyze(df)
-    session = store.create(file.filename, engine, file_size=len(data),
-                           file_type=Path(file.filename).suffix or "")
-    return _snapshot(session.id)
+    engine = await run_in_threadpool(analyze, df)
+    session = await run_in_threadpool(
+        store.create, file.filename, engine, file_size=len(data), file_type=Path(file.filename).suffix or ""
+    )
+    return await run_in_threadpool(_snapshot, session.id)
 
 
 @app.post("/api/datasets/sample")
@@ -381,17 +454,24 @@ def get_overview(session_id: str):
 
 
 @app.get("/api/datasets/{session_id}/rows")
-def get_rows(session_id: str, offset: int = 0, limit: int = 100):
+def get_rows(session_id: str, offset: int = 0, limit: int = 100,
+             column: str | None = None, operator: str | None = None, value: str = ""):
     session = _get_session_or_404(session_id)
     if offset < 0 or limit < 1 or limit > 1000:
         raise HTTPException(status_code=400, detail="offset >= 0 and 1 <= limit <= 1000 required.")
-    total = len(session.engine.df)
-    rows = rows_slice(session.engine.df, offset=offset, limit=limit)
+    df = session.engine.df
+    if column is not None or operator is not None:
+        try:
+            df = df.loc[matching_rows(df, column, operator, value)]
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+    total = len(df)
+    rows = rows_slice(df, offset=offset, limit=limit)
     return {
         "offset": offset,
         "limit": limit,
         "total": total,
-        "columns": [c["name"] for c in session.engine.columns],
+        "columns": list(df.columns),
         "rows": rows,
     }
 
@@ -430,36 +510,61 @@ def pd_writer(buf: io.BytesIO):
     return pd.ExcelWriter(buf, engine="openpyxl")
 
 
+@app.post("/api/datasets/{session_id}/clean/preview")
+def preview_clean(session_id: str, request: CleanRequest):
+    engine = _get_session_or_404(session_id).engine
+    params = request.operation_params()
+    try:
+        result, description = prepare_clean(engine.df, request.action, params)
+        review = review_clean(engine.df, result, description, request.action, params)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {**review, "revision": engine.revision}
+
+
+def check_revision(expected: str | None, current: str):
+    if expected is not None and expected != current:
+        raise HTTPException(status_code=409, detail="The dataset changed. Review the current data and try again.")
+
+
 @app.post("/api/datasets/{session_id}/clean")
 def clean_dataset(session_id: str, request: CleanRequest):
     session = _get_session_or_404(session_id)
-    params: dict = {}
-    if request.column is not None:
-        params["column"] = request.column
-    if request.value is not None:
-        params["value"] = request.value
-    try:
-        engine, description = session.apply_clean(request.action, params)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    engine.invalidate()
-    store.persist(session)
-    snapshot = _snapshot(session.id)
-    snapshot["cleaning"] = {"description": description, "history_length": len(session.history)}
-    return snapshot
+    with session.clean_lock:
+        check_revision(request.expected_revision, session.engine.revision)
+        try:
+            _, description = session.apply_clean(request.action, request.operation_params())
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        try:
+            store.persist(session)
+        except Exception:
+            session.undo_clean()
+            raise
+        snapshot = _snapshot(session.id)
+        snapshot["cleaning"] = {"description": description, "history_length": len(session.history)}
+        return snapshot
 
 
 @app.post("/api/datasets/{session_id}/clean/undo")
-def undo_clean(session_id: str):
+def undo_clean(session_id: str, expected_revision: str | None = None):
     session = _get_session_or_404(session_id)
-    restored = session.undo_clean()
-    if restored is None:
-        return {"ok": True, "undone": False}
-    _engine, description = restored
-    store.persist(session)
-    snapshot = _snapshot(session.id)
-    snapshot["cleaning"] = {"description": description, "history_length": len(session.history), "undone": True}
-    return snapshot
+    with session.clean_lock:
+        check_revision(expected_revision, session.engine.revision)
+        previous = session.engine
+        restored = session.undo_clean()
+        if restored is None:
+            return {"ok": True, "undone": False}
+        engine, description = restored
+        try:
+            store.persist(session)
+        except Exception:
+            session.history.append({"engine": engine, "description": description})
+            session.engine = previous
+            raise
+        snapshot = _snapshot(session.id)
+        snapshot["cleaning"] = {"description": description, "history_length": len(session.history), "undone": True}
+        return snapshot
 
 
 @app.get("/api/datasets/{session_id}/cleaning")
@@ -528,21 +633,31 @@ def ask_question(session_id: str, request: AskRequest):
 
 
 @app.get("/api/datasets/{session_id}/report")
-def get_report(session_id: str, fmt: str = "markdown"):
+def get_report(session_id: str, fmt: str = "markdown", revision: str | None = None, sections: str | None = None):
     session = _get_session_or_404(session_id)
-    insights = session.engine.cached_insights()
+    engine, name = session.engine, session.name
+    if revision is not None and revision != engine.revision:
+        raise HTTPException(status_code=409, detail="The dataset changed. Reopen the report before exporting.")
+    if fmt not in {"html", "markdown", "pdf"}:
+        raise HTTPException(status_code=400, detail="fmt must be 'html', 'markdown', or 'pdf'.")
+
+    try:
+        report = prepare_report(engine, name, cleaning_steps=len(session.history),
+                                sections=tuple(sections.split(",")) if sections is not None else None)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     if fmt == "pdf":
-        pdf = build_report_pdf(session.engine, session.name, insights)
-        base = ".".join(session.name.rsplit(".", 1)[:-1]) if "." in session.name else session.name
+        pdf = build_report_pdf(report)
+        base = Path(name).stem or "dataset"
         return StreamingResponse(
             io.BytesIO(pdf),
             media_type="application/pdf",
             headers={"Content-Disposition": f"attachment; filename={json.dumps(base + '-report.pdf')}"},
         )
-    md = build_report_markdown(session.engine, session.name, insights)
+    md = build_report_markdown(report)
     if fmt == "html":
-        return {"format": "html", "content": build_report_html(session.engine, session.name, insights), "markdown": md}
-    return {"format": "markdown", "content": md, "markdown": md}
+        return {"format": "html", "content": build_report_html(report), "markdown": md, "revision": engine.revision}
+    return {"format": "markdown", "content": md, "markdown": md, "revision": engine.revision}
 
 
 @app.get("/api/datasets/{session_id}/conversation")
@@ -647,6 +762,22 @@ def merge_datasets_endpoint(request: MergeDatasetsRequest):
         "snapshot": _snapshot(new_session.id),
         "sessions": store.list_sessions(),
     }
+
+
+@app.post("/api/datasets/{session_id}/dashboard-metrics")
+def dashboard_metrics(session_id: str, request: DashboardMetricsRequest):
+    session = _get_session_or_404(session_id)
+    try:
+        return calculate_dashboard_metrics(
+            session.engine.df,
+            [widget.model_dump() for widget in request.widgets],
+            row_filter=request.row_filter.model_dump() if request.row_filter else None,
+            search=request.search,
+            category_column=request.category_column,
+            category_value=request.category_value,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/api/datasets/{session_id}/dashboard-layout")

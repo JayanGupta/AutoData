@@ -279,7 +279,6 @@ export function Features() {
           { value: 50, suffix: " MB", label: "max file upload" },
           { value: 11, suffix: "", label: "cleaning operations" },
           { value: 6, suffix: "", label: "chart types" },
-          { value: 100, suffix: "%", label: "local & private" },
         ].map((s) => (
           <div key={s.label} className="glass rounded-2xl px-5 py-6 text-center">
             <p className="font-display text-3xl font-bold text-white">

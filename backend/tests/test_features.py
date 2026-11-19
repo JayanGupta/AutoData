@@ -81,6 +81,23 @@ class TestCleaning(unittest.TestCase):
             session.apply_clean("nuke", {})
 
 
+class TestDatasetStorage(unittest.TestCase):
+    def test_storage_preserves_types_and_reads_legacy_records(self):
+        import pandas as pd
+        from pandas.testing import assert_frame_equal
+
+        from app.data_store.storage import _bytes_to_df, _df_to_bytes
+
+        frame = pd.DataFrame({
+            "code": pd.Series(["001", "NA", None], dtype=object),
+            "mixed": pd.Series([42, "42", pd.Timestamp("2026-01-02")], dtype=object),
+            "time": pd.to_datetime(["2026-01-01", None, "2026-01-03"], utc=True),
+            "nullable": pd.Series([1, pd.NA, 3], dtype="Int64"),
+        })
+        assert_frame_equal(frame, _bytes_to_df(_df_to_bytes(frame)))
+        assert_frame_equal(pd.DataFrame({"value": [7]}), _bytes_to_df(b"value\n7\n"))
+
+
 class TestRowsSlice(unittest.TestCase):
     def test_windows(self):
         engine = load_sample()

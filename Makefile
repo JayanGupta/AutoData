@@ -17,7 +17,7 @@ dev:
 	@echo "Run 'make dev-backend' and 'make dev-frontend' in separate terminals, or use docker-compose."
 
 test:
-	cd backend && .venv/bin/pytest tests/
+	cd backend && .venv/bin/python -m unittest discover -s tests
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +

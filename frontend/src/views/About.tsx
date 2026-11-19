@@ -17,10 +17,6 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useDataset } from "../store/DatasetContext";
-import { useToast } from "../store/ToastContext";
 import { Navbar } from "./landing/Navbar";
 import { Footer } from "./landing/Footer";
 import { AnimatedCounter, AuroraBackground, Particles, Reveal, SectionLabel, Stagger, StaggerItem } from "./landing/primitives";
@@ -97,37 +93,10 @@ const ACHIEVEMENTS = [
 ];
 
 export function AboutPage() {
-  const { resumeRecent, uploadSample } = useDataset();
-  const { error: toastError, success: toastSuccess } = useToast();
-  const router = useRouter();
-  const [loadingSample, setLoadingSample] = useState(false);
-
-  const handleSample = async () => {
-    setLoadingSample(true);
-    try {
-      await uploadSample();
-      toastSuccess("Sample dataset loaded successfully.");
-      router.push("/dashboard");
-    } catch {
-      /* error surfaced via toast */
-    } finally {
-      setLoadingSample(false);
-    }
-  };
-
-  const handleResume = async () => {
-    const ok = await resumeRecent();
-    if (ok) {
-      router.push("/dashboard");
-    } else {
-      toastError("Your previous analysis has expired. Upload the file again to continue.");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-night-950 text-slate-100 antialiased">
       <Ambient />
-      <Navbar onSample={() => void handleSample()} onResume={() => void handleResume()} loadingSample={loadingSample} />
+      <Navbar landing={false} />
       <main className="relative z-10">
         <Hero />
         <StatsSection />

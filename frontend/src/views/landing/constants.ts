@@ -25,7 +25,6 @@ export const NAV_LINKS = [
 ];
 
 export const ROUTE_LINKS = [
-  { label: "Datasets", href: "/datasets" },
   { label: "About", href: "/about" },
 ];
 
@@ -135,7 +134,7 @@ export const CAPABILITY_WORDS = [
 export const STATS = [
   { value: 50, suffix: " MB", label: "Max upload, with async background jobs" },
   { value: 11, suffix: "", label: "Guided cleaning operations, all reversible" },
-  { value: 100, suffix: "%", label: "Local — your data never leaves the machine" },
+  { value: 100, suffix: "%", label: "Local analysis available" },
   { value: 0, suffix: "", label: "Accounts, credit cards or trial walls" },
 ];
 

@@ -13,6 +13,8 @@ the real dataset size.
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 import pandas as pd
 
 from . import analysis, charts as chart_builder, profiler, quality
@@ -32,6 +34,7 @@ class EngineResult:
         correlations: dict,
         strong_correlations: list[dict],
     ):
+        self.revision = uuid4().hex
         self.df = df
         self.columns = columns
         self.summary = summary

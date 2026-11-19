@@ -36,7 +36,7 @@ const PALETTE = [
 
 const GRID = "rgba(148, 163, 184, 0.12)";
 const TOOLTIP_STYLE = {
-  fontSize: 12,
+  fontSize: 14,
   borderRadius: 12,
   border: "1px solid rgba(255,255,255,0.12)",
   backgroundColor: "rgba(11, 14, 33, 0.96)",
@@ -76,13 +76,13 @@ function renderChart(chart: ChartSpec, height: number) {
   }
 }
 
-function DataTooltip({ active, payload, label, valueName }: any) {
+export function DataTooltip({ active, payload, label, valueName }: any) {
   if (!active || !payload || !payload.length) return null;
   const rows = payload.filter((p: any) => p.value !== undefined && p.value !== null);
   if (!rows.length) return null;
   return (
     <div style={TOOLTIP_STYLE}>
-      {label !== undefined && label !== null && <p style={{ margin: 0, fontSize: 11, color: "#94a3b8", paddingBottom: 4 }}>{label}</p>}
+      {label !== undefined && label !== null && <p style={{ margin: 0, fontSize: 13, color: "#cbd5e1", paddingBottom: 4 }}>{label}</p>}
       {rows.map((p: any, i: number) => (
         <p key={i} style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, lineHeight: 1.7 }}>
           <span style={{ width: 8, height: 8, borderRadius: 2, background: p.color ?? p.payload?.fill ?? "#a78bfa", display: "inline-block", flexShrink: 0 }} />

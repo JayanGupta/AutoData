@@ -1,15 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, BarChart3, Check, ChevronDown, Download, FileSpreadsheet, FileText, FolderUp, GitMerge, Home, LayoutDashboard, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
+import { Activity, BarChart3, Check, ChevronDown, Download, FileSpreadsheet, FileText, GitMerge, Home, LayoutDashboard, Lightbulb, Library, MessagesSquare, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getExportUrl, getReportPdfUrl } from "@/api/client";
+import { getExportUrl } from "@/api/client";
 import { useDataset } from "@/store/DatasetContext";
 import { BrandMark } from "./landing/Navbar";
 import { cn } from "./landing/primitives";
 import { OverviewPage } from "./Overview";
+import type { DashboardWidget } from "../types";
 import { CustomDashboard } from "./CustomDashboard";
 import { DataQualityPage } from "./DataQuality";
 import { VisualizationsPage } from "./Visualizations";
@@ -24,7 +25,7 @@ type Section = "overview" | "custom_dash" | "quality" | "viz" | "analyst" | "ins
 const NAV: Array<{ key: Section; label: string; icon: typeof Activity }> = [
   { key: "overview", label: "Overview", icon: Activity },
   { key: "custom_dash", label: "Dashboard Studio", icon: LayoutDashboard },
-  { key: "quality", label: "Quality", icon: ShieldCheck },
+  { key: "quality", label: "Clean data", icon: ShieldCheck },
   { key: "viz", label: "Visualizations", icon: BarChart3 },
   { key: "analyst", label: "AI Analyst", icon: MessagesSquare },
   { key: "insights", label: "Insights", icon: Lightbulb },
@@ -34,6 +35,7 @@ const NAV: Array<{ key: Section; label: string; icon: typeof Activity }> = [
 export function Dashboard() {
   const { snapshot, resumeRecent, sessions, load, loading } = useDataset();
   const router = useRouter();
+  const [pendingChart, setPendingChart] = useState<{ dataset: string; widget: DashboardWidget } | null>(null);
   const [section, setSection] = useState<Section>("overview");
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -121,38 +123,36 @@ export function Dashboard() {
         <Sidebar
           section={section}
           onSection={setSection}
-          onNew={handleNew}
-          onExportCsv={() => window.open(getExportUrl(ds.id, "csv"), "_blank")}
-          onExportXlsx={() => window.open(getExportUrl(ds.id, "xlsx"), "_blank")}
-          onExportPdf={() => window.open(getReportPdfUrl(ds.id), "_blank")}
           onOpenGsheet={() => setGsheetModalOpen(true)}
           onOpenMerge={() => setMergeModalOpen(true)}
         />
         <main className="min-w-0 flex-1">
-          <Topbar
-            datasetName={ds.name}
-            rows={ds.rows}
-            columns={ds.columns}
-            quality={qualityScore}
-            qTone={qTone}
-            onNew={handleNew}
-            onExportCsv={() => window.open(getExportUrl(ds.id, "csv"), "_blank")}
-            onExportXlsx={() => window.open(getExportUrl(ds.id, "xlsx"), "_blank")}
-            onExportPdf={() => window.open(getReportPdfUrl(ds.id), "_blank")}
-            onOpenGsheet={() => setGsheetModalOpen(true)}
-            onOpenMerge={() => setMergeModalOpen(true)}
-            exportOpen={exportOpen}
-            setExportOpen={setExportOpen}
-            exportRef={exportRef}
-            sessions={sessions}
-            currentId={ds.id}
-            switchOpen={switchOpen}
-            setSwitchOpen={setSwitchOpen}
-            switchRef={switchRef}
-            onSwitch={handleSwitch}
-            switching={loading}
-          />
-          <MobileNav section={section} onSection={setSection} />
+          <div className="sticky top-0 z-20">
+            <Topbar
+              datasetName={ds.name}
+              rows={ds.rows}
+              columns={ds.columns}
+              quality={qualityScore}
+              qTone={qTone}
+              onNew={handleNew}
+              onExportCsv={() => window.open(getExportUrl(ds.id, "csv"), "_blank")}
+              onExportXlsx={() => window.open(getExportUrl(ds.id, "xlsx"), "_blank")}
+              onExportPdf={() => { setExportOpen(false); setSection("report"); }}
+              onOpenGsheet={() => setGsheetModalOpen(true)}
+              onOpenMerge={() => setMergeModalOpen(true)}
+              exportOpen={exportOpen}
+              setExportOpen={setExportOpen}
+              exportRef={exportRef}
+              sessions={sessions}
+              currentId={ds.id}
+              switchOpen={switchOpen}
+              setSwitchOpen={setSwitchOpen}
+              switchRef={switchRef}
+              onSwitch={handleSwitch}
+              switching={loading}
+            />
+            <MobileNav section={section} onSection={setSection} />
+          </div>
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -163,13 +163,13 @@ export function Dashboard() {
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
               className="mx-auto w-full max-w-[72rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
             >
-              {section === "overview" && <OverviewPage />}
-              {section === "custom_dash" && <CustomDashboard />}
-              {section === "quality" && <DataQualityPage />}
-              {section === "viz" && <VisualizationsPage />}
+              {section === "overview" && <OverviewPage key={snapshot.revision} onClean={() => setSection("quality")} />}
+              {section === "custom_dash" && <CustomDashboard key={ds.id} preset={pendingChart?.dataset === ds.id ? pendingChart.widget : undefined} onDismissPreset={() => setPendingChart(null)} />}
+              {section === "quality" && <DataQualityPage key={ds.id} />}
+              {section === "viz" && <VisualizationsPage key={snapshot.revision} onPin={widget => { setPendingChart({ dataset: ds.id, widget }); setSection("custom_dash"); }} />}
               {section === "analyst" && <AnalystPage pendingQuestion={pendingQuestion} onConsumed={() => setPendingQuestion(null)} />}
               {section === "insights" && <InsightsPage onAsk={handleAsk} />}
-              {section === "report" && <ReportPage />}
+              {section === "report" && <ReportPage key={snapshot.revision} />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -204,19 +204,11 @@ function Ambient() {
 function Sidebar({
   section,
   onSection,
-  onNew,
-  onExportCsv,
-  onExportXlsx,
-  onExportPdf,
   onOpenGsheet,
   onOpenMerge,
 }: {
   section: Section;
   onSection: (s: Section) => void;
-  onNew: () => void;
-  onExportCsv: () => void;
-  onExportXlsx: () => void;
-  onExportPdf: () => void;
   onOpenGsheet: () => void;
   onOpenMerge: () => void;
 }) {
@@ -233,7 +225,7 @@ function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
-        <p className="px-3 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Workspace</p>
+        <p className="px-3 pb-2 pt-2 text-xs font-semibold text-slate-400">Workspace</p>
         {NAV.map((item) => {
           const active = section === item.key;
           return (
@@ -260,7 +252,7 @@ function Sidebar({
             </button>
           );
         })}
-        <p className="px-3 pb-2 pt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Connect &amp; Merge</p>
+        <p className="px-3 pb-2 pt-4 text-xs font-semibold text-slate-400">Connect &amp; Merge</p>
         <button
           onClick={onOpenGsheet}
           className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-emerald-400 transition-all duration-300 hover:bg-emerald-500/10"
@@ -275,7 +267,7 @@ function Sidebar({
           <GitMerge className="h-[18px] w-[18px] text-cyan-400" />
           <span>Merge Datasets</span>
         </button>
-        <p className="px-3 pb-2 pt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Manage</p>
+        <p className="px-3 pb-2 pt-4 text-xs font-semibold text-slate-400">Manage</p>
         <Link
           href="/datasets"
           className="group relative flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-all duration-300 hover:bg-white/[0.04] hover:text-slate-100"
@@ -292,40 +284,7 @@ function Sidebar({
         </Link>
       </nav>
 
-      <div className="space-y-3 p-4">
-        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Export dataset</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <ExportLink label="CSV" onClick={onExportCsv} />
-            <ExportLink label="XLSX" onClick={onExportXlsx} />
-          </div>
-          <button
-            onClick={onExportPdf}
-            className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-violet-400/40 hover:bg-white/[0.08] hover:text-white"
-          >
-            <FileText className="h-3.5 w-3.5" /> PDF report
-          </button>
-        </div>
-        <button
-          onClick={onNew}
-          className="btn-gradient w-full px-4 py-2.5 text-sm font-semibold"
-        >
-          <FolderUp className="h-4 w-4" />
-          Upload Dataset
-        </button>
-      </div>
     </aside>
-  );
-}
-
-function ExportLink({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-violet-400/40 hover:bg-white/[0.08] hover:text-white"
-    >
-      <Download className="h-3.5 w-3.5" /> {label}
-    </button>
   );
 }
 
@@ -375,7 +334,7 @@ function Topbar({
   switching: boolean;
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-white/[0.06] bg-night-950/70 backdrop-blur-xl">
+    <header className="border-b border-white/[0.06] bg-night-950/70 backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -385,7 +344,7 @@ function Topbar({
                 disabled={switching}
                 aria-haspopup="menu"
                 aria-expanded={switchOpen}
-                className="group inline-flex max-w-[16rem] items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 transition-colors hover:border-violet-400/40 hover:bg-white/[0.08] disabled:opacity-50"
+                className="group inline-flex max-w-[48vw] sm:max-w-[16rem] items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 transition-colors hover:border-violet-400/40 hover:bg-white/[0.08] disabled:opacity-50"
                 title="Switch dataset"
               >
                 {switching && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-400/30 border-t-violet-400" />}
@@ -444,25 +403,25 @@ function Topbar({
                 )}
               </AnimatePresence>
             </div>
-            <span className={cn("rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider", qTone)}>
-              {quality}/100
+            <span className={cn("hidden rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs font-medium sm:inline", qTone)}>
+              Quality {quality}/100
             </span>
           </div>
           <p className="mt-0.5 text-xs text-slate-500">
-            {rows.toLocaleString()} rows · {columns} columns · uploaded via AutoData
+            {rows.toLocaleString()} rows · {columns} columns
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={onOpenGsheet}
-            className="btn-ghost hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
+            className="btn-ghost hidden sm:inline-flex lg:hidden items-center gap-1.5 px-3 py-2 text-xs font-medium text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors"
             title="Import from Google Sheets"
           >
             <FileSpreadsheet className="h-3.5 w-3.5" /> Google Sheets
           </button>
           <button
             onClick={onOpenMerge}
-            className="btn-ghost hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/10 transition-colors"
+            className="btn-ghost hidden sm:inline-flex lg:hidden items-center gap-1.5 px-3 py-2 text-xs font-medium text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/10 transition-colors"
             title="Merge & Join Datasets"
           >
             <GitMerge className="h-3.5 w-3.5" /> Merge
@@ -474,7 +433,7 @@ function Topbar({
               aria-haspopup="menu"
               aria-expanded={exportOpen}
             >
-              <Download className="h-4 w-4" /> Export
+              <Download className="h-4 w-4" /><span className="sr-only sm:not-sr-only">Export</span>
             </button>
             <AnimatePresence>
               {exportOpen && (
@@ -488,13 +447,13 @@ function Topbar({
                 >
                   <MenuItem label="Download CSV" icon={Download} onClick={onExportCsv} />
                   <MenuItem label="Download XLSX" icon={Download} onClick={onExportXlsx} />
-                  <MenuItem label="Download PDF report" icon={FileText} onClick={onExportPdf} />
+                  <MenuItem label="Build a report…" icon={FileText} onClick={onExportPdf} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
           <button onClick={onNew} className="btn-gradient px-3.5 py-2 text-sm font-semibold">
-            <FolderUp className="h-4 w-4" /> Library
+            <Library className="h-4 w-4" /><span className="sr-only sm:not-sr-only">Library</span>
           </button>
         </div>
       </div>
@@ -516,7 +475,7 @@ function MenuItem({ label, icon: Icon, onClick }: { label: string; icon: typeof 
 
 function MobileNav({ section, onSection }: { section: Section; onSection: (s: Section) => void }) {
   return (
-    <nav className="sticky top-[61px] z-20 flex gap-1.5 overflow-x-auto border-b border-white/[0.05] bg-night-950/70 px-4 py-2.5 backdrop-blur-xl lg:hidden">
+    <nav className="flex gap-1.5 overflow-x-auto border-b border-white/[0.05] bg-night-950/70 px-4 py-2.5 backdrop-blur-xl lg:hidden">
       {NAV.map((item) => {
         const active = section === item.key;
         return (

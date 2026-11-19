@@ -40,7 +40,7 @@ export function Footer() {
                 <span className="absolute h-full w-full rounded-full bg-emerald-400 animate-ping-soft" />
                 <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
               </span>
-              All systems local · no data leaves your machine
+              Open source · local analysis available
             </div>
           </div>
 

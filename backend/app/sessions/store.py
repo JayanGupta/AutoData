@@ -1,16 +1,20 @@
-"""Persistent session store using SQLite backing (CSV + JSON, no pickle)."""
+"""Dataset sessions and cleaning history backed by SQLite."""
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 import uuid
 
 from .. import config
 from ..data_engine import analyze
-from ..data_engine.cleaning import OPERATIONS
+from ..data_engine.cleaning import prepare_clean
 from ..data_engine.engine import EngineResult
 from ..data_store import storage
+from ..workspace import can_access, workspace_owner
+
+logger = logging.getLogger(__name__)
 
 
 class DatasetSession:
@@ -25,7 +29,9 @@ class DatasetSession:
         file_size: int = 0,
         file_type: str = "",
         favorite: bool = False,
+        owner: str | None = None,
     ):
+        self.clean_lock = threading.Lock()
         self.id = session_id
         self.name = name
         self.engine = engine
@@ -34,6 +40,7 @@ class DatasetSession:
         self.file_size = file_size
         self.file_type = file_type
         self.favorite = favorite
+        self.owner = owner
         # history entries: {"engine": EngineResult, "description": str}
         self.history = history or []
         self.conversation = conversation or []
@@ -45,17 +52,10 @@ class DatasetSession:
         return now - self.last_access > config.SESSION_TTL_SECONDS
 
     def apply_clean(self, action: str, params: dict) -> tuple[EngineResult, str]:
-        op = OPERATIONS.get(action)
-        if op is None:
-            raise ValueError(f"Unknown cleaning action '{action}'.")
-        try:
-            new_df, description = op(self.engine.df, **params)
-        except TypeError as exc:
-            raise ValueError(f"Invalid parameters for '{action}': {exc}") from exc
-        if len(new_df) == 0:
-            raise ValueError("That cleaning step would leave the dataset empty.")
+        new_df, description = prepare_clean(self.engine.df, action, params)
+        next_engine = analyze(new_df.reset_index(drop=True))
         self.history.append({"engine": self.engine, "description": description})
-        self.engine = analyze(new_df)
+        self.engine = next_engine
         return self.engine, description
 
     def undo_clean(self) -> tuple[EngineResult, str] | None:
@@ -74,11 +74,11 @@ class DatasetSession:
     @staticmethod
     def from_data(session_id: str, name: str, created_at: float, last_access: float,
                   df, history: list[dict], conversation: list[dict],
-                  file_size: int = 0, file_type: str = "", favorite: bool = False) -> "DatasetSession":
+                  file_size: int = 0, file_type: str = "", favorite: bool = False, owner: str | None = None) -> "DatasetSession":
         """Reconstruct a session from persisted raw data (df + history dfs)."""
         engine = analyze(df)
         session = DatasetSession(session_id, name, engine, created_at, None, conversation,
-                                 file_size=file_size, file_type=file_type, favorite=favorite)
+                                 file_size=file_size, file_type=file_type, favorite=favorite, owner=owner)
         session.last_access = last_access
         session.history = [
             {"engine": analyze(entry["df"]), "description": entry["description"]}
@@ -107,13 +107,14 @@ class SessionStore:
                     file_size=data.get("file_size", 0),
                     file_type=data.get("file_type", ""),
                     favorite=data.get("favorite", False),
+                    owner=data["owner"],
                 )
                 if not session.expired(now):
                     self._sessions[session.id] = session
                 else:
                     storage.delete_session(session.id)
             except Exception:
-                storage.delete_session(record["id"])
+                logger.exception("Could not load dataset %s", record["id"])
 
     def _persist(self, session: DatasetSession) -> None:
         storage.dump_session(
@@ -127,38 +128,47 @@ class SessionStore:
             file_size=session.file_size,
             file_type=session.file_type,
             favorite=session.favorite,
+            owner=session.owner,
         )
 
     def persist(self, session: DatasetSession) -> None:
         """Public helper to persist an in-memory session after mutation."""
         with self._lock:
-            self._persist(session)
+            if self._sessions.get(session.id) is session and can_access(session.owner):
+                self._persist(session)
 
     def create(self, name: str, engine: EngineResult, file_size: int = 0,
                file_type: str = "") -> DatasetSession:
         with self._lock:
             session_id = uuid.uuid4().hex
             session = DatasetSession(session_id, name, engine, time.time(),
-                                     file_size=file_size, file_type=file_type)
-            self._sessions[session_id] = session
+                                     file_size=file_size, file_type=file_type, owner=workspace_owner.get())
             self._persist(session)
+            self._sessions[session_id] = session
             self._evict_expired()
             return session
 
     def get(self, session_id: str) -> DatasetSession | None:
         with self._lock:
             session = self._sessions.get(session_id)
-            if session is not None:
-                session.touch()
-                self._persist(session)
+            if session is None or not can_access(session.owner):
+                return None
+            if session.expired(time.time()):
+                storage.delete_session(session_id)
+                del self._sessions[session_id]
+                return None
+            session.touch()
+            storage.touch_session(session_id, session.last_access)
             return session
 
     def delete(self, session_id: str) -> bool:
         with self._lock:
-            deleted = self._sessions.pop(session_id, None) is not None
-            if deleted:
-                storage.delete_session(session_id)
-            return deleted
+            session = self._sessions.get(session_id)
+            if session is None or not can_access(session.owner):
+                return False
+            storage.delete_session(session_id)
+            del self._sessions[session_id]
+            return True
 
     def rename(self, session_id: str, new_name: str) -> DatasetSession | None:
         new_name = (new_name or "").strip()
@@ -166,7 +176,7 @@ class SessionStore:
             raise ValueError("Name cannot be empty.")
         with self._lock:
             session = self._sessions.get(session_id)
-            if session is None:
+            if session is None or not can_access(session.owner):
                 return None
             session.name = new_name
             self._persist(session)
@@ -175,7 +185,7 @@ class SessionStore:
     def set_favorite(self, session_id: str, favorite: bool) -> DatasetSession | None:
         with self._lock:
             session = self._sessions.get(session_id)
-            if session is None:
+            if session is None or not can_access(session.owner):
                 return None
             session.favorite = bool(favorite)
             self._persist(session)
@@ -185,7 +195,7 @@ class SessionStore:
         """Clone an existing session into a new independent session."""
         with self._lock:
             source = self._sessions.get(session_id)
-            if source is None:
+            if source is None or not can_access(source.owner):
                 return None
             new_id = uuid.uuid4().hex
             dup_name = f"{source.name} (copy)"
@@ -193,10 +203,10 @@ class SessionStore:
             session = DatasetSession(
                 new_id, dup_name, engine, time.time(),
                 conversation=[dict(m) for m in source.conversation],
-                file_size=source.file_size, file_type=source.file_type, favorite=False,
+                file_size=source.file_size, file_type=source.file_type, favorite=False, owner=workspace_owner.get(),
             )
-            self._sessions[new_id] = session
             self._persist(session)
+            self._sessions[new_id] = session
             self._evict_expired()
             return session
 
@@ -218,7 +228,7 @@ class SessionStore:
                     "favorite": s.favorite,
                     "snippet": build_snippet(s.engine),
                 }
-                for s in self._sessions.values()
+                for s in self._sessions.values() if can_access(s.owner)
             ]
 
     def _evict_expired(self):

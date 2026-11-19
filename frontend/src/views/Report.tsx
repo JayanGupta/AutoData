@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { Check, Copy, Download, FileText, Loader2, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { ArrowDown, ArrowUp, Check, Copy, Download, FileText, Loader2, Sparkles } from "lucide-react";
 import { useDataset } from "../store/DatasetContext";
-import { getReport, getReportPdfUrl } from "../api/client";
+import { downloadReportPdf, getReport } from "../api/client";
+import { useToast } from "../store/ToastContext";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { cn } from "./landing/primitives";
@@ -9,42 +10,68 @@ import type { ReportResult } from "../types";
 
 type Tab = "preview" | "markdown";
 
+const SECTIONS: Record<string, string> = {
+  summary: "Executive summary", quality: "Data quality", charts: "Charts",
+  overview: "Dataset overview", columns: "Column profiles", insights: "Key insights", correlations: "Correlations",
+};
+
 export function ReportPage() {
   const { snapshot } = useDataset();
   const [report, setReport] = useState<ReportResult | null>(null);
   const [tab, setTab] = useState<Tab>("preview");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [order, setOrder] = useState(Object.keys(SECTIONS));
+  const [selected, setSelected] = useState(["summary", "quality", "charts"]);
+  const { error: toastError } = useToast();
 
   const sessionId = snapshot?.dataset.id ?? null;
   const baseName = snapshot?.dataset.name.replace(/\.[^.]+$/, "") || "report";
 
-  useEffect(() => {
-    let active = true;
-    if (!sessionId) return;
+  const outline = order.filter(key => selected.includes(key));
+  const generate = async () => {
+    if (!snapshot || !outline.length) return;
     setLoading(true);
     setError(null);
-    getReport(sessionId, "html")
-      .then((res) => {
-        if (!active) return;
-        setReport(res);
-      })
-      .catch((e) => active && setError(e instanceof Error ? e.message : "Failed to load report"))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
-  }, [sessionId]);
+    setReport(null);
+    try {
+      setReport(await getReport(snapshot.dataset.id, "html", undefined, outline, snapshot.revision));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not build the preview.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const download = (content: string, filename: string, mime: string) => {
-    const blob = new Blob([content], { type: mime });
+  function move(index: number, offset: number) {
+    const next = [...order];
+    [next[index], next[index + offset]] = [next[index + offset], next[index]];
+    setOrder(next);
+    setReport(null);
+  }
+
+  const download = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = filename;
     anchor.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const exportPdf = async () => {
+    if (!sessionId || !report || pdfLoading) return;
+    setPdfLoading(true);
+    try {
+      const pdf = await downloadReportPdf(sessionId, report.revision, outline);
+      download(pdf, `${baseName}-report.pdf`);
+    } catch (error) {
+      toastError(error instanceof Error ? error.message : "Could not download the PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
   };
 
   const copyMarkdown = async () => {
@@ -66,15 +93,15 @@ export function ReportPage() {
             <Sparkles className="h-5 w-5 text-violet-300" /> Analysis report
           </h2>
           <p className="text-sm text-slate-500">
-            A complete write-up of the overview, quality, insights, correlations and charts — ready to share.
+            Choose what to include, arrange the sections, then preview your report.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        {report && <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
             variant="ghost"
             disabled={!report}
-            onClick={() => report && download(report.markdown, `${baseName}-report.md`, "text/markdown")}
+            onClick={() => report && download(new Blob([report.markdown], { type: "text/markdown" }), `${baseName}-report.md`)}
           >
             <Download className="h-4 w-4" /> Markdown
           </Button>
@@ -82,15 +109,33 @@ export function ReportPage() {
             size="sm"
             variant="ghost"
             disabled={!report}
-            onClick={() => report && download(report.content, `${baseName}-report.html`, "text/html")}
+            onClick={() => report && download(new Blob([report.content], { type: "text/html" }), `${baseName}-report.html`)}
           >
             <Download className="h-4 w-4" /> HTML
           </Button>
-          <Button size="sm" onClick={() => sessionId && window.open(getReportPdfUrl(sessionId), "_blank")} disabled={!sessionId}>
+          <Button size="sm" onClick={() => void exportPdf()} disabled={!report || loading} loading={pdfLoading}>
             <FileText className="h-4 w-4" /> PDF
           </Button>
-        </div>
+        </div>}
       </div>
+      <fieldset disabled={loading || pdfLoading} className="panel space-y-3 p-5">
+        <legend className="sr-only">Report outline</legend>
+        <h3 className="panel-title">Report outline</h3>
+        <p className="text-sm text-slate-400">{outline.length ? outline.map(key => SECTIONS[key]).join(" → ") : "Select a section to start."}</p>
+        <ol className="divide-y divide-white/10">{order.map((key, index) => (
+          <li key={key} className="flex items-center gap-2 py-2">
+            <label className="flex flex-1 cursor-pointer items-center gap-3 text-sm">
+              <input type="checkbox" checked={selected.includes(key)} className="accent-violet-500" onChange={e => {
+                setSelected(e.target.checked ? [...selected, key] : selected.filter(item => item !== key));
+                setReport(null); setError(null);
+              }} />{SECTIONS[key]}
+            </label>
+            <Button variant="ghost" size="sm" aria-label={`Move ${SECTIONS[key]} up`} disabled={index === 0} onClick={() => move(index, -1)}><ArrowUp size={16} /></Button>
+            <Button variant="ghost" size="sm" aria-label={`Move ${SECTIONS[key]} down`} disabled={index === order.length - 1} onClick={() => move(index, 1)}><ArrowDown size={16} /></Button>
+          </li>
+        ))}</ol>
+        <Button onClick={() => void generate()} disabled={!outline.length} loading={loading}>Generate preview</Button>
+      </fieldset>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.02] py-20 text-slate-500">
@@ -98,7 +143,7 @@ export function ReportPage() {
           <p className="text-sm">Assembling your report…</p>
         </div>
       ) : error ? (
-        <EmptyState title="Could not generate the report" description={error} />
+        <EmptyState title="Could not generate the report" description={error} actionLabel="Retry" onAction={() => void generate()} />
       ) : report ? (
         <>
           <div className="flex items-center gap-1 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-1">
@@ -125,7 +170,7 @@ export function ReportPage() {
                   <FileText className="h-3.5 w-3.5" /> Report preview
                 </span>
                 <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 ring-1 ring-slate-200">
-                  Charts embedded
+                  {outline.length} sections
                 </span>
               </div>
               <iframe title="Report preview" sandbox="" srcDoc={report.content} className="h-[72vh] w-full" />

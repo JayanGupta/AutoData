@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, CheckCircle2, Filter, LineChart as LineChartIcon, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { useToast } from "../store/ToastContext";
 import { useDataset } from "../store/DatasetContext";
 import { Button, Spinner } from "../components/ui/Button";
 import { Badge, SeverityBadge } from "../components/ui/Badge";
@@ -12,16 +13,21 @@ import type { Insight } from "../types";
 type SeverityFilter = "all" | "high" | "medium" | "low";
 
 export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
-  const { snapshot, insights, insightsLoading, generateInsights } = useDataset();
+  const { snapshot, insights, insightsLoading, refreshInsights, generateInsights } = useDataset();
+  const { error: toastError } = useToast();
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
     if (snapshot && insights.length === 0 && !insightsLoading) {
-      void generateInsights();
+      void refreshInsights().catch((error: Error) => toastError(error.message));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot?.dataset.id]);
+
+  const regenerate = () => {
+    void generateInsights().catch((error: Error) => toastError(error.message));
+  };
 
   const categories = useMemo(() => {
     const cats = new Set(insights.map((i) => i.category));
@@ -55,7 +61,7 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
             Patterns detected automatically from the actual data — every insight links to its evidence.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void generateInsights()} loading={insightsLoading}>
+        <Button variant="outline" size="sm" onClick={regenerate} loading={insightsLoading}>
           {!insightsLoading && <RefreshCw className="h-4 w-4" />}
           Regenerate
         </Button>
@@ -89,7 +95,7 @@ export function InsightsPage({ onAsk }: { onAsk: (question: string) => void }) {
           <p className="text-sm">Scanning the dataset for meaningful patterns…</p>
         </div>
       ) : insights.length === 0 ? (
-        <EmptyState icon={<Sparkles className="h-10 w-10" />} title="No insights generated yet" description="Click regenerate to have the AI analyst scan your dataset for patterns, trends and anomalies." actionLabel="Generate insights" onAction={() => void generateInsights()} />
+        <EmptyState icon={<Sparkles className="h-10 w-10" />} title="No insights generated yet" description="Click regenerate to have the AI analyst scan your dataset for patterns, trends and anomalies." actionLabel="Generate insights" onAction={regenerate} />
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.02] py-12 text-slate-500">
           <Filter className="mb-2 h-6 w-6" />

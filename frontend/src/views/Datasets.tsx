@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as api from "@/api/client";
 import { useDataset } from "@/store/DatasetContext";
@@ -232,9 +233,9 @@ export function DatasetsPage() {
       <div className="relative mx-auto max-w-[76rem] px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-1.5 text-xs text-slate-500">
-          <a href="/" className="flex items-center gap-1 transition-colors hover:text-slate-300">
+          <Link href="/" className="flex items-center gap-1 transition-colors hover:text-slate-300">
             <Home className="h-3.5 w-3.5" /> Home
-          </a>
+          </Link>
           <ChevronRight className="h-3 w-3" />
           <span className="text-slate-300">My Workspace</span>
         </nav>
@@ -433,7 +434,7 @@ export function DatasetsPage() {
         )}
 
         <footer className="mt-12 border-t border-white/[0.05] pt-6 text-center text-xs text-slate-600">
-          {datasets.length} dataset{datasets.length === 1 ? "" : "s"} stored locally · nothing leaves this machine
+          {datasets.length} dataset{datasets.length === 1 ? "" : "s"} in this workspace
         </footer>
       </div>
 
@@ -846,7 +847,7 @@ function UploadModal({
         <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
           <div>
             <h3 className="font-display text-base font-bold text-white">Upload a dataset</h3>
-            <p className="mt-0.5 text-xs text-slate-500">CSV, TSV, XLSX or XLS · up to {MAX_MB} MB · processed locally</p>
+            <p className="mt-0.5 text-xs text-slate-500">CSV, TSV, XLSX or XLS · up to {MAX_MB} MB</p>
           </div>
           <button
             onClick={onClose}

@@ -198,7 +198,7 @@ input:focus-visible {
   }
 
   .field-label {
-    @apply mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500;
+    @apply mb-1.5 block text-sm font-medium text-slate-300;
   }
 
   .panel {
@@ -206,11 +206,11 @@ input:focus-visible {
   }
 
   .panel-title {
-    @apply font-display text-base font-semibold tracking-tight text-white;
+    @apply font-display text-xl font-semibold tracking-tight text-white;
   }
 
   .panel-sub {
-    @apply mt-0.5 text-xs text-slate-500;
+    @apply mt-1 text-sm leading-relaxed text-slate-400;
   }
 }
 
@@ -263,4 +263,38 @@ select.field option {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+.dashboard-sheet [hidden],
+.dashboard-readonly .dashboard-tools,
+.dashboard-readonly .widget-tools { display: none; }
+
+.dashboard-sheet .group { break-inside: avoid; }
+
+.dashboard-readonly {
+  background: white;
+  color: #182136;
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
+.dashboard-readonly :is(.group, .rounded-3xl) { background: white; border-color: #cbd5e1; box-shadow: none !important; }
+.dashboard-readonly :is(p, span, h2, h4, th, td, figcaption), .dashboard-readonly .btn-ghost { color: #263348 !important; }
+.dashboard-readonly .recharts-cartesian-axis-tick-value { fill: #475569; }
+@media print {
+  body:has(.dashboard-sheet) { color-scheme: light; color: #182136; background: white; }
+  body:has(.dashboard-sheet) :is(aside, main > .sticky, .dashboard-actions, .dashboard-tools, .widget-tools, [role="dialog"], [aria-hidden="true"].fixed) {
+    display: none !important;
+  }
+  body:has(.dashboard-sheet) main,
+  body:has(.dashboard-sheet) main > div,
+  body:has(.dashboard-sheet) .min-h-screen { width: 100%; max-width: none; min-height: 0; background: white; padding: 0; transform: none !important; }
+  .dashboard-sheet, .dashboard-sheet * { box-shadow: none !important; backdrop-filter: none !important; }
+  .dashboard-sheet { border: 0; color: #182136; }
+  .dashboard-sheet :is(.group, .rounded-3xl) { border-color: #cbd5e1; background: white; }
+  .dashboard-sheet :is(p, span, h2, h4, th, td, figcaption) { color: #263348 !important; }
+  .dashboard-sheet .recharts-cartesian-axis-tick-value { fill: #475569; }
+  .dashboard-sheet .grid { display: block; }
+  .dashboard-sheet .group { margin-bottom: 12pt; }
+  .dashboard-sheet .recharts-wrapper { print-color-adjust: exact; }
 }

@@ -83,7 +83,7 @@ def detect_duplicates(df: pd.DataFrame) -> list[dict]:
     severity = "high" if count / len(df) >= 0.2 else ("medium" if count / len(df) >= 0.05 else "low")
     return [_mk(
         "dup-0", severity, DUPLICATES, "", "Duplicate rows detected",
-        f"{count:,} of {len(df):,} rows ({count / len(df) * 100:.1f}%) are exact duplicates.",
+        f"{count:,} of {len(df):,} rows ({count / len(df) * 100:.1f}%) belong to groups of identical rows.",
         count,
     )]
 

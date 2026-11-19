@@ -6,6 +6,7 @@ normalised pandas DataFrame, with sensible validation errors for bad input.
 
 from __future__ import annotations
 
+import csv
 import io
 import os
 import re
@@ -40,7 +41,7 @@ def validate_size(data: bytes) -> None:
 def _sniff_delimiter(header_line: str) -> str:
     candidates = {"\t": 0, ";": 0, ",": 0}
     for delim in candidates:
-        candidates[delim] = header_line.count(delim)
+        candidates[delim] = len(next(csv.reader([header_line], delimiter=delim), []))
     best = max(candidates, key=candidates.get)
     return best
 
@@ -57,16 +58,31 @@ def parse_csv(data: bytes, filename: str) -> pd.DataFrame:
     encoding = _detect_encoding(data)
     text = data.decode(encoding, errors="replace")
 
-    first_line = text.splitlines()[0] if text.strip() else ""
-    delimiter = _sniff_delimiter(first_line)
-
+    lines = io.StringIO(text, newline="")
+    first_line = next((line for line in lines if line.strip()), "")
+    delimiter = "\t" if filename.lower().endswith(".tsv") else _sniff_delimiter(first_line)
     try:
+        lines.seek(0)
+        reader = csv.reader(lines, delimiter=delimiter, strict=True)
+        header = next((row for row in reader if row and (len(row) > 1 or row[0].strip())), [])
+        preserve_text = set()
+        padded_integer = re.compile(r"[+-]?0[0-9]+")
+        for row in reader:
+            if len(row) > len(header):
+                raise DataLoadError(
+                    f"CSV line {reader.line_num} has {len(row)} fields. Expected at most {len(header)}."
+                )
+            preserve_text.update(i for i, cell in enumerate(row) if padded_integer.fullmatch(cell.strip()))
+        lines.seek(0)
         df = pd.read_csv(
-            io.StringIO(text),
+            lines,
             sep=delimiter,
             encoding="utf-8",
-            on_bad_lines="warn",
+            on_bad_lines="error",
+            dtype={i: str for i in preserve_text},
         )
+    except DataLoadError:
+        raise
     except Exception as exc:  # noqa: BLE001 - surface any parse failure as a clean error
         raise DataLoadError(f"Could not parse CSV file: {exc}") from exc
 
@@ -77,12 +93,13 @@ def parse_csv(data: bytes, filename: str) -> pd.DataFrame:
 
 def parse_excel(data: bytes, filename: str, sheet_name: str | None = None) -> pd.DataFrame:
     try:
-        xl = pd.ExcelFile(io.BytesIO(data))
-        sheets = xl.sheet_names
-        chosen = sheet_name if sheet_name and sheet_name in sheets else (sheets[0] if sheets else None)
-        if chosen is None:
-            raise DataLoadError("The uploaded Excel file contains no sheets.")
-        df = pd.read_excel(io.BytesIO(data), sheet_name=chosen)
+        with pd.ExcelFile(io.BytesIO(data)) as workbook:
+            sheets = workbook.sheet_names
+            if not sheets:
+                raise DataLoadError("The uploaded Excel file contains no sheets.")
+            if sheet_name and sheet_name not in sheets:
+                raise DataLoadError(f"Unknown worksheet '{sheet_name}'. Available worksheets: {', '.join(sheets)}.")
+            df = workbook.parse(sheet_name or sheets[0], dtype=object).infer_objects()
     except DataLoadError:
         raise
     except Exception as exc:  # noqa: BLE001
@@ -171,7 +188,7 @@ def fetch_google_sheet_tabs(
                 sheets_to_load = [target_sheet_name] if target_sheet_name and target_sheet_name in sheet_names else sheet_names
                 for name in sheets_to_load:
                     try:
-                        df = pd.read_excel(io.BytesIO(resp.content), sheet_name=name)
+                        df = xl.parse(name, dtype=object).infer_objects()
                         df = _normalise_columns(df).dropna(how="all").dropna(axis=1, how="all").reset_index(drop=True)
                         if not df.empty:
                             tabs_data.append((name, df))

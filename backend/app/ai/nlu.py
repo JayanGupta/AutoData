@@ -36,17 +36,13 @@ def _sensitive_columns(engine) -> set[str]:
     return {c["name"] for c in engine.columns if c.get("sensitive")}
 
 
-def _schema_context(engine) -> tuple[str, dict[str, str]]:
-    alias_map = sql_runner.build_schema_map(engine.df)
-    sensitive = _sensitive_columns(engine)
+def _schema_context(engine, alias_map: dict[str, str]) -> str:
     lines = [
         "The dataset table is named `data`. Columns are exposed via safe aliases "
         "(c0, c1, ...). Use ONLY these aliases in SQL, never the display names. "
         "Alias mapping:",
     ]
     for alias, col_name in alias_map.items():
-        if col_name in sensitive:
-            continue
         col = next((c for c in engine.columns if c["name"] == col_name), None)
         if col is None:
             lines.append(f"- {alias} = {col_name}")
@@ -60,10 +56,6 @@ def _schema_context(engine) -> tuple[str, dict[str, str]]:
         elif kind == TYPE_DATETIME:
             s = col.get("stats", {})
             extra = f" range {s.get('min')} .. {s.get('max')}" if s else ""
-        else:
-            top = col.get("top_k", [])
-            if top:
-                extra = " top values " + ", ".join(f"'{t['value']}'" for t in top[:4])
         lines.append(f"- {alias} = {col_name} ({kind}){extra}")
     lines.append(
         f"The dataset has {engine.summary['row_count']:,} rows. "
@@ -71,11 +63,10 @@ def _schema_context(engine) -> tuple[str, dict[str, str]]:
         "and always reference columns by their alias (c0, c1, ...). "
         "Never select columns that are not in the mapping."
     )
-    return "\n".join(lines), alias_map
+    return "\n".join(lines)
 
 
-def _generate_sql(question: str, engine, alias_map: dict[str, str]) -> str:
-    context, _ = _schema_context(engine)
+def _generate_sql(question: str, context: str) -> str:
     messages = [
         {
             "role": "system",
@@ -99,9 +90,9 @@ def _generate_sql(question: str, engine, alias_map: dict[str, str]) -> str:
     return sql_runner.validate_select(sql)
 
 
-def _interpret(question: str, query_result: dict, engine) -> dict:
+def _interpret(question: str, query_result: dict) -> dict:
     table_text = "\n".join(
-        " | ".join(str(v) for v in row) for row in query_result["rows"][:15]
+        " | ".join(str(v)[:200] for v in row) for row in query_result["rows"][:15]
     )
     messages = [
         {
@@ -155,13 +146,14 @@ def _heuristic_chart(query_result: dict) -> dict | None:
 
 def answer(question: str, engine, memory: list[dict] | None = None) -> dict:
     """Answer a natural-language question, preferring LLM mode."""
-    if config.llm_enabled():
+    if config.llm_enabled() and len(visible := engine.df.columns.difference(_sensitive_columns(engine), sort=False)):
         sql = None
         try:
-            context, alias_map = _schema_context(engine)
-            sql = _generate_sql(question, engine, alias_map)
-            result = sql_runner.run_query(engine.df, sql)
-            interpretation = _interpret(question, result, engine)
+            df = engine.df.loc[:, visible]
+            context = _schema_context(engine, sql_runner.build_schema_map(df))
+            sql = _generate_sql(question, context)
+            result = sql_runner.run_query(df, sql)
+            interpretation = _interpret(question, result)
             return {
                 "answer": interpretation.get("answer", ""),
                 "numbers": interpretation.get("numbers", []),

@@ -41,7 +41,8 @@ def _fmt(v: float, digits: int = 1) -> str:
 
 def _val_or_zero(d: dict, key: str) -> float:
     try:
-        return float(d.get(key, 0) or 0)
+        value = float(d.get(key, 0) or 0)
+        return value if math.isfinite(value) else 0.0
     except (TypeError, ValueError):
         return 0.0
 
@@ -55,7 +56,7 @@ class _ChartFlowable(Flowable):
 
     def wrap(self, availWidth, availHeight):
         self.width = min(self.chart_w, availWidth)
-        self.height = min(self.chart_h, availHeight)
+        self.height = self.chart_h
         return self.width, self.height
 
     def _font(self, size: float = 8, bold: bool = False):
@@ -73,9 +74,8 @@ class _ChartFlowable(Flowable):
         c.drawString(0, self.height - 12, self.chart.get("title", ""))
         c.restoreState()
 
-    def _gridlines(self, left, top, right, bottom, vmax, n=4, show=True):
+    def _gridlines(self, left, top, right, bottom, vmin, vmax, n=4):
         c = self.canv
-        out = []
         c.saveState()
         c.setStrokeColor(GRID)
         c.setLineWidth(0.4)
@@ -83,12 +83,10 @@ class _ChartFlowable(Flowable):
         self._font(7)
         for i in range(n + 1):
             frac = i / n
-            y = top + (bottom - top) * (1 - frac)
+            y = bottom + (top - bottom) * frac
             c.line(left, y, right, y)
-            if show:
-                c.drawString(left - 6, y - 2, _fmt(frac * vmax))
+            c.drawRightString(left - 5, y - 2, _fmt(vmin + frac * (vmax - vmin)))
         c.restoreState()
-        return out
 
     def _x_label(self, text: str, x: float, y: float, center: bool = True):
         c = self.canv
@@ -110,56 +108,63 @@ class BarChart(_ChartFlowable):
         if not data:
             return
         x_key, y_key = self.chart["x"], self.chart["y"]
-        left, right = 30, self.width - 8
-        top, bottom = self.height - 18, self.height - 34
+        left, right = 40, self.width - 22
+        top, bottom = self.height - 26, 24
         values = [_val_or_zero(d, y_key) for d in data]
-        vmax = max(values) or 1
-        self._gridlines(left, top, right, bottom, vmax)
+        vmin, vmax = min(0, min(values)), max(0, max(values))
+        if vmin == vmax:
+            vmax = 1
+        self._gridlines(left, top, right, bottom, vmin, vmax)
+        scale = (top - bottom) / (vmax - vmin)
+        zero = bottom - vmin * scale
+        label_indices = {round(i * (len(data) - 1) / 7) for i in range(8)}
         bw = (right - left) / len(data)
         c.saveState()
         for i, d in enumerate(data):
             v = values[i]
-            bh = max(v / vmax * (bottom - top), 0.6)
+            y = bottom + (v - vmin) * scale
             x = left + i * bw + bw * 0.12
             w = max(bw * 0.72, 2)
             c.setFillColor(ACCENT_A)
             self._alpha(0.92)
-            c.roundRect(x, top, w, bh, 1.5, stroke=0, fill=1)
+            c.rect(x, min(y, zero), w, abs(y - zero), stroke=0, fill=1)
             self._alpha(1)
-            if len(data) <= 10:
-                self._x_label(d.get(x_key, ""), x + w / 2, bottom + 5)
+            if i in label_indices:
+                self._x_label(d.get(x_key, ""), x + w / 2, bottom - 12)
         c.restoreState()
 
 
 class LineChart(_ChartFlowable):
     def draw(self):
         c = self.canv
-        self._title()
         data = self.chart.get("data") or []
         if len(data) < 2:
-            BarChart(self.chart, self.chart_w, self.chart_h).draw()
+            bar = BarChart(self.chart, self.width, self.height)
+            bar.wrap(self.width, self.height)
+            bar.drawOn(c, 0, 0)
             return
+        self._title()
         x_key, y_key = self.chart["x"], self.chart["y"]
-        left, right = 30, self.width - 8
-        top, bottom = self.height - 18, self.height - 34
+        left, right = 40, self.width - 22
+        top, bottom = self.height - 26, 24
         values = [_val_or_zero(d, y_key) for d in data]
         vmin, vmax = min(values), max(values)
         if vmax == vmin:
             vmax, vmin = vmax + 1, vmin - 1
-        self._gridlines(left, top, right, bottom, vmax)
+        self._gridlines(left, top, right, bottom, vmin, vmax)
         step = (right - left) / (len(data) - 1)
         pts = []
         for i, d in enumerate(data):
             x = left + i * step
-            y = top + (bottom - top) * (1 - (values[i] - vmin) / (vmax - vmin))
+            y = bottom + (top - bottom) * (values[i] - vmin) / (vmax - vmin)
             pts.append((x, y))
         c.saveState()
         # area fill
         p = c.beginPath()
-        p.moveTo(pts[0][0], top)
+        p.moveTo(pts[0][0], bottom)
         for x, y in pts:
             p.lineTo(x, y)
-        p.lineTo(pts[-1][0], top)
+        p.lineTo(pts[-1][0], bottom)
         p.close()
         c.setFillColor(ACCENT_A)
         self._alpha(0.15)
@@ -171,15 +176,15 @@ class LineChart(_ChartFlowable):
         for i in range(len(pts) - 1):
             c.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1])
         c.setFillColor(WHITE)
-        for x, y in pts:
-            c.circle(x, y, 1.6, stroke=1, fill=1)
-            c.setFillColor(WHITE)
+        if len(pts) <= 60:
+            for x, y in pts:
+                c.circle(x, y, 1.6, stroke=1, fill=1)
         c.setStrokeColor(ACCENT_A)
         # labels (subset)
         max_labels = 8
         idxs = sorted({round(i * (len(data) - 1) / (max_labels - 1)) for i in range(max_labels)})
         for i in idxs:
-            self._x_label(data[i].get(x_key, ""), pts[i][0], bottom + 5)
+            self._x_label(data[i].get(x_key, ""), pts[i][0], bottom - 12)
         c.restoreState()
 
 
@@ -200,6 +205,8 @@ class PieChart(_ChartFlowable):
         legend_x = cx + r + 22
         legend_y = self.height - 30
         c.saveState()
+        c.setStrokeColor(WHITE)
+        c.setLineWidth(0.8)
         for i, d in enumerate(data):
             frac = _val_or_zero(d, y_key) / total
             sweep = frac * 360
@@ -213,8 +220,6 @@ class PieChart(_ChartFlowable):
             p.close()
             c.setFillColor(color)
             c.drawPath(p, stroke=1, fill=1)
-            c.setStrokeColor(WHITE)
-            c.setLineWidth(0.8)
             start += sweep
         # legend
         for i, d in enumerate(data):
@@ -242,19 +247,16 @@ class HeatmapChart(_ChartFlowable):
             return
         cols = len(columns)
         cell = min((self.width - 40) / cols, (self.height - 44) / cols)
-        left, top = 58, self.height - 22
+        left, bottom = 70, 20
+        top = bottom + cols * cell
         c.saveState()
         for j, name in enumerate(columns):
             self._font(6.5)
             c.setFillColor(MUTED)
-            c.drawCentredString(left + j * cell + cell / 2, top - 10, str(name)[:12])
-            c.saveState()
-            c.translate(left - 8, top + j * cell + cell / 2)
-            c.rotate(90)
-            c.drawString(3, -2, str(name)[:12])
-            c.restoreState()
+            c.drawCentredString(left + j * cell + cell / 2, bottom - 10, str(name)[:10])
+            c.drawRightString(left - 5, top - (j + 0.5) * cell, str(name)[:12])
             for i, v in enumerate(matrix[j]):
-                x, y = left + j * cell, top + i * cell
+                x, y = left + i * cell, top - (j + 1) * cell
                 if v is None:
                     c.setFillColor(colors.HexColor("#f8fafc"))
                     c.setStrokeColor(colors.HexColor("#e2e8f0"))
@@ -285,8 +287,8 @@ class ScatterChart(_ChartFlowable):
         if len(data) < 3:
             return
         x_key, y_key = self.chart["x"], self.chart["y"]
-        left, right = 34, self.width - 8
-        top, bottom = self.height - 18, self.height - 30
+        left, right = 40, self.width - 22
+        top, bottom = self.height - 28, 28
         xs = [_val_or_zero(d, x_key) for d in data]
         ys = [_val_or_zero(d, y_key) for d in data]
         xmin, xmax = min(xs), max(xs)
@@ -295,18 +297,22 @@ class ScatterChart(_ChartFlowable):
             xmax += 1
         if ymax == ymin:
             ymax += 1
-        self._gridlines(left, top, right, bottom, ymax)
+        self._gridlines(left, top, right, bottom, ymin, ymax)
         c.saveState()
-        for d, xv, yv in zip(data, xs, ys):
+        for xv, yv in zip(xs, ys):
             x = left + (xv - xmin) / (xmax - xmin) * (right - left)
-            y = top + (bottom - top) * (1 - (yv - ymin) / (ymax - ymin))
+            y = bottom + (top - bottom) * (yv - ymin) / (ymax - ymin)
             c.setFillColor(ACCENT_A)
             self._alpha(0.7)
             c.circle(x, y, 1.8, stroke=0, fill=1)
         self._alpha(1)
         c.setFillColor(MUTED)
         self._font(7)
-        c.drawString(left, bottom + 5, str(x_key)[:16])
+        for index in range(5):
+            fraction = index / 4
+            c.drawCentredString(left + fraction * (right - left), bottom - 10, _fmt(xmin + fraction * (xmax - xmin)))
+        c.drawCentredString((left + right) / 2, 5, str(x_key))
+        c.drawString(left, top + 5, str(y_key))
         c.restoreState()
 
 

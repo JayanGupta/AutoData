@@ -3,15 +3,15 @@
 </p>
 
 <p align="center">
-  <strong>AutoData</strong> — your local AI data analyst. Upload a CSV or Excel file and get instant data profiling, quality checks, guided cleaning, interactive visualizations, natural-language Q&A, AI insights, export, and a downloadable PDF report — all on your own machine.
+  <strong>AutoData</strong> — your local AI data analyst. Upload a CSV or Excel file and get instant data profiling, quality checks, guided cleaning, interactive visualizations, natural-language Q&A, AI insights, export, and a downloadable PDF report  — with an option to run locally.
 </p>
 
 <p align="center">
   <a href="#features"><img src="https://img.shields.io/badge/features-9-8b5cf6?style=for-the-badge" alt="Features"></a>
   <a href="#quick-start"><img src="https://img.shields.io/badge/quickstart-2_min-22d3ee?style=for-the-badge" alt="Quick start"></a>
   <a href="#deploy-to-render-free"><img src="https://img.shields.io/badge/deploy-render_free-34d399?style=for-the-badge" alt="Deploy to Render (free)"></a>
-  <a href="#tests"><img src="https://img.shields.io/badge/tests-55_passing-22c55e?style=for-the-badge" alt="55 tests passing"></a>
-  <a href="#privacy-note"><img src="https://img.shields.io/badge/privacy-100%25_local-fbbf24?style=for-the-badge" alt="100% local"></a>
+  <a href="#tests"><img src="https://img.shields.io/badge/tests-verified_in_CI-22c55e?style=for-the-badge" alt="Backend tests run in CI"></a>
+  <a href="#privacy-note"><img src="https://img.shields.io/badge/privacy-local_mode_available-fbbf24?style=for-the-badge" alt="Local mode available"></a>
   <br/><br/>
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
   <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
@@ -84,18 +84,20 @@ Most data-analysis tools are either black-box SaaS (your data leaves your machin
 
 ## 🛠️ Quick start
 
-Requirements: Python 3.11+, Node 18+, or Docker.
+Requirements: Python 3.11+, Node 22+, or Docker.
 
 **Using Docker Compose (Recommended)**
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 Open **http://localhost:3000** in your browser.
 
 **Using Make (Local Development)**
 ```bash
 make setup
-make dev
+# In separate terminals
+make dev-backend
+make dev-frontend
 ```
 Open **http://localhost:3000** in your browser.
 
@@ -164,7 +166,7 @@ card required:
 | Service | Runtime | What it runs |
 | --- | --- | --- |
 | `autodata-backend` | Python 3.11 | FastAPI + pandas on `$PORT`, health check `/api/health` |
-| `autodata-frontend` | Node 20 | Next.js `next start`, proxies every `/api/*` request to the backend via `BACKEND_URL` |
+| `autodata-frontend` | Node 22 | Next.js `next start`, proxies every `/api/*` request to the backend via `BACKEND_URL` |
 
 Open the frontend's `*.onrender.com` URL — the browser only ever talks to the
 frontend, which reverse-proxies `/api` to the backend, so no CORS setup is
@@ -192,7 +194,9 @@ Don't worry if your code isn't perfect. We are happy to help you get your PR acr
 
 ## 🔒 Privacy note
 
-Datasets are stored locally in a SQLite database under `backend/app/data/` and never leave your machine. Nothing is uploaded to a cloud. When no LLM key is configured, all analysis is computed locally with deterministic rules.
+On a local installation, datasets are stored on your machine in SQLite. With no external LLM key, analysis is performed by the local backend. On Render, files are uploaded to the hosted backend and each browser gets its own workspace through an HTTPS-only cookie. Hosted isolation requires access through the same-origin frontend proxy. Clearing cookies removes that browser's access to its hosted workspace. Legacy datasets without an owner stay hidden when isolation is enabled.
+
+If you configure an external LLM, analyst questions, allowed column names and statistics, and limited query results can be sent to the configured provider. Columns detected as sensitive are excluded from the external analyst's query input and downloadable reports. Review your data and provider settings before enabling external analysis.
 
 ---
 

@@ -42,12 +42,12 @@ def _frame(W: int, H: int, top: int = 22, bottom: int = 46, left: int = 56, righ
     return left, top, W - right, H - bottom
 
 
-def _gridlines(ax: float, ay: float, aw: float, ah: float, vmax: float, n: int = 5) -> list[tuple[float, float]]:
+def _gridlines(ax: float, ay: float, aw: float, ah: float, vmax: float, n: int = 5, vmin: float = 0) -> list[tuple[float, float]]:
     lines = []
     for i in range(n + 1):
         frac = i / n
         y = ay + ah - frac * ah
-        lines.append((y, frac * vmax))
+        lines.append((y, vmin + frac * (vmax - vmin)))
     return lines
 
 
@@ -69,7 +69,11 @@ def svg_bar_chart(chart: dict, W: int = WIDTH, H: int = HEIGHT) -> str:
     values = [float(d.get(y_key, 0) or 0) for d in data]
     if not values:
         return ""
-    vmax = max(values) or 1
+    vmin, vmax = min(0, min(values)), max(0, max(values))
+    if vmin == vmax:
+        vmax = 1
+    scale = ah / (vmax - vmin)
+    zero = bottom + vmin * scale
     bw = aw / max(len(data), 1)
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="{_esc(title)}" '
@@ -81,23 +85,23 @@ def svg_bar_chart(chart: dict, W: int = WIDTH, H: int = HEIGHT) -> str:
     ]
     if title:
         parts.append(f'<text x="{left}" y="16" fill="{INK}" font-size="13" font-weight="600">{_esc(title)}</text>')
-    for y, val in _gridlines(ax=left, ay=top, aw=aw, ah=ah, vmax=vmax, n=4):
+    for y, val in _gridlines(ax=left, ay=top, aw=aw, ah=ah, vmax=vmax, n=4, vmin=vmin):
         parts.append(
             f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="{GRID}" stroke-width="1"/>'
             f'<text x="{left - 8}" y="{y + 3:.1f}" fill="{MUTED}" font-size="9" text-anchor="end">{_fmt(val)}</text>'
         )
     for i, d in enumerate(data):
         v = values[i]
-        bh = max((v / vmax) * ah, 1)
+        bh = abs(v * scale)
         x = left + i * bw + bw * 0.12
         bar_w = max(bw * 0.72, 3)
-        y = top + ah - bh
+        y = min(zero, zero - v * scale)
         parts.append(
             f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_w:.1f}" height="{bh:.1f}" rx="3" fill="url(#barGrad)" opacity="0.92"/>'
         )
         label = _esc(str(d.get(x_key, "")))
-        rotate = ' transform="rotate(-30)"' if len(data) > 8 else ""
         tx, ty = (x + bar_w / 2, bottom + 12)
+        rotate = f' transform="rotate(-30 {tx:.1f} {ty})"' if len(data) > 8 else ""
         if rotate:
             parts.append(
                 f'<text x="{tx:.1f}" y="{ty}" fill="{MUTED}" font-size="9" text-anchor="end"{rotate}>{label}</text>'
@@ -140,7 +144,7 @@ def svg_line_chart(chart: dict, W: int = WIDTH, H: int = HEIGHT) -> str:
     ]
     if title:
         parts.append(f'<text x="{left}" y="16" fill="{INK}" font-size="13" font-weight="600">{_esc(title)}</text>')
-    for y, val in _gridlines(ax=left, ay=top, aw=aw, ah=ah, vmax=vmax, n=4):
+    for y, val in _gridlines(ax=left, ay=top, aw=aw, ah=ah, vmax=vmax, n=4, vmin=vmin):
         parts.append(
             f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="{GRID}" stroke-width="1"/>'
             f'<text x="{left - 8}" y="{y + 3:.1f}" fill="{MUTED}" font-size="9" text-anchor="end">{_fmt(val)}</text>'
@@ -271,7 +275,7 @@ def svg_scatter_chart(chart: dict, W: int = WIDTH, H: int = HEIGHT) -> str:
     ]
     if title:
         parts.append(f'<text x="{left}" y="16" fill="{INK}" font-size="13" font-weight="600">{_esc(title)}</text>')
-    for y, val in _gridlines(ax=left, ay=top, aw=aw, ah=ah, vmax=ymax, n=4):
+    for y, val in _gridlines(ax=left, ay=top, aw=aw, ah=ah, vmax=ymax, n=4, vmin=ymin):
         parts.append(
             f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="{GRID}" stroke-width="1"/>'
             f'<text x="{left - 8}" y="{y + 3:.1f}" fill="{MUTED}" font-size="9" text-anchor="end">{_fmt(val)}</text>'
@@ -315,15 +319,12 @@ def pick_report_charts(charts: list[dict], max_charts: int = 6) -> list[dict]:
         return []
     preferred = {"bar": 0, "line": 1, "pie": 2, "histogram": 3, "heatmap": 4, "scatter": 5}
     ordered = sorted(charts, key=lambda c: preferred.get(c.get("chart_type"), 9))
-    seen_types = {}
-    picked = []
-    for c in ordered:
-        t = c.get("chart_type")
-        seen_types[t] = seen_types.get(t, 0) + 1
-        limit = {"scatter": 1, "histogram": 2, "heatmap": 1}.get(t, 2)
-        if seen_types[t] > limit:
-            continue
-        picked.append(c)
-        if len(picked) >= max_charts:
-            break
-    return picked
+    first_by_type = {}
+    additional = []
+    for chart in ordered:
+        kind = chart.get("chart_type")
+        if kind in first_by_type:
+            additional.append(chart)
+        else:
+            first_by_type[kind] = chart
+    return (list(first_by_type.values()) + additional)[:max_charts]

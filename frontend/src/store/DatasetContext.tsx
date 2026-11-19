@@ -5,6 +5,7 @@ import type {
   AnalysisJob,
   AnalysisSnapshot,
   ChartSpec,
+  CleanParams,
   CleaningResponse,
   DatasetInfo,
   Insight,
@@ -38,7 +39,7 @@ interface DatasetContextValue {
   deleteSession: (id: string) => Promise<void>;
   refreshInsights: () => Promise<void>;
   generateInsights: () => Promise<void>;
-  applyClean: (action: string, params?: { column?: string; value?: string | number | null }) => Promise<CleaningResponse | undefined>;
+  applyClean: (action: string, params?: CleanParams) => Promise<CleaningResponse | undefined>;
   undoClean: () => Promise<CleaningResponse | undefined>;
   resumeRecent: () => Promise<boolean>;
   clear: () => void;
@@ -125,10 +126,19 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       setErrorSafe(null);
       try {
         const { job_id } = await api.createUploadJob(file);
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          await new Promise((r) => setTimeout(r, 700));
-          const job: AnalysisJob = await api.getJob(job_id);
+        const deadline = Date.now() + 120_000;
+        let delay = 700;
+        while (Date.now() + delay < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          let job: AnalysisJob;
+          try {
+            job = await api.getJob(job_id, AbortSignal.timeout(Math.max(1, deadline - Date.now())));
+          } catch (error) {
+            if (!(error instanceof api.ApiError) || error.status !== 429) throw error;
+            delay = error.retryAfterMs ?? Math.min(delay * 2, 10_000);
+            continue;
+          }
+          delay = 700;
           onProgress?.({ progress: job.progress, stage: job.stage, message: job.message });
           if (job.status === "done" && job.session_id) {
             const snap = await api.getDataset(job.session_id);
@@ -139,6 +149,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
             throw new Error(job.error ?? "Analysis failed");
           }
         }
+        throw new Error("Analysis is taking longer than expected. Check your workspace before uploading again.");
       } catch (e) {
         setErrorSafe(e instanceof Error ? e.message : "Upload failed");
         throw e;
@@ -273,7 +284,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
   }, [snapshot]);
 
   const applyClean = useCallback(
-    async (action: string, params: { column?: string; value?: string | number | null } = {}) => {
+    async (action: string, params: CleanParams = {}) => {
       if (!snapshot) return undefined;
       const next = await api.cleanDataset(snapshot.dataset.id, action, params);
       setSnapshot(next);
@@ -286,7 +297,8 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
 
   const undoClean = useCallback(async () => {
     if (!snapshot) return undefined;
-    const next = await api.undoClean(snapshot.dataset.id);
+    const next = await api.undoClean(snapshot.dataset.id, snapshot.revision);
+    if ("undone" in next) return undefined;
     setSnapshot(next);
     setInsights([]);
     await refreshCleaning(snapshot.dataset.id);
